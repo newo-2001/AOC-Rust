@@ -1,4 +1,4 @@
-use std::{fs};
+use std::fs;
 
 fn parse_floor(char: char) -> Result<i32, String> {
     match char {
