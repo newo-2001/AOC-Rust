@@ -22,6 +22,7 @@ dependencies = [
  "queues",
  "regex",
  "serde_json",
+ "tupletools",
 ]
 
 [[package]]
@@ -124,3 +125,9 @@ dependencies = [
  "ryu",
  "serde",
 ]
+
+[[package]]
+name = "tupletools"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "03da4be6ae1a8c95b91059b98d35c9e57a3bb018fc812689d224967e524feebb"
