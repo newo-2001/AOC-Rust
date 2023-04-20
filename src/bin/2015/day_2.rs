@@ -33,7 +33,7 @@ fn required_ribbon(present: &Present) -> u32 {
 }
 
 fn main() {
-    let presents: Vec<Present> = fs::read_to_string("inputs/day_2.txt")
+    let presents: Vec<Present> = fs::read_to_string("inputs/2015/day_2.txt")
         .expect("Failed to find input file!")
         .lines()
         .map(parse_present)

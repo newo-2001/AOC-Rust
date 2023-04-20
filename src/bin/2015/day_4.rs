@@ -18,7 +18,7 @@ fn proof_of_work(zeros: usize, prefix: &str) -> u32 {
 }
 
 fn main() {
-    let prefix = fs::read_to_string("inputs/day_4.txt")
+    let prefix = fs::read_to_string("inputs/2015/day_4.txt")
         .expect("Failed to read input file!");
     
     println!("The first suffix to produce 5 leading zeros is {}", proof_of_work(5, &prefix));

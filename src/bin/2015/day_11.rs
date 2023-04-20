@@ -61,7 +61,7 @@ fn change_password(password: &mut Password) {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut password: Password = fs::read_to_string("inputs/day_11.txt")?
+    let mut password: Password = fs::read_to_string("inputs/2015/day_11.txt")?
         .chars().collect();
     
     change_password(&mut password);

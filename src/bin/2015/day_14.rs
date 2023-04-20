@@ -52,7 +52,7 @@ fn most_points_after_seconds(reindeers: &Vec<Reindeer>, duration: u32) -> u32 {
 fn main() -> Result<(), Box<dyn Error>> {
     const DURATION: u32 = 2503;
     
-    let content = fs::read_to_string("inputs/day_14.txt")?;
+    let content = fs::read_to_string("inputs/2015/day_14.txt")?;
     let reindeers: Vec<Reindeer> = content.lines()
         .map(Reindeer::parse)
         .collect::<Result<Vec<Reindeer>, String>>()?;

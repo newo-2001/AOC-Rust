@@ -68,7 +68,7 @@ fn solve<'a>(fact: Fact, system: Vec<Sue>, predicate: impl Fn(Fact, &Sue) -> boo
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/day_16.txt")?;
+    let content = fs::read_to_string("inputs/2015/day_16.txt")?;
 
     let sues = content.lines().map(parse_sue)
         .collect::<Result<Vec<Sue>, String>>()?;

@@ -22,7 +22,7 @@ fn find_numbers(document: &Value, ignore_red: bool) -> Vec<i64> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/day_12.txt")?;
+    let content = fs::read_to_string("inputs/2015/day_12.txt")?;
     let document = serde_json::from_str(content.as_str())?;
 
     let sum: i64 = find_numbers(&document, false).iter().sum();

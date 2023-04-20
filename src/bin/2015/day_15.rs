@@ -103,7 +103,7 @@ fn best_score<'a>(cookies: impl Iterator<Item=&'a Cookie<'a>>, ingredients: &Ing
 
 fn main() -> Result<(), Box<dyn Error>> {
     const TEASPOONS: u32 = 100;
-    let content = fs::read_to_string("inputs/day_15.txt")?;
+    let content = fs::read_to_string("inputs/2015/day_15.txt")?;
 
     let ingredients = content.lines()
         .map(Ingredient::parse)

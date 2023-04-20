@@ -29,7 +29,7 @@ fn look_and_say_rounds(seed: Vec<u8>, rounds: u8) -> Vec<u8> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut seed: Vec<u8> = fs::read_to_string("inputs/day_10.txt")?
+    let mut seed: Vec<u8> = fs::read_to_string("inputs/2015/day_10.txt")?
         .chars().map(|c| c.to_digit(10).map(|x| x as u8))
         .collect::<Option<Vec<u8>>>()
         .expect("Failed to parse digit");

@@ -58,7 +58,7 @@ fn serialized_size_diff(input: &str) -> usize {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/day_8.txt")?;
+    let content = fs::read_to_string("inputs/2015/day_8.txt")?;
 
     let serialized_overhead: usize = content
         .lines()

@@ -74,7 +74,7 @@ impl<'a> Graph<'a> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/day_9.txt")?;
+    let content = fs::read_to_string("inputs/2015/day_9.txt")?;
 
     let edges = content
         .lines().map(parse_edge)

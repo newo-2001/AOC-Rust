@@ -1,0 +1,1 @@
+pub struct Point2D(pub i32, pub i32);

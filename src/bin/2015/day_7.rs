@@ -177,7 +177,7 @@ fn build_expression_tree<'a>(assignments: &'a Vec<Assignment>) -> Result<Express
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/day_7.txt")
+    let content = fs::read_to_string("inputs/2015/day_7.txt")
         .expect("Failed to read input file!");
 
     let assignments = content.lines()

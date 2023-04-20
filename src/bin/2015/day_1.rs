@@ -20,7 +20,7 @@ fn find_basement<'a>(directions: impl Iterator<Item=&'a i32>) -> Option<usize> {
 }
 
 fn main() {
-    let directions: Vec<i32> = fs::read_to_string("inputs/day_1.txt")
+    let directions: Vec<i32> = fs::read_to_string("inputs/2015/day_1.txt")
         .expect("Failed to find input file!")
         .chars()
         .map(parse_floor)

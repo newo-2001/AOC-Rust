@@ -1,3 +1,5 @@
+mod day_18;
+
 use std::{error::Error, fs, num::ParseIntError};
 
 use itertools::Itertools;
@@ -10,7 +12,7 @@ fn different_sums(total: u32, sizes: &Vec<u32>) -> impl Iterator<Item = Vec<&u32
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/day_17.txt")?;
+    let content = fs::read_to_string("inputs/2015/day_17.txt")?;
 
     let containers = content.lines()
         .map(|x| u32::from_str_radix(x, 10))

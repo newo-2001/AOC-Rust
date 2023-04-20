@@ -47,7 +47,7 @@ fn unique_houses<'a>(directions: impl Iterator<Item=&'a Direction>) -> HashSet<C
 }
 
 fn main() {
-    let movements: Vec<Direction> = fs::read_to_string("inputs/day_3.txt")
+    let movements: Vec<Direction> = fs::read_to_string("inputs/2015/day_3.txt")
         .expect("Failed to read input file!")
         .chars()
         .map(|c| Direction::parse(&c))

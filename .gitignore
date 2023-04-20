@@ -2,4 +2,4 @@
 .vscode
 .vs
 .idea
-inputs/*.txt
+inputs/**/*.txt

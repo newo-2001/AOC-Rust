@@ -91,7 +91,7 @@ fn parse_step(str: &str) -> Result<Step, String> {
 }
 
 fn main() {
-    let steps: Vec<Step> = fs::read_to_string("inputs/day_6.txt")
+    let steps: Vec<Step> = fs::read_to_string("inputs/2015/day_6.txt")
         .expect("Failed to read input file!")
         .lines()
         .map(parse_step)

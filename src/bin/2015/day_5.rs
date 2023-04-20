@@ -65,7 +65,7 @@ fn real_is_nice(str: &str) -> bool {
 }
 
 fn main() {
-    let words: Vec<String> = fs::read_to_string("inputs/day_5.txt")
+    let words: Vec<String> = fs::read_to_string("inputs/2015/day_5.txt")
         .expect("Failed to read input file!")
         .lines()
         .map(String::from)

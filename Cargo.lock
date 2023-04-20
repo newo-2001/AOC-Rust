@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "aoc-2015"
+name = "aoc_rust"
 version = "0.1.0"
 dependencies = [
  "itertools",

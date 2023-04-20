@@ -80,7 +80,7 @@ fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, String> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/day_13.txt")?;
+    let content = fs::read_to_string("inputs/2015/day_13.txt")?;
     let edges = content.lines().map(parse_edge)
         .collect::<Result<Vec<WeightedEdge>, String>>()?;
 
