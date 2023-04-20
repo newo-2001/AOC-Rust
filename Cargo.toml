@@ -79,6 +79,7 @@ name = "2015-day17"
 path = "src/bin/2015/day_17.rs"
 
 [dependencies]
+impl_ops = "0.1.1"
 itertools = "0.10.5"
 md5 = "0.7.0"
 nom = "7.1.1"
