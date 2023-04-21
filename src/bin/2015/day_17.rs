@@ -1,5 +1,3 @@
-mod day_18;
-
 use std::{error::Error, fs, num::ParseIntError};
 
 use itertools::Itertools;
