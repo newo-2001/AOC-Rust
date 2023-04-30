@@ -1,4 +1,4 @@
-use std::{fs, error::Error, cmp::max, collections::HashMap, iter};
+use std::{fs, error::Error, cmp::{max, min}, collections::HashMap, iter};
 
 use itertools::Itertools;
 use nom::{
@@ -18,41 +18,20 @@ struct Entity {
     armor: u32
 }
 
-trait DamageSource {
-    fn damage(&self) -> u32;
-    fn attack(&self, target: &mut dyn Damagable) {
-        target.hurt(max(self.damage() as i32 - target.armor() as i32, 1) as u32);
-    }
-}
-
-trait Damagable {
-    fn health(&self) -> u32;
-    fn armor(&self) -> u32;
-    fn hurt(&mut self, damage: u32);
-    
-    fn alive(&self) -> bool { self.health() > 0 }
-}
-
-impl Damagable for Entity {
-    fn armor(&self) -> u32 { self.armor }
-    fn health(&self) -> u32 { self.health }
-
-    fn hurt(&mut self, amount: u32) {
-        self.health = max(0, self.health as i32 - amount as i32) as u32
-    }
-}
-
-impl DamageSource for Entity {
-    fn damage(&self) -> u32 { self.damage }
-}
-
 impl Entity {
+    fn alive(&self) -> bool { self.health > 0 }
+    
+    fn attack(&self, target: &mut Self) {
+        let damage = max(1, self.damage as i32 - target.armor as i32) as u32;
+        target.health -= min(damage, target.health);
+    }
+
     fn parse(input: &str) -> Result<Entity, String> {
         let lf = || alt((value((), newline), value((), crlf), value((), eof)));
 
         let kv = |key| terminated(preceded(tag(key).and(tag(": ")), complete::u32), lf());
         let mut entity = tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
-            .map(|(health, damage, armor)| Entity { health: health, damage, armor });
+            .map(|(health, damage, armor)| Entity { health, damage, armor });
 
         Ok(entity.parse(input).map_err(|err: nom::Err<VerboseError<&str>>| err.to_string())?.1)
     }
@@ -96,32 +75,22 @@ fn make_shop() -> Shop {
         Item { cost, damage, armor }
     }
 
-    let weapons = vec![
-        make_weapon(8, 4),
-        make_weapon(10, 5),
-        make_weapon(25, 6),
-        make_weapon(40, 7),
-        make_weapon(74, 8),
-    ];
+    let weapons: Vec<Item> = [(8, 4), (10, 5), (25, 6), (40, 7), (74, 8)]
+        .into_iter()
+        .map(|(cost, damage)| make_weapon(cost, damage))
+        .collect();
 
-    let armor = vec![
-        make_armor(0, 0),
-        make_armor(13, 1),
-        make_armor(31, 2),
-        make_armor(3, 3),
-        make_armor(75, 4),
-        make_armor(102, 5)
-    ];
+    let armor: Vec<Item> = [(0, 0), (13, 1), (31, 2), (53, 3), (75, 4), (102, 5)]
+        .into_iter()
+        .map(|(cost, armor)| make_armor(cost, armor))
+        .collect();
 
-    let rings = vec![
-        make_ring(0, 0, 0),
-        make_ring(25, 1, 0),
-        make_ring(50, 2, 0),
-        make_ring(100, 3, 0),
-        make_ring(20, 0, 1),
-        make_ring(40, 0, 2),
-        make_ring(80, 0, 3)
-    ];
+    let rings: Vec<Item> = [
+        (0, 0, 0), (25, 1, 0), (50, 2, 0), (100, 3, 0),
+        (20, 0, 1), (40, 0, 2), (80, 0, 3)
+    ].into_iter()
+        .map(|(cost, damage, armor)| make_ring(cost, damage, armor))
+        .collect();
 
     HashMap::from_iter([
         (ItemSlot::Weapon, weapons),
@@ -144,7 +113,7 @@ fn gear_cost(gear: &Gear) -> u32 {
     gear.iter().map(|item| item.cost).sum()
 }
 
-fn all_loadouts<'a>(shop: &Shop) -> Vec<Gear> {
+fn all_loadouts(shop: &Shop) -> Vec<Gear> {
     let no_ring = shop[&ItemSlot::Ring].iter()
         .find(|ring| ring.cost == 0).unwrap();
 
