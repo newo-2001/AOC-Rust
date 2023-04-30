@@ -1,0 +1,201 @@
+use std::{fs, error::Error, cmp::max, collections::HashMap, iter};
+
+use itertools::Itertools;
+use nom::{
+    bytes::complete::tag,
+    character::complete::{self, newline, crlf},
+    sequence::{preceded, tuple, terminated},
+    Parser,
+    error::VerboseError,
+    combinator::{eof, value},
+    branch::alt
+};
+
+#[derive(Clone)]
+struct Entity {
+    health: u32,
+    damage: u32,
+    armor: u32
+}
+
+trait DamageSource {
+    fn damage(&self) -> u32;
+    fn attack(&self, target: &mut dyn Damagable) {
+        target.hurt(max(self.damage() as i32 - target.armor() as i32, 1) as u32);
+    }
+}
+
+trait Damagable {
+    fn health(&self) -> u32;
+    fn armor(&self) -> u32;
+    fn hurt(&mut self, damage: u32);
+    
+    fn alive(&self) -> bool { self.health() > 0 }
+}
+
+impl Damagable for Entity {
+    fn armor(&self) -> u32 { self.armor }
+    fn health(&self) -> u32 { self.health }
+
+    fn hurt(&mut self, amount: u32) {
+        self.health = max(0, self.health as i32 - amount as i32) as u32
+    }
+}
+
+impl DamageSource for Entity {
+    fn damage(&self) -> u32 { self.damage }
+}
+
+impl Entity {
+    fn parse(input: &str) -> Result<Entity, String> {
+        let lf = || alt((value((), newline), value((), crlf), value((), eof)));
+
+        let kv = |key| terminated(preceded(tag(key).and(tag(": ")), complete::u32), lf());
+        let mut entity = tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
+            .map(|(health, damage, armor)| Entity { health: health, damage, armor });
+
+        Ok(entity.parse(input).map_err(|err: nom::Err<VerboseError<&str>>| err.to_string())?.1)
+    }
+
+    fn with_gear(&self, gear: &Vec<&Item>) -> Entity {
+        let gear_armor: u32 = gear.iter().map(|item| item.armor).sum();
+        let gear_damage: u32 = gear.iter().map(|item| item.damage).sum();
+
+        Entity {
+            health: self.health,
+            armor: self.armor + gear_armor,
+            damage: self.damage + gear_damage
+        }
+    }
+}
+
+#[derive(Hash, PartialEq, Eq, Clone, Copy)]
+enum ItemSlot {
+    Weapon, Armor, Ring
+}
+
+struct Item {
+    cost: u32,
+    damage: u32,
+    armor: u32,
+}
+
+type Shop = HashMap<ItemSlot, Vec<Item>>;
+type Gear<'a> = Vec<&'a Item>;
+
+fn make_shop() -> Shop {
+    fn make_weapon(cost: u32, damage: u32) -> Item {
+        Item { cost, damage, armor: 0 }
+    }
+
+    fn make_armor(cost: u32, armor: u32) -> Item {
+        Item { cost, armor, damage: 0 }
+    }
+
+    fn make_ring(cost: u32, damage: u32, armor: u32) -> Item {
+        Item { cost, damage, armor }
+    }
+
+    let weapons = vec![
+        make_weapon(8, 4),
+        make_weapon(10, 5),
+        make_weapon(25, 6),
+        make_weapon(40, 7),
+        make_weapon(74, 8),
+    ];
+
+    let armor = vec![
+        make_armor(0, 0),
+        make_armor(13, 1),
+        make_armor(31, 2),
+        make_armor(3, 3),
+        make_armor(75, 4),
+        make_armor(102, 5)
+    ];
+
+    let rings = vec![
+        make_ring(0, 0, 0),
+        make_ring(25, 1, 0),
+        make_ring(50, 2, 0),
+        make_ring(100, 3, 0),
+        make_ring(20, 0, 1),
+        make_ring(40, 0, 2),
+        make_ring(80, 0, 3)
+    ];
+
+    HashMap::from_iter([
+        (ItemSlot::Weapon, weapons),
+        (ItemSlot::Armor, armor),
+        (ItemSlot::Ring, rings)
+    ])
+}
+
+fn fight(mut player: Entity, mut enemy: Entity) -> bool {
+    loop {
+        player.attack(&mut enemy);
+        enemy.attack(&mut player);
+
+        if !enemy.alive() { return true; }
+        else if !player.alive() { return false; }
+    }
+}
+
+fn gear_cost(gear: &Gear) -> u32 {
+    gear.iter().map(|item| item.cost).sum()
+}
+
+fn all_loadouts<'a>(shop: &Shop) -> Vec<Gear> {
+    let no_ring = shop[&ItemSlot::Ring].iter()
+        .find(|ring| ring.cost == 0).unwrap();
+
+    let rings = shop[&ItemSlot::Ring].iter()
+        .combinations(2).chain(iter::once(vec![no_ring, no_ring]))
+        .collect_vec();
+
+    let armor_weapons = shop[&ItemSlot::Armor].iter()
+        .flat_map(|armor| shop[&ItemSlot::Weapon].iter()
+            .map(move |weapon| vec![armor, weapon]))
+            .collect_vec();
+
+    rings.iter().flat_map(|rings| armor_weapons.iter().map(|gear| {
+        rings.clone().into_iter()
+            .chain(gear.clone().into_iter()).collect()
+    })).collect()
+}
+
+const PLAYER: Entity = Entity {
+    health: 100,
+    armor: 0,
+    damage: 0
+};
+
+fn cheapest_victory(enemy: &Entity, loadouts: &Vec<Gear>) -> u32 {
+    loadouts.iter()
+        .map(|gear| (PLAYER.with_gear(gear), gear_cost(gear)))
+        .filter_map(|(player, cost)| fight(player, enemy.clone()).then_some(cost))
+        .min().expect("Player can't defeat the enemy")
+}
+
+fn most_expensive_loss(enemy: &Entity, loadouts: &Vec<Gear>) -> u32 {
+    loadouts.iter()
+        .map(|gear| (PLAYER.with_gear(gear), gear_cost(gear)))
+        .filter_map(|(player, cost)| (!fight(player, enemy.clone())).then_some(cost))
+        .max().expect("Player can't lose to the enemy")
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let content = fs::read_to_string("inputs/2015/day_21.txt")?;
+
+    let shop = make_shop();
+    let loadouts = all_loadouts(&shop);
+
+    let boss = Entity::parse(&content)?;
+
+    let cost = cheapest_victory(&boss, &loadouts);
+    println!("The least amount of gold to expend on equipment to win is {}", cost);
+
+    let cost = most_expensive_loss(&boss, &loadouts);
+    println!("The most amount of gold to expend on equipment and still lose is {}", cost);
+
+    Ok(())
+}
