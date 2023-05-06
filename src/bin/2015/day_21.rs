@@ -1,14 +1,13 @@
 use std::{fs, error::Error, cmp::{max, min}, collections::HashMap, iter};
 
+use aoc_lib::parsing::optional_newline;
 use itertools::Itertools;
 use nom::{
     bytes::complete::tag,
-    character::complete::{self, newline, crlf},
+    character::complete,
     sequence::{preceded, tuple, terminated},
     Parser,
-    error::VerboseError,
-    combinator::{eof, value},
-    branch::alt
+    error::VerboseError
 };
 
 #[derive(Clone)]
@@ -27,9 +26,7 @@ impl Entity {
     }
 
     fn parse(input: &str) -> Result<Entity, String> {
-        let lf = || alt((value((), newline), value((), crlf), value((), eof)));
-
-        let kv = |key| terminated(preceded(tag(key).and(tag(": ")), complete::u32), lf());
+        let kv = |key| terminated(preceded(tag(key).and(tag(": ")), complete::u32), optional_newline);
         let mut entity = tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
             .map(|(health, damage, armor)| Entity { health, damage, armor });
 
@@ -44,6 +41,19 @@ impl Entity {
             health: self.health,
             armor: self.armor + gear_armor,
             damage: self.damage + gear_damage
+        }
+    }
+
+    fn fight(mut self: Entity, mut other: Entity) -> BattleResult {
+        loop {
+            self.attack(&mut other);
+            other.attack(&mut self);
+
+            match (self.alive(), other.alive()) {
+                (_, false) => return BattleResult::Victory,
+                (false, true) => return BattleResult::Defeat,
+                (true, true) => { }
+            }
         }
     }
 }
@@ -99,14 +109,14 @@ fn make_shop() -> Shop {
     ])
 }
 
-fn fight(mut player: Entity, mut enemy: Entity) -> bool {
-    loop {
-        player.attack(&mut enemy);
-        enemy.attack(&mut player);
+#[derive(Eq, PartialEq)]
+enum BattleResult {
+    Victory,
+    Defeat
+}
 
-        if !enemy.alive() { return true; }
-        else if !player.alive() { return false; }
-    }
+impl BattleResult {
+    fn won(&self) -> bool { self == &BattleResult::Victory }
 }
 
 fn gear_cost(gear: &Gear) -> u32 {
@@ -141,14 +151,14 @@ const PLAYER: Entity = Entity {
 fn cheapest_victory(enemy: &Entity, loadouts: &Vec<Gear>) -> u32 {
     loadouts.iter()
         .map(|gear| (PLAYER.with_gear(gear), gear_cost(gear)))
-        .filter_map(|(player, cost)| fight(player, enemy.clone()).then_some(cost))
+        .filter_map(|(player, cost)| player.fight(enemy.clone()).won().then_some(cost))
         .min().expect("Player can't defeat the enemy")
 }
 
 fn most_expensive_loss(enemy: &Entity, loadouts: &Vec<Gear>) -> u32 {
     loadouts.iter()
         .map(|gear| (PLAYER.with_gear(gear), gear_cost(gear)))
-        .filter_map(|(player, cost)| (!fight(player, enemy.clone())).then_some(cost))
+        .filter_map(|(player, cost)| (!player.fight(enemy.clone()).won()).then_some(cost))
         .max().expect("Player can't lose to the enemy")
 }
 
