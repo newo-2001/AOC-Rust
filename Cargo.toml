@@ -99,8 +99,12 @@ name = "2015-day22"
 path = "src/bin/2015/day_22.rs"
 
 [[bin]]
-name= "2015-day23"
+name = "2015-day23"
 path = "src/bin/2015/day_23.rs"
+
+[[bin]]
+name = "2015-day24"
+path= "src/bin/2015/day_24.rs"
 
 [dependencies]
 impl_ops = "0.1.1"
