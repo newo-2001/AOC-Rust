@@ -11,103 +11,103 @@ name = "aoc_lib"
 path = "src/lib/lib.rs"
 
 [[bin]]
-name = "2015-day1"
+name = "2015-day-1"
 path = "src/bin/2015/day_1.rs"
 
 [[bin]]
-name = "2015-day2"
+name = "2015-day-2"
 path = "src/bin/2015/day_2.rs"
 
 [[bin]]
-name = "2015-day3"
+name = "2015-day-3"
 path = "src/bin/2015/day_3.rs"
 
 [[bin]]
-name = "2015-day4"
+name = "2015-day-4"
 path = "src/bin/2015/day_4.rs"
 
 [[bin]]
-name = "2015-day5"
+name = "2015-day-5"
 path = "src/bin/2015/day_5.rs"
 
 [[bin]]
-name = "2015-day6"
+name = "2015-day-6"
 path = "src/bin/2015/day_6.rs"
 
 [[bin]]
-name = "2015-day7"
+name = "2015-day-7"
 path = "src/bin/2015/day_7.rs"
 
 [[bin]]
-name = "2015-day8"
+name = "2015-day-8"
 path = "src/bin/2015/day_8.rs"
 
 [[bin]]
-name = "2015-day9"
+name = "2015-day-9"
 path = "src/bin/2015/day_9.rs"
 
 [[bin]]
-name = "2015-day10"
+name = "2015-day-10"
 path = "src/bin/2015/day_10.rs"
 
 [[bin]]
-name = "2015-day11"
+name = "2015-day-11"
 path = "src/bin/2015/day_11.rs"
 
 [[bin]]
-name = "2015-day12"
+name = "2015-day-12"
 path = "src/bin/2015/day_12.rs"
 
 [[bin]]
-name = "2015-day13"
+name = "2015-day-13"
 path = "src/bin/2015/day_13.rs"
 
 [[bin]]
-name = "2015-day14"
+name = "2015-day-14"
 path = "src/bin/2015/day_14.rs"
 
 [[bin]]
-name = "2015-day15"
+name = "2015-day-15"
 path = "src/bin/2015/day_15.rs"
 
 [[bin]]
-name = "2015-day16"
+name = "2015-day-16"
 path = "src/bin/2015/day_16.rs"
 
 [[bin]]
-name = "2015-day17"
+name = "2015-day-17"
 path = "src/bin/2015/day_17.rs"
 
 [[bin]]
-name = "2015-day18"
+name = "2015-day-18"
 path = "src/bin/2015/day_18.rs"
 
 [[bin]]
-name = "2015-day19"
+name = "2015-day-19"
 path = "src/bin/2015/day_19.rs"
 
 [[bin]]
-name = "2015-day20"
+name = "2015-day-20"
 path = "src/bin/2015/day_20.rs"
 
 [[bin]]
-name = "2015-day21"
+name = "2015-day-21"
 path = "src/bin/2015/day_21.rs"
 
 [[bin]]
-name = "2015-day22"
+name = "2015-day-22"
 path = "src/bin/2015/day_22.rs"
 
 [[bin]]
-name = "2015-day23"
+name = "2015-day-23"
 path = "src/bin/2015/day_23.rs"
 
 [[bin]]
-name = "2015-day24"
+name = "2015-day-24"
 path= "src/bin/2015/day_24.rs"
 
 [[bin]]
-name = "2015-day25"
+name = "2015-day-25"
 path = "src/bin/2015/day_25.rs"
 
 [dependencies]
