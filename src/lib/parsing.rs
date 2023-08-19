@@ -11,6 +11,8 @@ use nom::{
 };
 use tupletools::snd;
 
+pub type TextParseResult<'a, T> = IResult<&'a str, T, VerboseError<&'a str>>;
+
 pub fn ignore<I, O, E, F>(parser: F) -> impl FnMut(I) -> IResult<I, (), E>
     where E : ParseError<I>,
           F : Parser<I, O, E> {

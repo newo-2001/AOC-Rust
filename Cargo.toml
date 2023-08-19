@@ -110,6 +110,10 @@ path= "src/bin/2015/day_24.rs"
 name = "2015-day-25"
 path = "src/bin/2015/day_25.rs"
 
+[[bin]]
+name = "2016-day-1"
+path = "src/bin/2016/day_1.rs"
+
 [dependencies]
 impl_ops = "0.1.1"
 itertools = "0.10.5"
