@@ -1,17 +1,9 @@
-use std::{ops::{Add, Sub, Mul}, cmp::{max, min}, hash::{Hash, Hasher}};
-
+use std::{ops::{Add, Sub, Mul, AddAssign, SubAssign}, cmp::{max, min}, hash::Hash};
 use num::{Integer, Signed, FromPrimitive, Zero, One};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Point2D<T>(T, T)
     where T: Integer;
-
-impl<T: Integer + Hash> Hash for Point2D<T> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.hash(state);
-        self.1.hash(state);
-    }
-}
 
 impl<T: Integer> Add for Point2D<T> {
     type Output = Self;
@@ -21,11 +13,25 @@ impl<T: Integer> Add for Point2D<T> {
     }
 }
 
+impl<T: Integer + Copy> AddAssign for Point2D<T> {
+    fn add_assign(&mut self, rhs: Self) {
+        self.0 = self.0 + rhs.0;
+        self.1 = self.1 + rhs.1;
+    }
+}
+
 impl<T: Integer> Sub for Point2D<T> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
         Point2D(self.0 - rhs.0, self.1 - rhs.1)
+    }
+}
+
+impl<T: Integer + Copy> SubAssign for Point2D<T> {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.0 = self.0 - rhs.0;
+        self.1 = self.1 - rhs.1;
     }
 }
 
@@ -38,7 +44,7 @@ impl<T: Integer + Copy> Mul<T> for Point2D<T> {
 }
 
 impl<T: Integer + Copy> Point2D<T> {
-    pub fn manhattan_distance(self, other: Self) -> T {
+    pub fn manhattan_distance(&self, other: &Self) -> T {
         let x = max(self.0, other.0) - min(self.0, other.0);
         let y = max(self.1, other.1) - min(self.1, other.1);
         x + y
@@ -70,7 +76,7 @@ pub enum CardinalDirection {
 }
 
 impl CardinalDirection {
-    pub fn unit_vector<T>(self) -> Point2D<T>
+    pub fn direction_vector<T>(self) -> Point2D<T>
         where T: Signed + Integer + FromPrimitive
     {
         let (zero, one) = (Zero::zero(), T::from_i32(1).unwrap());

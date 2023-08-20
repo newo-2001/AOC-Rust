@@ -1,7 +1,6 @@
 use std::{error::Error, fs, collections::HashSet};
 
 use aoc_lib::{parsing::{run, TextParseResult}, geometry::{Point2D, CardinalDirection, RotationDirection}};
-use itertools::{Itertools, FoldWhile::{Continue, Done}};
 use nom::{Parser, character::complete, combinator::value, multi::separated_list0, bytes::complete::tag};
 
 struct Instruction {
@@ -16,13 +15,9 @@ struct State {
 }
 
 impl State {
-    fn after_instruction(&self, instruction: &Instruction) -> State {
-        let facing = self.facing.rotate(instruction.direction);
-
-        State {
-            facing,
-            position: self.position + facing.unit_vector() * instruction.amount as i32
-        }
+    fn apply_instruction(&mut self, instruction: &Instruction) {
+        self.facing = self.facing.rotate(instruction.direction);
+        self.position += self.facing.direction_vector() * instruction.amount as i32
     }
 }
 
@@ -41,32 +36,19 @@ fn parse_instructions(input: &str) -> Result<Vec<Instruction>, String> {
     run(&mut instructions, input)
 }
 
-fn distance_to_end<'a>(initial_state: State, instructions: impl IntoIterator<Item=&'a Instruction>) -> u32 {
-    let final_state = instructions.into_iter()
-        .fold(initial_state.clone(), |state, instruction| State::after_instruction(&state, instruction));
+fn path_to_end<'a>(initial_state: State, instructions: impl IntoIterator<Item=&'a Instruction>) -> Vec<Point2D<i32>> {
+    instructions.into_iter()
+        .scan(initial_state, |state: &mut State, instruction: &Instruction| {
+            let original_position = state.position;
+            state.apply_instruction(instruction);
+            
+            let steps: Vec<Point2D<i32>> = (1..instruction.amount + 1)
+                .map(|offset| original_position + state.facing.direction_vector() * offset as i32)
+                .collect();
 
-    initial_state.position.manhattan_distance(final_state.position) as u32
-}
-
-fn distance_to_first_duplicate<'a>(initial_state: State, instructions: impl IntoIterator<Item=&'a Instruction>) -> u32 {
-    let mut seen = HashSet::<Point2D<i32>>::new();
-    
-    let final_state = instructions.into_iter()
-        .fold_while(initial_state.clone(), |state, instruction| {
-            let new_state = state.after_instruction(instruction);
-            let visited = (1..instruction.amount + 1)
-                .map(|offset| state.position + new_state.facing.unit_vector() * offset as i32);
-
-            for position in visited {
-                if !seen.insert(position) {
-                    return Done(State { position, facing: new_state.facing })
-                }
-            }
-
-            Continue(new_state)
-        }).into_inner();
-
-    initial_state.position.manhattan_distance(final_state.position) as u32
+            Some(steps)
+        }).flatten()
+        .collect()
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -78,10 +60,17 @@ fn main() -> Result<(), Box<dyn Error>> {
         facing: CardinalDirection::North
     };
 
-    let distance = distance_to_end(initial_state.clone(), &instructions);
+    let path = path_to_end(initial_state.clone(), &instructions);
+    let destination = path.last().unwrap_or(&initial_state.position);
+    let distance = initial_state.position.manhattan_distance(destination) as u32;
     println!("The distance from the start to the destination is {}", distance);
 
-    let distance = distance_to_first_duplicate(initial_state, &instructions);
+    let mut seen = HashSet::<Point2D<i32>>::new();
+    let first_duplicate = path.into_iter()
+        .skip_while(|&location| seen.insert(location))
+        .next().ok_or("No location is visited twice")?;
+
+    let distance = initial_state.position.manhattan_distance(&first_duplicate);
     println!("The distance to the first location your visit twice is {}", distance);
 
     Ok(())
