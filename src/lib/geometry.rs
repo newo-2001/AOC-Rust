@@ -1,8 +1,8 @@
 use std::{ops::{Add, Sub, Mul, AddAssign, SubAssign}, cmp::{max, min}, hash::Hash};
-use num::{Integer, Signed, FromPrimitive, Zero, One};
+use num::{Integer, Signed, FromPrimitive, Zero, One, clamp};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct Point2D<T>(T, T)
+pub struct Point2D<T>(pub T, pub T)
     where T: Integer;
 
 impl<T: Integer> Add for Point2D<T> {
@@ -49,6 +49,12 @@ impl<T: Integer + Copy> Point2D<T> {
         let y = max(self.1, other.1) - min(self.1, other.1);
         x + y
     }
+
+    pub fn clamp(&self, min: T, max: T) -> Point2D<T> {
+        let x = clamp(self.0, min, max);
+        let y = clamp(self.1, min, max);
+        Point2D(x, y)
+    }
 }
 
 impl<T: Integer> Point2D<T> {
@@ -82,9 +88,9 @@ impl CardinalDirection {
         let (zero, one) = (Zero::zero(), T::from_i32(1).unwrap());
 
         match self {
-            CardinalDirection::North => Point2D(zero, one),
+            CardinalDirection::North => Point2D(zero, -one),
             CardinalDirection::East => Point2D(one, zero),
-            CardinalDirection::South => Point2D(zero, -one),
+            CardinalDirection::South => Point2D(zero, one),
             CardinalDirection::West => Point2D(-one, zero)
         }
     }
