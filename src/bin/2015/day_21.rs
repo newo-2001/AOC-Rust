@@ -1,13 +1,12 @@
-use std::{fs, error::Error, cmp::{max, min}, collections::HashMap, iter};
+use std::{error::Error, cmp::{max, min}, collections::HashMap, iter};
 
-use aoc_lib::parsing::optional_newline;
+use aoc_lib::{parsing::{optional_newline, run}, io::read_puzzle_input};
 use itertools::Itertools;
 use nom::{
     bytes::complete::tag,
     character::complete,
     sequence::{preceded, tuple, terminated},
-    Parser,
-    error::VerboseError
+    Parser
 };
 
 #[derive(Clone)]
@@ -30,7 +29,7 @@ impl Entity {
         let mut entity = tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
             .map(|(health, damage, armor)| Entity { health, damage, armor });
 
-        Ok(entity.parse(input).map_err(|err: nom::Err<VerboseError<&str>>| err.to_string())?.1)
+        run(&mut entity, input)
     }
 
     fn with_gear(&self, gear: &Vec<&Item>) -> Entity {
@@ -163,7 +162,7 @@ fn most_expensive_loss(enemy: &Entity, loadouts: &Vec<Gear>) -> u32 {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_21.txt")?;
+    let content = read_puzzle_input(2015, 21)?;
 
     let shop = make_shop();
     let loadouts = all_loadouts(&shop);

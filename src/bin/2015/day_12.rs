@@ -1,5 +1,6 @@
-use std::{error::Error, fs};
+use std::error::Error;
 
+use aoc_lib::io::read_puzzle_input;
 use itertools::Itertools;
 use serde_json::{Value, Map};
 
@@ -22,7 +23,7 @@ fn find_numbers(document: &Value, ignore_red: bool) -> Vec<i64> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_12.txt")?;
+    let content = read_puzzle_input(2015, 12)?;
     let document = serde_json::from_str(content.as_str())?;
 
     let sum: i64 = find_numbers(&document, false).iter().sum();

@@ -1,5 +1,6 @@
-use std::{error::Error, fs, num::ParseIntError, iter::IntoIterator};
+use std::{error::Error, num::ParseIntError, iter::IntoIterator};
 
+use aoc_lib::io::read_puzzle_input;
 use itertools::Itertools;
 use tupletools::fst;
 
@@ -46,7 +47,7 @@ fn entanglement_optimal_group(items: Vec<u32>, groups: u32) -> Result<(), &'stat
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string("inputs/2015/day_24.txt")?;
+    let contents = read_puzzle_input(2015, 24)?;
     let items = parse_items(&contents)?;
 
     entanglement_optimal_group(items.clone(), 3)?;

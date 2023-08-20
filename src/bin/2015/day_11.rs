@@ -1,5 +1,6 @@
-use std::{error::Error, fs};
+use std::error::Error;
 
+use aoc_lib::io::read_puzzle_input;
 use itertools::Itertools;
 
 type Password = Vec<char>;
@@ -61,8 +62,9 @@ fn change_password(password: &mut Password) {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut password: Password = fs::read_to_string("inputs/2015/day_11.txt")?
-        .chars().collect();
+    let mut password: Password = read_puzzle_input(2015, 11)?
+        .chars()
+        .collect();
     
     change_password(&mut password);
     println!("The new password is {}", password.iter().collect::<String>());

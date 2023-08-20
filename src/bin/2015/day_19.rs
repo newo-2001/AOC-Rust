@@ -1,5 +1,6 @@
-use std::{fs, error::Error, collections::{HashSet, BTreeSet}};
+use std::{error::Error, collections::{HashSet, BTreeSet}};
 
+use aoc_lib::io::read_puzzle_input;
 use itertools::Itertools;
 use nom::{character::complete::alpha1, Parser, sequence::preceded, bytes::complete::tag, error::VerboseError};
 
@@ -80,7 +81,7 @@ fn fastest_synthesis(target: &str, replacements: &Vec<Replacement>) -> Result<us
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_19.txt")?;
+    let content = read_puzzle_input(2015, 19)?;
 
     let (replacements, target) = content.split_once("\r\n\r\n")
         .expect("No empty line found in file");

@@ -1,4 +1,6 @@
-use std::fs;
+use std::error::Error;
+
+use aoc_lib::io::read_puzzle_input;
 use md5;
 
 fn proof_of_work(zeros: usize, prefix: &str) -> u32 {
@@ -14,13 +16,14 @@ fn proof_of_work(zeros: usize, prefix: &str) -> u32 {
         i += 1;
     }
     
-    return i;
+    i   
 }
 
-fn main() {
-    let prefix = fs::read_to_string("inputs/2015/day_4.txt")
-        .expect("Failed to read input file!");
+fn main() -> Result<(), Box<dyn Error>> {
+    let prefix = read_puzzle_input(2015, 4)?;
     
     println!("The first suffix to produce 5 leading zeros is {}", proof_of_work(5, &prefix));
     println!("The first suffix to produce 6 leading zeros is {}", proof_of_work(6, &prefix));
+
+    Ok(())
 }

@@ -1,6 +1,6 @@
-use std::{error::Error, fs};
+use std::error::Error;
 
-use aoc_lib::parsing::{run, skip_until};
+use aoc_lib::{parsing::{run, skip_until}, io::read_puzzle_input};
 use nom::{character::complete, bytes::complete::tag, sequence::preceded, Parser};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -36,7 +36,7 @@ fn parse_input(input: &str) -> Result<Position, String> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_25.txt")?;
+    let content = read_puzzle_input(2015, 25)?;
     let position = parse_input(&content)?;
 
     let code = position.code();

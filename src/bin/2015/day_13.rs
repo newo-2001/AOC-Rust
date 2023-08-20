@@ -1,13 +1,13 @@
-use std::{error::Error, fs, collections::{HashMap, HashSet}};
+use std::{error::Error, collections::{HashMap, HashSet}};
 
+use aoc_lib::{io::read_puzzle_input, parsing::run};
 use itertools::Itertools;
 use nom::{
     combinator::value,
     bytes::complete::tag,
     Parser,
     character::complete::{alpha1, self},
-    sequence::{tuple, preceded},
-    error::VerboseError
+    sequence::{tuple, preceded}
 };
 
 #[derive(Eq, PartialEq, Hash, Clone)]
@@ -74,14 +74,16 @@ fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, String> {
         });
     
     let neighbour = preceded(tag(" happiness units by sitting next to "), alpha1);
-    Ok(tuple((alpha1, weight, neighbour))
-            .map(|(person, weight, neighbour)| WeightedEdge { edge: Edge(person, neighbour), weight })
-            .parse(input).map_err(|err: nom::Err<VerboseError<&str>>| err.to_string())?.1)
+    let mut edge = tuple((alpha1, weight, neighbour))
+        .map(|(person, weight, neighbour)| WeightedEdge { edge: Edge(person, neighbour), weight });
+    
+    run(&mut edge, input)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_13.txt")?;
-    let edges = content.lines().map(parse_edge)
+    let content = read_puzzle_input(2015, 13)?;
+    let edges = content.lines()
+        .map(parse_edge)
         .collect::<Result<Vec<WeightedEdge>, String>>()?;
 
     let mut graph = Graph::from_edges(edges);

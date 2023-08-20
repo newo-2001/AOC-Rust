@@ -1,60 +1,24 @@
-use std::{fs, ops, collections::HashSet};
+use std::{collections::HashSet, error::Error};
 
-#[derive(Default, Eq, PartialEq, Hash, Copy, Clone)]
-struct Coord(i32, i32);
+use aoc_lib::{geometry::{CardinalDirection, Point2D}, io::read_puzzle_input, parsing::{run, direction}};
+use nom::multi::many0;
 
-impl ops::Add<&Coord> for &Coord {
-    type Output = Coord;
-    fn add(self, rhs: &Coord) -> Self::Output {
-        return Coord(self.0 + rhs.0, self.1 + rhs.1);
-    }
+fn unique_houses<'a>(directions: impl IntoIterator<Item=&'a CardinalDirection>) -> HashSet<Point2D<i32>> {
+    let mut position = Point2D::<i32>::zero();
+
+    directions.into_iter()
+        .map(|direction| {
+            position += direction.direction_vector();
+            position
+        }).chain(std::iter::once(Point2D::zero()))
+        .collect()
 }
 
-enum Direction {
-    North, East, South, West
-}
+fn main() -> Result<(), Box<dyn Error>> {
+    let content = read_puzzle_input(2015, 3)?;
+    let movements = run(&mut many0(direction), &content)?;
 
-impl Direction {
-    fn unit_vector(&self) -> Coord {
-        use Direction::*;
-        return match self {
-            North => Coord(0, -1),
-            East => Coord(1, 0),
-            South => Coord(0, 1),
-            West => Coord(-1, 0)
-        }
-    }
-
-    fn parse(c: &char) -> Result<Direction, String> {
-        use Direction::*;
-        return match c {
-            '^' => Ok(North),
-            '>' => Ok(East),
-            'v' => Ok(South),
-            '<' => Ok(West),
-            _ => Err(format!("Failed to parse direction: {}", c))
-        };
-    }
-}
-
-fn unique_houses<'a>(directions: impl Iterator<Item=&'a Direction>) -> HashSet<Coord> {
-    let mut position = Coord::default();
-    return directions.map(|direction| {
-        position = &direction.unit_vector() + &position;
-        return position;
-    }).chain(std::iter::once(Coord::default()))
-        .collect();
-}
-
-fn main() {
-    let movements: Vec<Direction> = fs::read_to_string("inputs/2015/day_3.txt")
-        .expect("Failed to read input file!")
-        .chars()
-        .map(|c| Direction::parse(&c))
-        .collect::<Result<Vec<Direction>, String>>()
-        .unwrap_or_else(|err| panic!("{}", err));
-
-    let visited_houses: usize = unique_houses(movements.iter()).len();
+    let visited_houses = unique_houses(movements.iter()).len();
     println!("Santa visits {} unique houses", visited_houses);
 
     let santa_houses = unique_houses(movements.iter().step_by(2));
@@ -62,4 +26,6 @@ fn main() {
     let all_houses = santa_houses.union(&robo_santa_houses);
     
     println!("Santa and Robo-Santa together visit {} unique houses", all_houses.count());
+
+    Ok(())
 }

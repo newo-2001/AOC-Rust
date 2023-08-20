@@ -1,5 +1,6 @@
-use std::{error::Error, fs, f32::consts::E, iter::repeat};
+use std::{error::Error, f32::consts::E, iter::repeat};
 
+use aoc_lib::io::read_puzzle_input;
 use itertools::Itertools;
 
 const GAMMA: f32 = 0.5772156649;
@@ -110,7 +111,7 @@ fn first_house_with_n_presents_finite(presents: usize, houses_per_elf: usize) ->
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_20.txt")?;
+    let content = read_puzzle_input(2015, 20)?;
     let number: usize = content.parse()?;
 
     let house = first_house_with_n_presents_infinite(number);

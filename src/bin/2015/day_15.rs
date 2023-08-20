@@ -1,13 +1,14 @@
 extern crate queues;
+use aoc_lib::{io::read_puzzle_input, parsing::run};
 use queues::*;
 
-use std::{error::Error, fs, collections::HashMap, iter};
+use std::{error::Error, collections::HashMap, iter};
 
 use nom::{
     sequence::{tuple, preceded, terminated},
     bytes::complete::tag,
     character::complete::{alpha1, self},
-    Parser, error::VerboseError, combinator::opt
+    Parser, combinator::opt
 };
 use queues::{Queue, queue};
 
@@ -41,7 +42,7 @@ impl Ingredient<'_> {
         )).map(|(name, capacity, durability, flavor, texture, calories)|
             Ingredient { name, capacity, durability, flavor, texture, calories });
 
-        Ok(ingredient.parse(input).map_err(|err: nom::Err<VerboseError<&str>>| err.to_string())?.1)
+        run(&mut ingredient, input)
     }   
 }
 
@@ -103,7 +104,7 @@ fn best_score<'a>(cookies: impl Iterator<Item=&'a Cookie<'a>>, ingredients: &Ing
 
 fn main() -> Result<(), Box<dyn Error>> {
     const TEASPOONS: u32 = 100;
-    let content = fs::read_to_string("inputs/2015/day_15.txt")?;
+    let content = read_puzzle_input(2015, 15)?;
 
     let ingredients = content.lines()
         .map(Ingredient::parse)

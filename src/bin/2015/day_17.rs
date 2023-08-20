@@ -1,5 +1,6 @@
-use std::{error::Error, fs, num::ParseIntError};
+use std::{error::Error, num::ParseIntError};
 
+use aoc_lib::io::read_puzzle_input;
 use itertools::Itertools;
 
 fn different_sums(total: u32, sizes: &Vec<u32>) -> impl Iterator<Item = Vec<&u32>> {
@@ -10,7 +11,7 @@ fn different_sums(total: u32, sizes: &Vec<u32>) -> impl Iterator<Item = Vec<&u32
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_17.txt")?;
+    let content = read_puzzle_input(2015, 17)?;
 
     let containers = content.lines()
         .map(|x| u32::from_str_radix(x, 10))

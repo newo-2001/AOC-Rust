@@ -1,6 +1,6 @@
-use std::{error::Error, fs};
+use std::error::Error;
 
-use aoc_lib::spatial::{Grid, Coordinate, Area};
+use aoc_lib::{spatial::{Grid, Coordinate, Area}, io::read_puzzle_input};
 use itertools::Itertools;
 use tupletools::snd;
 
@@ -64,7 +64,7 @@ fn count_lights(grid: &Grid<bool>, area: Area) -> usize {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let area = Area::square(100);
-    let content = fs::read_to_string("inputs/2015/day_18.txt")?;
+    let content = read_puzzle_input(2015, 18)?;
     let original_grid = Grid::from_lines(content.lines(), parse_cell)?;
 
     let mut grid = original_grid.clone();

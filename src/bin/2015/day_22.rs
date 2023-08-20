@@ -1,9 +1,9 @@
-use std::{cmp::{max, min}, collections::{BinaryHeap, HashSet}, iter, error::Error, fs, hash::Hash};
+use std::{cmp::{max, min}, collections::{BinaryHeap, HashSet}, iter, error::Error, hash::Hash};
 
-use aoc_lib::parsing::optional_newline;
+use aoc_lib::{parsing::{optional_newline, run}, io::read_puzzle_input};
 use nom:: {
     sequence::delimited,
-    Parser, error::VerboseError,
+    Parser,
     bytes::complete::tag,
     character::complete
 };
@@ -170,7 +170,7 @@ impl Enemy {
         let mut entity = kv("Hit Points").and(kv("Damage"))
             .map(|(health, damage)| Enemy { health, damage });
 
-        Ok(entity.parse(input).map_err(|err: nom::Err<VerboseError<&str>>| err.to_string())?.1)
+        run(&mut entity, input)
     }
 }
 
@@ -288,7 +288,7 @@ fn least_amount_of_mana_for_victory(battle: Battle) -> Option<u32> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_22.txt")?;    
+    let content = read_puzzle_input(2015, 22)?;
     let enemy = Enemy::parse(&content)?;
 
     let player = Player {

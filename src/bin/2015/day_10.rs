@@ -1,5 +1,6 @@
-use std::{error::Error, fs};
+use std::error::Error;
 
+use aoc_lib::io::read_puzzle_input;
 use itertools::Itertools;
 
 fn look_and_say(look: &Vec<u8>) -> Vec<u8> {
@@ -29,10 +30,11 @@ fn look_and_say_rounds(seed: Vec<u8>, rounds: u8) -> Vec<u8> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut seed: Vec<u8> = fs::read_to_string("inputs/2015/day_10.txt")?
-        .chars().map(|c| c.to_digit(10).map(|x| x as u8))
+    let mut seed: Vec<u8> = read_puzzle_input(2015, 10)?
+        .chars()
+        .map(|c| c.to_digit(10).map(|x| x as u8))
         .collect::<Option<Vec<u8>>>()
-        .expect("Failed to parse digit");
+        .ok_or("Failed to parse digit")?;
 
     seed = look_and_say_rounds(seed, 40);
     println!("The length of the result after 40 rounds is {}", serialize(&seed).len());

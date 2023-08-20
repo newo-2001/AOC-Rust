@@ -1,6 +1,6 @@
-use std::{error::Error, fs, collections::HashSet};
+use std::{error::Error, collections::HashSet};
 
-use aoc_lib::{parsing::{run, TextParserResult}, geometry::{Point2D, CardinalDirection, RotationDirection}};
+use aoc_lib::{parsing::{run, TextParserResult}, geometry::{Point2D, CardinalDirection, RotationDirection}, io::read_puzzle_input};
 use nom::{Parser, character::complete, combinator::value, multi::separated_list0, bytes::complete::tag};
 
 struct Instruction {
@@ -52,7 +52,7 @@ fn path_to_end<'a>(initial_state: State, instructions: impl IntoIterator<Item=&'
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string("inputs/2016/day_1.txt")?;
+    let contents = read_puzzle_input(2016, 1)?;
     let instructions = parse_instructions(&contents)?;
 
     let initial_state = State {

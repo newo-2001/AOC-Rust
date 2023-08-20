@@ -1,7 +1,8 @@
-use std::{error::Error, fs, cmp::min, collections::HashMap};
+use std::{error::Error, cmp::min, collections::HashMap};
 
+use aoc_lib::{io::read_puzzle_input, parsing::run};
 use itertools::Itertools;
-use nom::{sequence::{tuple, preceded}, bytes::complete::tag, character::complete::{self, alpha1}, Parser, error::VerboseError};
+use nom::{sequence::{tuple, preceded}, bytes::complete::tag, character::complete::{self, alpha1}, Parser};
 
 struct Reindeer<'a> {
     name: &'a str,
@@ -16,9 +17,10 @@ impl Reindeer<'_> {
         let stamina = preceded(tag(" km/s for "), complete::u32);
         let recovery = preceded(tag(" seconds, but then must rest for "), complete::u32);
 
-        Ok(tuple((alpha1, speed, stamina, recovery))
-            .map(|(name, speed, stamina, recovery)| Reindeer { name, speed, stamina, recovery })
-            .parse(input).map_err(|err: nom::Err<VerboseError<&str>>| err.to_string())?.1)
+        let mut reindeer = tuple((alpha1, speed, stamina, recovery))
+            .map(|(name, speed, stamina, recovery)| Reindeer { name, speed, stamina, recovery });
+
+        run(&mut reindeer, input)    
     }
 
     fn distance_after_seconds(&self, duration: u32) -> u32 {
@@ -52,7 +54,7 @@ fn most_points_after_seconds(reindeers: &Vec<Reindeer>, duration: u32) -> u32 {
 fn main() -> Result<(), Box<dyn Error>> {
     const DURATION: u32 = 2503;
     
-    let content = fs::read_to_string("inputs/2015/day_14.txt")?;
+    let content = read_puzzle_input(2015, 14)?;
     let reindeers: Vec<Reindeer> = content.lines()
         .map(Reindeer::parse)
         .collect::<Result<Vec<Reindeer>, String>>()?;

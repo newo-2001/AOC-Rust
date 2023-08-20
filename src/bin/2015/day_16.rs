@@ -1,11 +1,12 @@
-use std::{error::Error, fs, collections::HashMap};
+use std::{error::Error, collections::HashMap};
 
+use aoc_lib::{io::read_puzzle_input, parsing::run};
 use itertools::Itertools;
 use nom::{
     sequence::{terminated, delimited},
     bytes::complete::tag,
     character::complete::{self, alpha1},
-    combinator::opt, multi::many0, Parser, error::VerboseError
+    combinator::opt, multi::many0, Parser
 };
 
 const DIMENSIONS: usize = 10;
@@ -33,7 +34,7 @@ fn parse_sue(input: &str) -> Result<Sue, String> {
         .map(|compounds| COMPOUNDS.iter().map(|compound| compounds.get(compound).map(|x| *x)).collect_vec().try_into());
     
     let mut sue = number.and(compounds).map(|(number, compounds)| Sue { number, compounds: compounds.unwrap() });
-    Ok(sue.parse(input).map_err(|err: nom::Err<VerboseError<&str>>| err.to_string())?.1)
+    run(&mut sue, input)
 }
 
 fn is_valid_solution(fact: Fact, solution: &Sue) -> bool {
@@ -68,9 +69,10 @@ fn solve<'a>(fact: Fact, system: Vec<Sue>, predicate: impl Fn(Fact, &Sue) -> boo
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_16.txt")?;
+    let content = read_puzzle_input(2015, 16)?;
 
-    let sues = content.lines().map(parse_sue)
+    let sues = content.lines()
+        .map(parse_sue)
         .collect::<Result<Vec<Sue>, String>>()?;
 
     const FACT: Fact = [3, 7, 2, 3, 0, 0, 5, 3, 2, 1];

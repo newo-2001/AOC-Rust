@@ -1,5 +1,6 @@
-use std::{fs, error::Error, rc::Rc, collections::HashMap, cell::RefCell, sync::Mutex};
+use std::{error::Error, rc::Rc, collections::HashMap, cell::RefCell, sync::Mutex};
 
+use aoc_lib::{io::read_puzzle_input, parsing::run};
 use nom::{
     bytes::complete::tag,
     character::complete::{self, alpha1},
@@ -100,7 +101,7 @@ impl Expression {
 
 static EXPRESSION_CACHE: Lazy<Mutex<HashMap<String, u16>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
-fn parse_expression<'a>(input: &'a str) -> Result<Assignment<'a>, Box<dyn Error + 'a>> {
+fn parse_expression<'a>(input: &'a str) -> Result<Assignment<'a>, String> {
     use UnresolvedExpression::*;
     use BinaryOperator::*;
     use UnaryOperator::*;
@@ -135,9 +136,7 @@ fn parse_expression<'a>(input: &'a str) -> Result<Assignment<'a>, Box<dyn Error 
     let assignment = expression.and(target)
         .map(|(expression, target)| Assignment { expression, target });
 
-    return complete(assignment).parse(input)
-        .map(|(_, result)| result)
-        .map_err(|err| err.into());
+    run(&mut complete(assignment), input)
 }
 
 fn build_expression_tree<'a>(assignments: &'a Vec<Assignment>) -> Result<ExpressionTree<'a>, Box<dyn Error>> {
@@ -177,13 +176,10 @@ fn build_expression_tree<'a>(assignments: &'a Vec<Assignment>) -> Result<Express
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_7.txt")
-        .expect("Failed to read input file!");
-
+    let content = read_puzzle_input(2015, 7)?;
     let assignments = content.lines()
         .map(parse_expression)
-        .collect::<Result<Vec<Assignment>, Box<dyn Error>>>()
-        .unwrap_or_else(|err| panic!("{}", err));
+        .collect::<Result<Vec<Assignment>, String>>()?;
 
     let tree = build_expression_tree(&assignments)?;
     let a = tree.get("a").ok_or(String::from("'a' was undefined"))?

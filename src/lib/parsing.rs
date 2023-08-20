@@ -3,15 +3,16 @@ use std::ops::RangeFrom;
 use nom::{
     Parser,
     IResult,
-    combinator::{value, eof},
+    combinator::{value, eof, opt},
     error::{ParseError, VerboseError},
     branch::alt,
-    character::complete::{crlf, newline, anychar, one_of},
-    Slice, InputIter, InputLength, AsChar, multi::many_till
+    character::complete::{crlf, newline, anychar, one_of, self},
+    Slice, InputIter, InputLength, AsChar, multi::many_till, sequence::{terminated, delimited}
 };
+use num::{Integer, FromPrimitive};
 use tupletools::snd;
 
-use crate::geometry::CardinalDirection;
+use crate::geometry::{CardinalDirection, Point2D};
 
 pub type TextParserResult<'a, T> = IResult<&'a str, T, VerboseError<&'a str>>;
 
@@ -50,9 +51,20 @@ pub fn optional_newline(input: &str) -> TextParserResult<()> {
 
 pub fn direction(input: &str) -> TextParserResult<CardinalDirection> {
     alt((
-        value(CardinalDirection::North, one_of("UN")),
-        value(CardinalDirection::East, one_of("RE")),
-        value(CardinalDirection::South, one_of("DS")),
-        value(CardinalDirection::West, one_of("LW"))
+        value(CardinalDirection::North, one_of("UuNn^")),
+        value(CardinalDirection::East, one_of("RrEe>")),
+        value(CardinalDirection::South, one_of("DdSsVv")),
+        value(CardinalDirection::West, one_of("LlWw<"))
     ))(input)
+}
+
+pub fn point2d<T>(input: &str) -> TextParserResult<Point2D<T>>
+    where T: Integer + FromPrimitive
+{
+    let sep = complete::char(',').and(opt(complete::char(' ')));
+    let point = terminated(complete::i64, sep).and(complete::i64);
+    
+    delimited(opt(complete::char('(')), point, opt(complete::char(')')))
+        .map(|(x, y)| Point2D(T::from_i64(x).unwrap(), T::from_i64(y).unwrap()))
+        .parse(input)
 }

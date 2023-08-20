@@ -1,6 +1,7 @@
 
-use std::{error::Error, fs};
+use std::error::Error;
 
+use aoc_lib::io::read_puzzle_input;
 use itertools::Itertools;
 use nom::{
     bytes::complete::{tag, take_while_m_n},
@@ -58,19 +59,18 @@ fn serialized_size_diff(input: &str) -> usize {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_8.txt")?;
+    let content = read_puzzle_input(2015, 8)?;
 
-    let serialized_overhead: usize = content
-        .lines()
+    let serialized_overhead: usize = content.lines()
         .map(deserialized_size_diff)
         .collect::<Result<Vec<usize>, Box<dyn Error>>>()
-        .expect("Failed to read string")
-        .iter().sum();
+        .map_err(|err| err.to_string())?
+        .iter()
+        .sum();
 
     println!("The deserialized code saved {} characters", serialized_overhead);
 
-    let serialized_overhead: usize = content
-        .lines()
+    let serialized_overhead: usize = content.lines()
         .map(serialized_size_diff)
         .sum();
 

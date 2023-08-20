@@ -1,11 +1,11 @@
 use std::{
     error::Error,
-    fs,
     collections::{HashMap, HashSet},
     hash::{Hash, Hasher},
     cmp::{max, min}
 };
 
+use aoc_lib::{io::read_puzzle_input, parsing::run};
 use itertools::Itertools;
 use nom::{
     character::complete::{alpha1, self},
@@ -37,12 +37,12 @@ impl PartialEq for Edge<'_> {
 
 type WeightedEdge<'a> = (Edge<'a>, u32);
 
-fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, Box<dyn Error + 'a>> {
+fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, String> {
     let edge = alpha1::<&str, VerboseError<&str>>.and(preceded(tag(" to "), alpha1))
         .map(|(from, to)| Edge(from, to));
 
     let distance = preceded(tag(" = "), complete::u32);
-    Ok(edge.and(distance).parse(input)?.1)
+    run(&mut edge.and(distance), input)
 }
 
 struct Graph<'a> {
@@ -74,12 +74,11 @@ impl<'a> Graph<'a> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_9.txt")?;
+    let content = read_puzzle_input(2015, 9)?;
 
-    let edges = content
-        .lines().map(parse_edge)
-        .collect::<Result<Vec<WeightedEdge>, Box<dyn Error>>>()
-        .map_err(|err| err.to_string())?;
+    let edges = content.lines()
+        .map(parse_edge)
+        .collect::<Result<Vec<WeightedEdge>, String>>()?;
 
     let graph = Graph::from_edges(edges);
     let distances: Vec<u32> = graph.nodes.clone().into_iter()

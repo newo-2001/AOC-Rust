@@ -1,12 +1,12 @@
-use std::{error::Error, fs};
+use std::error::Error;
 
+use aoc_lib::{io::read_puzzle_input, parsing::{TextParserResult, run}};
 use nom::{
     Parser,
     character::complete,
     sequence::{preceded, terminated},
     branch::alt, combinator::value,
-    bytes::complete::tag,
-    IResult
+    bytes::complete::tag
 };
 
 #[derive(Clone)]
@@ -79,7 +79,7 @@ impl State {
 }
 
 fn parse_instruction(input: &str) -> Result<Instruction, String> {
-    fn register(input: &str) -> IResult<&str, Register> {
+    fn register(input: &str) -> TextParserResult<Register> {
         value(Register::A, complete::char('a'))
             .or(value(Register::B, complete::char('b')))
             .parse(input)
@@ -96,9 +96,8 @@ fn parse_instruction(input: &str) -> Result<Instruction, String> {
         preceded(tag("jio "), terminated(register, tag(", ")).and(offset))
             .map(|(register, offset)| Instruction::JumpIfOne(register, offset))
     ));
-    
-    Ok(instruction.parse(input)
-        .map_err(|err| err.to_string())?.1)
+
+    run(&mut instruction, input)   
 }
 
 fn parse_program(input: &str) -> Result<Vec<Instruction>, String> {
@@ -116,7 +115,7 @@ fn run_program(program: &Vec<Instruction>, mut state: State) -> State {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string("inputs/2015/day_23.txt")?;
+    let content = read_puzzle_input(2015, 23)?;
     let program = parse_program(&content)?;
 
     let State { b, .. } = run_program(&program, State { a: 0, b: 0, ip: 0 });

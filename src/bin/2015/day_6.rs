@@ -1,15 +1,12 @@
-use std::{fs, cmp};
+use std::{cmp, error::Error};
 
+use aoc_lib::{io::read_puzzle_input, geometry::Point2D, parsing::{point2d, run}};
 use itertools::Itertools;
-use regex::Regex;
+use nom::{bytes::complete::tag, branch::alt, combinator::value, sequence::{tuple, preceded}, Parser};
 
-type Point = (usize, usize);
 type Grid<T> := Vec<[T; 1000]>;
 
-fn add(p1: &Point, p2: &Point) -> Point {
-    return (p1.0 + p2.0, p1.1 + p2.1);
-}
-
+#[derive(Clone, Copy)]
 enum Action {
     On,
     Off,
@@ -42,32 +39,9 @@ impl Togglable for i32 {
     }
 }
 
-impl Action {
-    fn parse(str: &str) -> Result<Action, String> {
-        return match str {
-            "on" => Ok(Self::On),
-            "off" => Ok(Self::Off),
-            "toggle" => Ok(Self::Toggle),
-            _ => Err(format!("Invalid action: {}", str))
-        };
-    }
-}
-
-fn parse_point(str: &str) -> Result<Point, String>{
-    let tokens = str.split_once(',')
-        .ok_or("Point did not contain comma delimiter")?;
-
-    fn parse_int(str: &str) -> Result<usize, String> {
-        return str::parse::<usize>(str)
-            .map_err(|err| err.to_string());
-    }
-
-    return Ok((parse_int(tokens.0)?, parse_int(tokens.1)?));
-}
-
 struct Step {
-    top_left: Point,
-    bottom_right: Point,
+    top_left: Point2D<usize>,
+    bottom_right: Point2D<usize>,
     action: Action
 }
 
@@ -80,23 +54,27 @@ fn set_square<T : Togglable>(grid: &mut Grid<T>, step: &Step) {
 }
 
 fn parse_step(str: &str) -> Result<Step, String> {
-    let regex = Regex::new("(on|off|toggle) (\\d+,\\d+) (?:through) (\\d+,\\d+)").unwrap();
-    let captures = regex.captures(str).ok_or("Failed to parse step")?;
+    let action = alt((
+        value(Action::Off, tag("turn off ")),
+        value(Action::On, tag("turn on ")),
+        value(Action::Toggle, tag("toggle "))
+    ));
 
-    return Ok(Step {
-        action: Action::parse(&captures[1])?,
-        top_left: parse_point(&captures[2])?,
-        bottom_right: add(&(1, 1), &parse_point(&captures[3])?),
-    });
+    let mut step = tuple((
+        action,
+        point2d,
+        preceded(tag(" through "), point2d)
+    )).map(|(action, top_left, bottom_right)|
+        Step { action, top_left, bottom_right: bottom_right + Point2D::one() });
+
+    run(&mut step, str)
 }
 
-fn main() {
-    let steps: Vec<Step> = fs::read_to_string("inputs/2015/day_6.txt")
-        .expect("Failed to read input file!")
+fn main() -> Result<(), Box<dyn Error>> {
+    let steps: Vec<Step> = read_puzzle_input(2015, 6)?
         .lines()
         .map(parse_step)
-        .collect::<Result<Vec<Step>, String>>()
-        .unwrap_or_else(|err| panic!("{}", err));
+        .collect::<Result<Vec<Step>, String>>()?;
      
     let mut grid = vec![[false; 1000]; 1000];
     let mut grid_dimmed = vec![[0; 1000]; 1000];
@@ -118,4 +96,6 @@ fn main() {
         .sum();
 
     println!("After following the new instructions the total brightness is {}", total_brightness);
+
+    Ok(())
 }

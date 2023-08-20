@@ -1,29 +1,31 @@
-use std::{fs, collections::HashSet};
+use std::{collections::HashSet, error::Error};
+use aoc_lib::io::read_puzzle_input;
 use itertools::Itertools;
 
 fn is_vowel(char: &char) -> bool {
-    return "aioeu".contains(*char);
+    "aioeu".contains(*char)
 }
 
 fn count_vowels(str: &str) -> usize {
-    return str.chars().filter(is_vowel).count();
+    str.chars().filter(is_vowel).count()
 }
 
 fn has_consecutive_duplicates(str: &str) -> bool {
-    return str.chars().dedup().count() != str.len();
+    str.chars().dedup().count() != str.len()
 }
 
 fn has_naughty_substring(str: &str) -> bool {
-    return ["ab", "cd", "pq", "xy"].iter()
-        .any(|x| str.contains(x));
+    ["ab", "cd", "pq", "xy"].iter()
+        .any(|x| str.contains(x))
 }
 
 fn is_nice(str: &str) -> bool {
-    return count_vowels(str) >= 3
-        && has_consecutive_duplicates(str)
-        && !has_naughty_substring(str);
+    count_vowels(str) >= 3 &&
+    has_consecutive_duplicates(str) &&
+    !has_naughty_substring(str)
 }
 
+// Tf is this function??
 fn has_duplicate_consecutive_duplicate(str: &str) -> bool {
     let pairs = str.chars().tuple_windows::<(char, char)>();
     let mut seen = HashSet::new();
@@ -47,26 +49,25 @@ fn has_duplicate_consecutive_duplicate(str: &str) -> bool {
         seen.insert(pair);
     }
 
-    return false;
+    false
 }
 
 fn has_seperated_repeating_letter(str: &str) -> bool {
-    return str.chars()
+    str.chars()
         .skip(1)
         .step_by(2)
         .dedup_with_count()
         .chain(str.chars().step_by(2).dedup_with_count())
-        .any(|(i, _)| i > 1);
+        .any(|(i, _)| i > 1)
 }
 
 fn real_is_nice(str: &str) -> bool {
-    return has_duplicate_consecutive_duplicate(str)
-        && has_seperated_repeating_letter(str);
+    has_duplicate_consecutive_duplicate(str) &&
+    has_seperated_repeating_letter(str)
 }
 
-fn main() {
-    let words: Vec<String> = fs::read_to_string("inputs/2015/day_5.txt")
-        .expect("Failed to read input file!")
+fn main() -> Result<(), Box<dyn Error>> {
+    let words: Vec<String> = read_puzzle_input(2015, 5)?
         .lines()
         .map(String::from)
         .collect();
@@ -82,4 +83,6 @@ fn main() {
         .count();
 
     println!("{} string are actually nice", real_nice_words);
+
+    Ok(())
 }
