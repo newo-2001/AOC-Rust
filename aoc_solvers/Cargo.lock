@@ -3,35 +3,11 @@
 version = 3
 
 [[package]]
-name = "aoc_lib"
+name = "aoc_rust"
 version = "0.1.0"
 dependencies = [
- "impl_ops",
- "itertools",
- "nom",
- "num",
- "tupletools",
-]
-
-[[package]]
-name = "aoc_runner"
-version = "0.1.0"
-dependencies = [
- "aoc_runner_api",
- "aoc_solvers",
-]
-
-[[package]]
-name = "aoc_runner_api"
-version = "0.1.0"
-
-[[package]]
-name = "aoc_solvers"
-version = "0.1.0"
-dependencies = [
- "aoc_lib",
- "aoc_runner_api",
  "composing",
+ "impl_ops",
  "itertools",
  "md5",
  "nom",
@@ -206,9 +182,9 @@ checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
 
 [[package]]
 name = "serde"
-version = "1.0.185"
+version = "1.0.183"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be9b6f69f1dfd54c3b568ffa45c310d6973a5e5148fd40cf515acaf38cf5bc31"
+checksum = "32ac8da02677876d532745a130fc9d8e6edfa81a269b107c5b00829b91d8eb3c"
 
 [[package]]
 name = "serde_json"

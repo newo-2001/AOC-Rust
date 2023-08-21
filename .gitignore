@@ -1,5 +1,3 @@
 /target
-.vscode
-.vs
-.idea
-inputs/**/*.txt
+**/.vscode/
+**/.idea/

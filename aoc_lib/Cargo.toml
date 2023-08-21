@@ -1,0 +1,14 @@
+[toolchain]
+channel = "nightly"
+
+[package]
+name = "aoc_lib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+itertools = "0.10.5"
+nom = "7.1.1"
+num = "0.4.1"
+tupletools = "0.3.0"
+impl_ops = "0.1.1"
