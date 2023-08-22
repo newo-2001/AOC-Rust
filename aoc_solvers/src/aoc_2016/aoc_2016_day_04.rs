@@ -1,4 +1,4 @@
-use std::{collections::HashMap, cmp::Ordering, iter};
+use std::{collections::HashMap, cmp::Ordering, iter::repeat};
 
 use aoc_lib::parsing::{parse_lines, Runnable};
 use aoc_runner_api::SolverResult;
@@ -13,23 +13,14 @@ struct Room<'a> {
 }
 
 impl<'a> Room<'a> {
-    fn letter_frequencies(&self) -> HashMap<char, u16> {
-        let mut frequencies: HashMap<char, u16> = HashMap::new();
-        let chars = self.name.chars()
-            .into_iter()
-            .filter(|&c| c != '-');
-
-        for c in chars {
-            let frequency = frequencies.get(&c)
-                .unwrap_or(&0) + 1;
-            frequencies.insert(c, frequency);
-        }
-
-        frequencies
+    fn letter_frequencies(&self) -> HashMap<char, usize> {
+        self.name.chars()
+            .filter(|&c| c != '-')
+            .counts()
     }
 
     fn is_real(&self) -> bool {
-        fn compare_letters(left: &(char, u16), right: &(char, u16)) -> Ordering {
+        fn compare_letters(left: &(char, usize), right: &(char, usize)) -> Ordering {
             match left.1.cmp(&right.1) {
                 Ordering::Equal => left.0.cmp(&right.0),
                 ordering => ordering.reverse()
@@ -38,7 +29,7 @@ impl<'a> Room<'a> {
 
         self.letter_frequencies()
             .into_iter()
-            .sorted_by(compare_letters)
+            .sorted_unstable_by(compare_letters)
             .take(self.checksum.len())
             .map(fst)
             .eq(self.checksum.chars())
@@ -56,17 +47,14 @@ impl<'a> Room<'a> {
 }
 
 fn rotate_letter(c: char) -> char {
-    match c {
-        'z' => 'a',
-        c => (c as u8 + 1) as char,
-    }
+    if c == 'z' { 'a' }
+    else { (c as u8 + 1) as char }
 }
 
 fn rotate_str(str: &str) -> String {
     str.chars()
-        .into_iter()
         .map(rotate_letter)
-        .collect::<String>()
+        .collect()
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
@@ -84,7 +72,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .into_iter()
         .filter(Room::is_real)
         .update(|room| {
-            room.name = iter::repeat(())
+            room.name = repeat(())
                 .take(room.sector_id as usize)
                 .fold(room.name.to_owned(), |name, _| rotate_str(&name))
         }).find(|room| room.name.contains("northpole"))
