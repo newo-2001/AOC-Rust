@@ -1,6 +1,3 @@
-[toolchain]
-channel = "nightly"
-
 [package]
 name = "aoc_lib"
 version = "0.1.0"

@@ -22,14 +22,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn execute<'a>(runner: fn(&Puzzle) -> SolverResult, puzzles: &Vec<Puzzle>) {
-    println!("Executing {} puzzles...", puzzles.len());
+    println!("Executing {} puzzle(s)...", puzzles.len());
 
     let results = puzzles.into_iter().map(|puzzle| {
         let (year, day, part) = (puzzle.year, puzzle.day, puzzle.part);
         let result = runner(puzzle);
         match &result {
-            Ok(answer) => println!("[{} day {} part {}] (Success) {}", year, day, part, answer),
-            Err(err) => println!("[{} day {} part {}] (Failed) {}", year, day, part, err.to_string())
+            Ok(answer) => println!("[{} day {:02} part {}] (Success) {}", year, day, part, answer),
+            Err(err) => println!("[{} day {:02} part {}] (Failed) {}", year, day, part, err.to_string())
         }
 
         result

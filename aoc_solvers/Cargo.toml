@@ -1,6 +1,3 @@
-[toolchain]
-channel = "nightly"
-
 [package]
 name = "aoc_solvers"
 version = "0.1.0"
@@ -19,6 +16,7 @@ md5 = "0.7.0"
 nom = "7.1.1"
 num = "0.4.1"
 once_cell = "1.17.1"
+paste = "1.0.14"
 queues = "1.1.0"
 serde_json = "1.0.96"
 transpose = "0.2.2"

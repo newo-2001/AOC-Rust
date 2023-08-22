@@ -7,7 +7,7 @@ use crate::RunnerAction;
 fn available_puzzles() -> impl Iterator<Item=Puzzle> {
     (2015..=2022).flat_map(move |year| {
         (1..=25).flat_map(move |day| {
-            (1..=2).map(move |part| {
+            (1..=(if day == 25 { 1 } else { 2 })).map(move |part| {
                 Puzzle { year, day, part }
             })
         })
@@ -25,7 +25,7 @@ pub fn parse_puzzles<'a>(mut arguments: impl Iterator<Item=String>) -> Result<im
         let day = arguments.next().ok_or("Missing 'day' argument")?.parse::<u8>()?;
         let parts = arguments.next()
             .map(|part| vec![part.parse::<u8>()])
-            .unwrap_or_else(|| vec![Ok(1u8), Ok(2u8)])
+            .unwrap_or_else(|| if day == 25 { vec![Ok(1u8)] } else { vec![Ok(1u8), Ok(2u8)] })
             .into_iter().collect::<Result<Vec<u8>, ParseIntError>>()?;
 
         Box::new(parts.into_iter().map(move |part| Puzzle { year, day, part }))

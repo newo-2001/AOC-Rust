@@ -27,10 +27,10 @@ fn get_solution_for_puzzle(puzzle: &Puzzle) -> Result<String, String> {
 }
 
 pub fn run_puzzle(puzzle: &Puzzle) -> SolverResult {
-    let input = get_input_for_puzzle(puzzle)?;
-
     let solver = aoc_solvers::get_solver(puzzle)
         .ok_or(format!("Failed to resolve solver for {}-{}-{}", puzzle.year, puzzle.day, puzzle.part))?;
+
+    let input = get_input_for_puzzle(puzzle)?;
 
     solver(&input)
 }
