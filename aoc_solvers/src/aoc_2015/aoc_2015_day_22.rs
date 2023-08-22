@@ -1,6 +1,6 @@
 use std::{cmp::{max, min}, collections::{BinaryHeap, HashSet}, iter, hash::Hash};
 
-use aoc_lib::parsing::{optional_newline, run};
+use aoc_lib::parsing::{optional_newline, Runnable};
 use aoc_runner_api::SolverResult;
 use nom:: {
     sequence::delimited,
@@ -168,10 +168,9 @@ impl Enemy {
     fn parse(input: &str) -> Result<Enemy, String> {
         let kv = |key| delimited(tag(key).and(tag(": ")), complete::u32, optional_newline);
 
-        let mut entity = kv("Hit Points").and(kv("Damage"))
-            .map(|(health, damage)| Enemy { health, damage });
-
-        run(&mut entity, input)
+        kv("Hit Points").and(kv("Damage"))
+            .map(|(health, damage)| Enemy { health, damage })
+            .run(input)
     }
 }
 

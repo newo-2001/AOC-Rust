@@ -1,4 +1,4 @@
-use aoc_lib::parsing::{run, skip_until};
+use aoc_lib::parsing::{skip_until, Runnable};
 use aoc_runner_api::SolverResult;
 use nom::{character::complete, bytes::complete::tag, sequence::preceded, Parser};
 
@@ -28,10 +28,10 @@ impl Position {
 fn parse_input(input: &str) -> Result<Position, String> {
     let row = preceded(tag("row "), complete::u32);
     let col = preceded(tag(", column "), complete::u32);
-    let mut position = skip_until(row.and(col))
-        .map(|(row, col)| Position(col, row));
-
-    run(&mut position, input)
+    
+    skip_until(row.and(col))
+        .map(|(row, col)| Position(col, row))
+        .run(input)
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {

@@ -25,16 +25,22 @@ pub fn skip_until<I, O, E, F, C>(parser: F) -> impl Parser<I, O, E>
     many_till(anychar, parser).map(snd)
 }
 
-pub fn run<'a, O, F>(parser: &mut F, input: &'a str) -> Result<O, String>
-    where F: Parser<&'a str, O, VerboseError<&'a str>>
-{
-    Ok(parser.parse(input).map_err(|err| err.to_string())?.1)
-}
-
 pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
     where F: Fn(&'a str) -> Result<T, E>
 {
     input.lines()
         .map(parser)
         .collect()
+}
+
+pub trait Runnable<'a, O> {
+    fn run(&mut self, input: &'a str) -> Result<O, String>;
+}
+
+impl<'a, O, F> Runnable<'a, O> for F where
+    F: Parser<&'a str, O, VerboseError<&'a str>>
+{
+    fn run(&mut self, input: &'a str) -> Result<O, String> {
+        Ok(self.parse(input).map_err(|err| err.to_string())?.1)
+    }
 }

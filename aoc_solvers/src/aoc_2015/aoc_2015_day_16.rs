@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use aoc_lib::parsing::{run, parse_lines};
+use aoc_lib::parsing::{parse_lines, Runnable};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -34,8 +34,9 @@ fn parse_sue(input: &str) -> Result<Sue, String> {
         .map(|x| x.into_iter().collect::<HashMap<&str, u8>>())
         .map(|compounds| COMPOUNDS.iter().map(|compound| compounds.get(compound).map(|x| *x)).collect_vec().try_into());
     
-    let mut sue = number.and(compounds).map(|(number, compounds)| Sue { number, compounds: compounds.unwrap() });
-    run(&mut sue, input)
+    number.and(compounds)
+        .map(|(number, compounds)| Sue { number, compounds: compounds.unwrap() })
+        .run(input)
 }
 
 fn is_valid_solution(fact: Fact, solution: &Sue) -> bool {

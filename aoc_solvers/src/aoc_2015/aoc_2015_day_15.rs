@@ -1,5 +1,5 @@
 extern crate queues;
-use aoc_lib::parsing::{run, parse_lines};
+use aoc_lib::parsing::{parse_lines, Runnable};
 use aoc_runner_api::SolverResult;
 use queues::*;
 
@@ -33,7 +33,7 @@ impl Ingredient<'_> {
             terminated(complete::i32, opt(complete::char(','))));
         let name = terminated(alpha1, complete::char(':'));
 
-        let mut ingredient = tuple((
+        tuple((
             name,
             property("capacity"),
             property("durability"),
@@ -41,9 +41,8 @@ impl Ingredient<'_> {
             property("texture"),
             property("calories")
         )).map(|(name, capacity, durability, flavor, texture, calories)|
-            Ingredient { name, capacity, durability, flavor, texture, calories });
-
-        run(&mut ingredient, input)
+            Ingredient { name, capacity, durability, flavor, texture, calories }
+        ).run(input)
     }   
 }
 

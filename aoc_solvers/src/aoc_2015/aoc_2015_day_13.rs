@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use aoc_lib::parsing::{run, parse_lines};
+use aoc_lib::parsing::{parse_lines, Runnable};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -75,10 +75,9 @@ fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, String> {
         });
     
     let neighbour = preceded(tag(" happiness units by sitting next to "), alpha1);
-    let mut edge = tuple((alpha1, weight, neighbour))
-        .map(|(person, weight, neighbour)| WeightedEdge { edge: Edge(person, neighbour), weight });
-    
-    run(&mut edge, input)
+    tuple((alpha1, weight, neighbour))
+        .map(|(person, weight, neighbour)| WeightedEdge { edge: Edge(person, neighbour), weight })
+        .run(input)
 }
 
 fn build_graph(input: &str) -> Result<Graph, String> {

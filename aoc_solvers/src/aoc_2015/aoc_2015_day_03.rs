@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use aoc_lib::{geometry::{CardinalDirection, Point2D}, parsing::{run, direction}};
+use aoc_lib::{geometry::{CardinalDirection, Point2D}, parsing::{direction, Runnable}};
 use aoc_runner_api::SolverResult;
 use nom::multi::many0;
 
@@ -16,7 +16,7 @@ fn unique_houses<'a>(directions: impl IntoIterator<Item=&'a CardinalDirection>) 
 }
 
 fn parse_movements(input: &str) -> Result<Vec<CardinalDirection>, String> {
-    run(&mut many0(direction), input)
+    many0(direction).run(input)
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {

@@ -1,6 +1,6 @@
 use std::{cmp::{max, min}, collections::HashMap, iter};
 
-use aoc_lib::parsing::{optional_newline, run};
+use aoc_lib::parsing::{optional_newline, Runnable};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -27,10 +27,10 @@ impl Entity {
 
     fn parse(input: &str) -> Result<Entity, String> {
         let kv = |key| terminated(preceded(tag(key).and(tag(": ")), complete::u32), optional_newline);
-        let mut entity = tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
-            .map(|(health, damage, armor)| Entity { health, damage, armor });
 
-        run(&mut entity, input)
+        tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
+            .map(|(health, damage, armor)| Entity { health, damage, armor })
+            .run(input)
     }
 
     fn with_gear(&self, gear: &Vec<&Item>) -> Entity {

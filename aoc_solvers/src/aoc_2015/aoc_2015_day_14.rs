@@ -1,6 +1,6 @@
 use std::{cmp::min, collections::HashMap};
 
-use aoc_lib::parsing::{run, parse_lines};
+use aoc_lib::parsing::{parse_lines, Runnable};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded}, bytes::complete::tag, character::complete::{self, alpha1}, Parser};
@@ -18,10 +18,9 @@ impl Reindeer<'_> {
         let stamina = preceded(tag(" km/s for "), complete::u32);
         let recovery = preceded(tag(" seconds, but then must rest for "), complete::u32);
 
-        let mut reindeer = tuple((alpha1, speed, stamina, recovery))
-            .map(|(name, speed, stamina, recovery)| Reindeer { name, speed, stamina, recovery });
-
-        run(&mut reindeer, input)    
+        tuple((alpha1, speed, stamina, recovery))
+            .map(|(name, speed, stamina, recovery)| Reindeer { name, speed, stamina, recovery })
+            .run(input)    
     }
 
     fn distance_after_seconds(&self, duration: u32) -> u32 {

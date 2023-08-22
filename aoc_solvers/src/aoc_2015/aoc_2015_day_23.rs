@@ -1,4 +1,4 @@
-use aoc_lib::parsing::{TextParserResult, run, parse_lines};
+use aoc_lib::parsing::{TextParserResult, parse_lines, Runnable};
 use aoc_runner_api::SolverResult;
 use nom::{
     Parser,
@@ -85,7 +85,7 @@ fn parse_instruction(input: &str) -> Result<Instruction, String> {
     }
     
     let offset = complete::i64;
-    let mut instruction = alt((
+    alt((
         preceded(tag("hlf "), register).map(|register| Instruction::Half(register)),
         preceded(tag("tpl "), register).map(|register| Instruction::Triple(register)),
         preceded(tag("inc "), register).map(|register| Instruction::Increment(register)),
@@ -94,9 +94,7 @@ fn parse_instruction(input: &str) -> Result<Instruction, String> {
             .map(|(register, offset)| Instruction::JumpIfEven(register, offset)),
         preceded(tag("jio "), terminated(register, tag(", ")).and(offset))
             .map(|(register, offset)| Instruction::JumpIfOne(register, offset))
-    ));
-
-    run(&mut instruction, input)   
+    )).run(input)
 }
 
 fn run_program(program: &Vec<Instruction>, mut state: State) -> State {

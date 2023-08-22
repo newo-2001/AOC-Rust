@@ -1,6 +1,6 @@
 use std::{error::Error, rc::Rc, collections::HashMap, cell::RefCell, sync::Mutex};
 
-use aoc_lib::parsing::{run, parse_lines};
+use aoc_lib::parsing::{parse_lines, Runnable};
 use aoc_runner_api::SolverResult;
 use nom::{
     bytes::complete::tag,
@@ -137,7 +137,7 @@ fn parse_expression<'a>(input: &'a str) -> Result<Assignment<'a>, Box<dyn Error>
     let assignment = expression.and(target)
         .map(|(expression, target)| Assignment { expression, target });
 
-    run(&mut complete(assignment), input)
+    complete(assignment).run(input)
         .map_err(|err| err.into())
 }
 

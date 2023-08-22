@@ -1,4 +1,4 @@
-use aoc_lib::parsing::{run, parse_lines};
+use aoc_lib::parsing::{parse_lines, Runnable};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded}, character::complete::{self, multispace1}, Parser};
@@ -16,13 +16,12 @@ impl Triangle {
     }
 
     fn parse(input: &str) -> Result<Triangle, String> {
-        let mut triangle = tuple((
+        tuple((
             preceded(multispace1, complete::u32),
             preceded(multispace1, complete::u32),
             preceded(multispace1, complete::u32)
-        )).map(|(x, y, z)| Triangle(x, y, z));
-
-        run(&mut triangle, input)
+        )).map(|(x, y, z)| Triangle(x, y, z))
+            .run(input)
     }
 }
 

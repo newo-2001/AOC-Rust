@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use aoc_lib::{parsing::{run, TextParserResult}, geometry::{Point2D, CardinalDirection, RotationDirection}};
+use aoc_lib::{parsing::{TextParserResult, Runnable}, geometry::{Point2D, CardinalDirection, RotationDirection}};
 use aoc_runner_api::SolverResult;
 use nom::{Parser, character::complete, combinator::value, multi::separated_list0, bytes::complete::tag};
 
@@ -33,8 +33,8 @@ fn parse_instructions(input: &str) -> Result<Vec<Instruction>, String> {
             .parse(input)
     }
 
-    let mut instructions = separated_list0(tag(", "), parse_instruction);
-    run(&mut instructions, input)
+    separated_list0(tag(", "), parse_instruction)
+        .run(input)
 }
 
 fn path_to_end<'a>(from: Point2D<i32>, instructions: impl IntoIterator<Item=&'a Instruction>) -> Vec<Point2D<i32>> {

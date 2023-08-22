@@ -4,7 +4,7 @@ use std::{
     cmp::{max, min}
 };
 
-use aoc_lib::parsing::{run, parse_lines};
+use aoc_lib::parsing::{parse_lines, Runnable};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -42,7 +42,7 @@ fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, String> {
         .map(|(from, to)| Edge(from, to));
 
     let distance = preceded(tag(" = "), complete::u32);
-    run(&mut edge.and(distance), input)
+    edge.and(distance).run(input)
 }
 
 struct Graph<'a> {
