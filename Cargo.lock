@@ -6,6 +6,7 @@ version = 3
 name = "aoc_lib"
 version = "0.1.0"
 dependencies = [
+ "gen-iter",
  "impl_ops",
  "itertools",
  "nom",
@@ -32,6 +33,8 @@ dependencies = [
  "aoc_lib",
  "aoc_runner_api",
  "composing",
+ "gen-iter",
+ "hex",
  "itertools",
  "md5",
  "nom",
@@ -61,6 +64,21 @@ name = "either"
 version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a26ae43d7bcc3b814de94796a5e736d4029efb0ee900c12e2d54c993ad1a1e07"
+
+[[package]]
+name = "gen-iter"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33ab36ccf1ed3d9c719f4c8725b34482c530f6d569c084ea762490b5e19f77bf"
+
+[[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "impl_ops"

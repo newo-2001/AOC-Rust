@@ -1,3 +1,5 @@
+#![feature(generators)]
+
 use aoc_2015::*;
 use aoc_2016::*;
 use aoc_runner_api::{Solver, Puzzle};
@@ -61,6 +63,7 @@ pub fn get_solver(puzzle: &Puzzle) -> Option<Box<Solver>> {
             2 => solver!(2016, "02", puzzle.part),
             3 => solver!(2016, "03", puzzle.part),
             4 => solver!(2016, "04", puzzle.part),
+            5 => solver!(2016, "05", puzzle.part),
             _ => None
         },
         _ => None

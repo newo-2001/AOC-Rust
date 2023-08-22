@@ -11,6 +11,8 @@ path = "src/lib.rs"
 aoc_lib = { path = "../aoc_lib" }
 aoc_runner_api = { path = "../aoc_runner_api" }
 composing = "0.2.0"
+gen-iter = "0.3.0"
+hex = { version = "0.4.3", features = ["serde"] }
 itertools = "0.10.5"
 md5 = "0.7.0"
 nom = "7.1.1"
