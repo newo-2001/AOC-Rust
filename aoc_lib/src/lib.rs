@@ -6,3 +6,4 @@ pub mod spatial;
 pub mod parsing;
 pub mod math;
 pub mod geometry;
+pub mod iteration;
