@@ -1,6 +1,6 @@
 use std::vec;
 
-use aoc_lib::iteration::{SingleError, Single, Mode};
+use aoc_lib::iteration::ExtraIter;
 use aoc_runner_api::SolverResult;
 use composing::compose_fn;
 use itertools::{Itertools, enumerate};
@@ -17,24 +17,25 @@ pub fn places(input: &str) -> impl Iterator<Item=vec::IntoIter<char>> {
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let message = places(input)
-        .map(compose_fn!(Mode::mode => Single::single))
-        .collect::<Result<String, SingleError>>()?;
+        .map(ExtraIter::mode)
+        .collect::<Option<String>>()
+        .ok_or("Column was empty")?;
 
     Ok(Box::new(message))
 }
 
-fn least_common(it: impl Iterator<Item=char>) -> Result<char, SingleError> {
+fn least_common(it: impl Iterator<Item=char>) -> Option<char> {
     it.counts()
         .into_iter()
-        .min_set_by_key(|&(_, frequency)| frequency)
-        .into_iter()
-        .single().map(fst)
+        .min_by_key(|(_, count)| *count)
+        .map(fst)
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
     let message= places(input)
         .map(least_common)
-        .collect::<Result<String, SingleError>>()?;
+        .collect::<Option<String>>()
+        .ok_or("Column was empty")?;
 
     Ok(Box::new(message))
 }

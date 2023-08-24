@@ -17,18 +17,12 @@ impl Display for SingleError {
 
 impl Error for SingleError {}
 
-pub trait Single<T> {
-    fn single(self) -> Result<T, SingleError>;
-}
-
-impl<T, I: Iterator<Item=T>> Single<T> for I {
-    fn single(mut self) -> Result<T, SingleError> {
-        match self.next() {
-            None => Err(SingleError::None),
-            Some(v) => match self.next() {
-                None => Ok(v),
-                Some(_) => Err(SingleError::More)
-            }
+pub fn single<T>(mut it: impl Iterator<Item=T>) -> Result<T, SingleError> {
+    match it.next() {
+        None => Err(SingleError::None),
+        Some(v) => match it.next() {
+            None => Ok(v),
+            Some(_) => Err(SingleError::More)
         }
     }
 }
