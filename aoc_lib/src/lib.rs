@@ -1,4 +1,4 @@
-#![feature(generators)]
+#![feature(generators, step_trait)]
 #[macro_use] extern crate impl_ops;
 
 #[deprecated(note="Use the more abstract `geometry` module instead")]

@@ -1,6 +1,8 @@
 mod single;
 mod mode;
+mod linear_sequence;
 
+use self::linear_sequence::LinearSequence;
 pub use self::single::SingleError;
 use std::hash::Hash;
 
@@ -29,6 +31,12 @@ pub trait ExtraIter : Iterator {
               Self::Item: Eq + Hash
     {
         mode::multi_mode(self)
+    }
+
+    fn linear_sequence(self, step_size: usize, offset: usize) -> LinearSequence<Self>
+        where Self: Sized
+    {
+        LinearSequence { it: self, step_size, offset }
     }
 }
 
