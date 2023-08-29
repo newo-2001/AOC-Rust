@@ -1,4 +1,4 @@
-use aoc_lib::{geometry::{CardinalDirection, Point2D}, parsing::{direction, parse_lines, Runnable}};
+use aoc_lib::{geometry::{CardinalDirection, Point2D}, parsing::{parse_lines, Runnable}};
 use aoc_runner_api::SolverResult;
 use nom::multi::many0;
 
@@ -8,7 +8,7 @@ enum KeyPad {
 }
 
 fn parse_instruction(line: &str) -> Result<Vec<CardinalDirection>, String> {
-    many0(direction).run(line)
+    many0(CardinalDirection::parse).run(line)
 }
 
 fn digit<'a>(keypad: &KeyPad, location: &mut Point2D<i32>, movements: impl IntoIterator<Item=&'a CardinalDirection>) -> char {

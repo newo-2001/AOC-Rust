@@ -1,6 +1,6 @@
 use std::cmp;
 
-use aoc_lib::{geometry::Point2D, parsing::{point2d, parse_lines, Runnable}};
+use aoc_lib::{geometry::Point2D, parsing::{parse_lines, Runnable}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{bytes::complete::tag, branch::alt, combinator::value, sequence::{tuple, preceded}, Parser};
@@ -63,8 +63,8 @@ fn parse_step(str: &str) -> Result<Step, String> {
 
     tuple((
         action,
-        point2d,
-        preceded(tag(" through "), point2d)
+        Point2D::parse,
+        preceded(tag(" through "), Point2D::parse)
     )).map(|(action, top_left, bottom_right)|
         Step { action, top_left, bottom_right: bottom_right + Point2D::one() }
     ).run(str)

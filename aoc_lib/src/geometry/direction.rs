@@ -1,4 +1,7 @@
+use nom::{branch::alt, combinator::value, character::complete::one_of};
 use num::{Integer, Signed, Zero, One};
+
+use crate::parsing::TextParserResult;
 
 use super::Point2D;
 
@@ -41,6 +44,15 @@ impl CardinalDirection {
             (Self::West, RotationDirection::Left) => Self::South,
             (Self::West, RotationDirection::Right) => Self::North
         }
+    }
+
+    pub fn parse(input: &str) -> TextParserResult<CardinalDirection> {
+        alt((
+            value(CardinalDirection::North, one_of("UuNn^")),
+            value(CardinalDirection::East, one_of("RrEe>")),
+            value(CardinalDirection::South, one_of("DdSsVv")),
+            value(CardinalDirection::West, one_of("LlWw<"))
+        ))(input)
     }
 }
 

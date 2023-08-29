@@ -1,6 +1,9 @@
 use std::{ops::{Add, AddAssign, Sub, SubAssign, Mul}, cmp::{max, min}, fmt::{Display, Formatter, self}};
 
-use num::{Integer, clamp, Zero, One, CheckedAdd, NumCast, Signed};
+use nom::{character::complete, combinator::opt, sequence::{terminated, delimited}, Parser};
+use num::{Integer, clamp, Zero, One, CheckedAdd, NumCast, Signed, FromPrimitive};
+
+use crate::parsing::TextParserResult;
 
 use super::{Direction, CardinalDirection, OrdinalDirection};
 
@@ -103,6 +106,17 @@ impl<T: Integer> Point2D<T> {
 
     pub fn y(self) -> T {
         self.1
+    }
+
+    pub fn parse(input: &str) -> TextParserResult<Point2D<T>>
+        where T: FromPrimitive
+    {
+        let sep = complete::char(',').and(opt(complete::char(' ')));
+        let point = terminated(complete::i64, sep).and(complete::i64);
+        
+        delimited(opt(complete::char('(')), point, opt(complete::char(')')))
+            .map(|(x, y)| Point2D(T::from_i64(x).unwrap(), T::from_i64(y).unwrap()))
+            .parse(input)
     }
 }
 

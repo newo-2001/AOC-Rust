@@ -1,5 +1,8 @@
-
 use std::{fmt::{Display, Formatter, self, Debug}, error::Error, vec, slice, iter::FlatMap, ops::Index};
+
+use nom::{multi::many0, combinator::value, character::complete, Parser};
+
+use crate::parsing::Runnable;
 
 use super::{Point2D, Dimensions, WrongDimensionsError, Area};
 
@@ -117,7 +120,7 @@ impl<'a, T> GridView<'a, T> {
     
     pub fn get(&self, location: Point2D<usize>) -> Option<&T> {
         if !self.area.contains(location) { return None; }
-        
+
         let location = location + self.area.top_left();
         let index = self.grid.backing_index(location);
         self.grid.tiles.get(index)
@@ -276,5 +279,35 @@ impl<'a, T> GridViewMut<'a, T> {
             .collect();
 
         Some(column)
+    }
+}
+
+#[derive(Debug)]
+pub enum GridParseError {
+    ParseError(String),
+    WrongDimensions(WrongDimensionsError)
+}
+
+impl Display for GridParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let err = match self {
+            GridParseError::ParseError(err) => err.to_string(),
+            GridParseError::WrongDimensions(err) => err.to_string()
+        };
+
+        write!(f, "{}", err)
+    }
+}
+
+impl Error for GridParseError {}
+
+impl Grid<bool> {
+    pub fn parse(dimensions: Dimensions, input: &str) -> Result<Grid<bool>, GridParseError> {
+        let cell = value(true, complete::char('#'))
+            .or(value(false, complete::char('.')));
+
+        let input: String = input.lines().flat_map(str::chars).collect();
+        let cells = many0(cell).run(&input).map_err(GridParseError::ParseError)?;
+        Grid::from_iter(dimensions, cells).map_err(GridParseError::WrongDimensions)
     }
 }
