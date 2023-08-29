@@ -1,9 +1,7 @@
-pub trait Pipe {
-    fn pipe<O>(self, dest: impl FnOnce(Self) -> O) -> O where Self: Sized;
-}
+use std::iter::repeat;
 
-impl<T: Sized> Pipe for T {
-    fn pipe<O>(self, dest: impl FnOnce(Self) -> O) -> O {
-        dest(self)
-    }
+pub fn repeat_apply<T>(times: usize, seed: T, f: impl Fn(T) -> T) -> T {
+    repeat(())
+        .take(times)
+        .fold(seed, |value, _| f(value))
 }

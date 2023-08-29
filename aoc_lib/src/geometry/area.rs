@@ -26,12 +26,6 @@ impl<T> Area<T> where T: Integer + Copy {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> impl Iterator<Item=Point2D<T>> + 'a where T: Step {
-        (self.top_left.y()..=self.bottom_right.y()).flat_map(move |y| {
-            (self.top_left.x()..=self.bottom_right.x()).map(move |x| Point2D(x, y))
-        })
-    }
-
     pub fn dimensions(&self) -> Dimensions where T: ToPrimitive {
         let Point2D(width, height) = self.bottom_right() - self.top_left();
         Dimensions(T::to_usize(&width).unwrap() + 1, T::to_usize(&height).unwrap() + 1)
@@ -55,6 +49,17 @@ impl<T> Area<T> where T: Integer + Copy {
 
     pub fn corners(&self) -> [Point2D<T>; 4] {
         [self.top_left(), self.top_right(), self.bottom_left(), self.bottom_right()]
+    }
+
+    pub fn iter(self) -> impl Iterator<Item=Point2D<T>> where T: Step {
+        (self.top()..=self.bottom()).flat_map(move |y| {
+            (self.left()..=self.right()).map(move |x| Point2D(x, y))
+        })
+    }
+
+    pub fn contains(&self, Point2D(x, y): Point2D<T>) -> bool {
+        x >= self.left() && x <= self.right() &&
+        y >= self.top() && y <= self.bottom()
     }
 }
 

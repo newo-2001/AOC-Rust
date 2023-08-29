@@ -1,6 +1,8 @@
 use std::{ops::{Add, AddAssign, Sub, SubAssign, Mul}, cmp::{max, min}, fmt::{Display, Formatter, self}};
 
-use num::{Integer, clamp, Zero, One};
+use num::{Integer, clamp, Zero, One, CheckedAdd, NumCast, Signed};
+
+use super::{Direction, CardinalDirection, OrdinalDirection};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Point2D<T>(pub T, pub T) where T: Integer;
@@ -46,6 +48,17 @@ impl<T: Integer + Copy> Mul<T> for Point2D<T> {
 }
 
 impl<T: Integer + Copy> Point2D<T> {
+    fn checked_add<U>(self, rhs: Point2D<U>) -> Option<Point2D<T>>
+        where U: Integer + NumCast + Signed,
+              T: NumCast
+    {
+        let add = |a: T, b: U| T::from(U::from(a).unwrap() + b);
+
+        let x = add(self.0, rhs.0)?;
+        let y = add(self.1, rhs.1)?;
+        Some(Point2D(x, y))
+    }
+
     pub fn manhattan_distance(&self, other: &Self) -> T {
         let x = max(self.0, other.0) - min(self.0, other.0);
         let y = max(self.1, other.1) - min(self.1, other.1);
@@ -56,6 +69,22 @@ impl<T: Integer + Copy> Point2D<T> {
         let x = clamp(self.0, min, max);
         let y = clamp(self.1, min, max);
         Point2D(x, y)
+    }
+
+    pub fn neighbours(self) -> impl Iterator<Item=Point2D<T>>
+        where T: CheckedAdd + NumCast
+    {
+        [
+            Direction::Cardinal(CardinalDirection::North),
+            Direction::Ordinal(OrdinalDirection::NorthEast),
+            Direction::Cardinal(CardinalDirection::East),
+            Direction::Ordinal(OrdinalDirection::SouthEast),
+            Direction::Cardinal(CardinalDirection::South),
+            Direction::Ordinal(OrdinalDirection::SouthWest),
+            Direction::Cardinal(CardinalDirection::West),
+            Direction::Ordinal(OrdinalDirection::NorthWest)
+        ].into_iter()
+            .filter_map(move |direction| self.checked_add(direction.direction_vector::<i64>()))
     }
 }
 
@@ -87,6 +116,7 @@ impl<T: Integer + Copy> PartialOrd for Point2D<T> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         let x = self.x().partial_cmp(&other.x());
         let y = self.y().partial_cmp(&other.y());
+
         match (x, y) {
             (Some(x), Some(y)) if x == y => Some(x),
             _ => None
