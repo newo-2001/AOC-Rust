@@ -1,8 +1,6 @@
 use std::{fmt::{Display, Formatter, self, Debug}, error::Error, vec, slice, iter::FlatMap, ops::Index};
 
-use nom::{multi::many0, combinator::value, character::complete, Parser};
-
-use crate::parsing::Runnable;
+use crate::parsing::InvalidTokenError;
 
 use super::{Point2D, Dimensions, WrongDimensionsError, Area};
 
@@ -127,7 +125,7 @@ impl<'a, T> GridView<'a, T> {
     }
 
     pub fn get_row(&self, row: usize) -> Option<&[T]> {
-        if row > self.area.right() { return None };
+        if row > self.area.bottom() { return None };
 
         let row = row + self.area.top();
         let start = row * self.grid.dimensions.width() + self.area.left();
@@ -137,7 +135,7 @@ impl<'a, T> GridView<'a, T> {
     }
 
     pub fn get_column(&self, column: usize) -> Option<Vec<&T>> {
-        if column > self.area.bottom() { return None };
+        if column > self.area.right() { return None };
 
         let offset = self.area.left() + column;
         let step_size = self.grid.dimensions.width();
@@ -203,8 +201,8 @@ impl<'a, T> Debug for GridView<'a, T> where T: Debug {
         let rows: Vec<Vec<_>> = self.iter_rows()
             .map(Iterator::collect)
             .collect();
-
-        writeln!(f, "")?;
+        
+        writeln!(f)?;
         for row in rows {
             writeln!(f, "{:?}", row)?;
         }
@@ -280,18 +278,25 @@ impl<'a, T> GridViewMut<'a, T> {
 
         Some(column)
     }
+
+    pub fn fill(&mut self, value: T) where T: Clone {
+        for row in self.area.top()..=self.area.bottom() {
+            let row = self.get_row_mut(row).unwrap();
+            row.fill(value.clone());
+        }
+    }
 }
 
 #[derive(Debug)]
 pub enum GridParseError {
-    ParseError(String),
+    InvalidToken(InvalidTokenError<char>),
     WrongDimensions(WrongDimensionsError)
 }
 
 impl Display for GridParseError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let err = match self {
-            GridParseError::ParseError(err) => err.to_string(),
+            GridParseError::InvalidToken(err) => err.to_string(),
             GridParseError::WrongDimensions(err) => err.to_string()
         };
 
@@ -301,13 +306,14 @@ impl Display for GridParseError {
 
 impl Error for GridParseError {}
 
-impl Grid<bool> {
-    pub fn parse(dimensions: Dimensions, input: &str) -> Result<Grid<bool>, GridParseError> {
-        let cell = value(true, complete::char('#'))
-            .or(value(false, complete::char('.')));
+impl<T: TryFrom<char, Error = InvalidTokenError<char>>> Grid<T> {
+    pub fn parse(dimensions: Dimensions, input: &str) -> Result<Grid<T>, GridParseError> {
+        let cells = input.lines()
+            .flat_map(|line| line.chars().map(TryInto::<T>::try_into))
+            .collect::<Result<Vec<T>, InvalidTokenError<char>>>()
+            .map_err(GridParseError::InvalidToken)?;
 
-        let input: String = input.lines().flat_map(str::chars).collect();
-        let cells = many0(cell).run(&input).map_err(GridParseError::ParseError)?;
-        Grid::from_iter(dimensions, cells).map_err(GridParseError::WrongDimensions)
+        Grid::from_iter(dimensions, cells)
+            .map_err(GridParseError::WrongDimensions)
     }
 }

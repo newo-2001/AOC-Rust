@@ -1,6 +1,9 @@
 use std::{error::Error, fmt::{Display, Formatter, self, Debug}};
 
+use nom::{sequence::preceded, character::complete, Parser};
 use num::Integer;
+
+use crate::parsing::{TextParserResult, self};
 
 use super::Point2D;
 
@@ -13,6 +16,13 @@ impl Dimensions {
     
     pub fn surface_area(&self) -> usize {
         self.width() * self.height()
+    }
+    
+    pub fn parse(input: &str) -> TextParserResult<Dimensions> {
+        let size = parsing::usize;
+        size.and(preceded(complete::char('x'), size))
+            .map(|(width, height)| Dimensions(width, height))
+            .parse(input)
     }
 }
 

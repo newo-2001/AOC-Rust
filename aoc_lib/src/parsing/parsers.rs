@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     combinator::eof,
-    character::complete::{crlf, newline},
+    character::complete::{crlf, newline, self}, Parser,
 };
 
 use super::{TextParserResult, ignore};
@@ -12,4 +12,8 @@ pub fn optional_newline(input: &str) -> TextParserResult<()> {
         ignore(newline),
         ignore(eof)
     ))(input)
+}
+
+pub fn usize(input: &str) -> TextParserResult<usize> {
+    complete::u64.map(|n| n as usize).parse(input)
 }
