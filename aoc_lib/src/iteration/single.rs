@@ -1,21 +1,10 @@
-use std::{fmt::{Formatter, Display}, error::Error};
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum SingleError {
-    None,
-    More
+    #[error("Iterator yielded no elements")] None,
+    #[error("Iterator yielded more than one element")] More
 }
-
-impl Display for SingleError {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        match self {
-            Self::None => write!(f, "Iterator yielded no elements"),
-            Self::More => write!(f, "Iterator yielded more than one element")
-        }
-    }
-}
-
-impl Error for SingleError {}
 
 pub fn single<T>(mut it: impl Iterator<Item=T>) -> Result<T, SingleError> {
     match it.next() {

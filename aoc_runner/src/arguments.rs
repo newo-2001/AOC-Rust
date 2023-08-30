@@ -1,4 +1,4 @@
-use std::{error::Error, num::ParseIntError};
+use std::num::ParseIntError;
 
 use aoc_runner_api::Puzzle;
 
@@ -22,7 +22,7 @@ fn locate_puzzles(year: Option<u16>) -> impl Iterator<Item=Puzzle> {
         })
 }
 
-pub fn parse_puzzles<'a>(mut arguments: impl Iterator<Item=String>) -> Result<impl Iterator<Item=Puzzle>, Box<dyn Error>> {
+pub fn parse_puzzles<'a>(mut arguments: impl Iterator<Item=String>) -> Result<impl Iterator<Item=Puzzle>, ParseIntError> {
     let puzzles: Box<dyn Iterator<Item=Puzzle>> = if let Some(year) = arguments.next() {
         let year = year.parse::<u16>()?;
         if let Some(day) = arguments.next() {
@@ -43,7 +43,7 @@ pub fn parse_puzzles<'a>(mut arguments: impl Iterator<Item=String>) -> Result<im
     Ok(puzzles)
 }
 
-pub fn parse(arguments: Vec<String>) -> Result<RunnerAction, Box<dyn Error>> {
+pub fn parse(arguments: Vec<String>) -> Result<RunnerAction, ParseIntError> {
     let action = arguments.first().map(|arg| arg.as_str());
     let action = match action {
         Some("verify") => {

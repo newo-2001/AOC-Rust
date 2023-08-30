@@ -7,3 +7,4 @@ edition = "2021"
 aoc_runner_api = { path = "../aoc_runner_api" }
 aoc_solvers = { path = "../aoc_solvers" }
 colored = "2.0.4"
+thiserror = "1.0.47"

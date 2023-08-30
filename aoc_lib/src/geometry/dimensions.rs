@@ -1,7 +1,8 @@
-use std::{error::Error, fmt::{Display, Formatter, self, Debug}};
+use std::fmt::{Display, Formatter, self, Debug};
 
 use nom::{sequence::preceded, character::complete, Parser};
 use num::Integer;
+use thiserror::Error;
 
 use crate::parsing::{TextParserResult, self};
 
@@ -51,15 +52,8 @@ impl Display for Dimensions {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
+#[error("Data did not have the expected dimensions, expected: {expected}")]
 pub struct WrongDimensionsError {
     pub expected: Dimensions
 }
-
-impl Display for WrongDimensionsError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "Data did not have the expected dimensions, expected: {}", self.expected)
-    }
-}
-
-impl Error for WrongDimensionsError {}

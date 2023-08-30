@@ -1,4 +1,6 @@
-use std::{fmt::{Display, Formatter, self, Debug}, error::Error, vec, slice, ops::Index};
+use std::{fmt::{Formatter, self, Debug}, vec, slice, ops::Index};
+
+use thiserror::Error;
 
 use crate::parsing::InvalidTokenError;
 
@@ -95,24 +97,13 @@ impl<T: Debug> Debug for Grid<T> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum GridParseError {
-    InvalidToken(InvalidTokenError<char>),
-    WrongDimensions(WrongDimensionsError)
+    #[error(transparent)]
+    InvalidToken(#[from] InvalidTokenError<char>),
+    #[error(transparent)]
+    WrongDimensions(#[from] WrongDimensionsError)
 }
-
-impl Display for GridParseError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let err = match self {
-            GridParseError::InvalidToken(err) => err.to_string(),
-            GridParseError::WrongDimensions(err) => err.to_string()
-        };
-
-        write!(f, "{}", err)
-    }
-}
-
-impl Error for GridParseError {}
 
 impl<T> Grid<T>
 {
@@ -198,19 +189,12 @@ impl<T> IntoIterator for Grid<T> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Error)]
+#[error("{dimensions} is not a valid area within a grid with dimensions {area}")]
 pub struct InvalidGridAreaError {
     pub dimensions: Dimensions,
     pub area: Area<usize>
 }
-
-impl Display for InvalidGridAreaError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{} is not a valid area within a grid with dimensions {}", self.area, self.dimensions)
-    }
-}
-
-impl Error for InvalidGridAreaError {}
 
 #[derive(Clone)]
 pub struct GridView<'a, T> {
