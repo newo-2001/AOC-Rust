@@ -18,12 +18,14 @@ fn get_solution_for_puzzle(puzzle: &Puzzle) -> Result<String, String> {
     let content = fs::read_to_string(&path)
         .map_err(|_| format!("Failed to resolve solution file: {}", path))?;
 
-    content.lines()
-        .into_iter()
-        .collect::<Vec<&str>>()
-        .get((puzzle.part - 1) as usize)
-        .map(|&s| s.to_owned())
-        .ok_or(format!("Failed to resolve solution entry for {}-{}-{}", puzzle.year, puzzle.day, puzzle.part))
+    let solution = *content.chars()
+        .as_str()
+        .split(';')
+        .collect::<Vec<_>>()
+        .get(puzzle.part as usize - 1)
+        .ok_or(format!("Failed to resolve solution entry for {}-{}-{}", puzzle.year, puzzle.day, puzzle.part))?;
+
+    Ok(solution.to_owned())
 }
 
 pub fn run_puzzle(puzzle: &Puzzle) -> SolverResult {
@@ -36,9 +38,15 @@ pub fn run_puzzle(puzzle: &Puzzle) -> SolverResult {
 }
 
 pub fn verify_puzzle(puzzle: &Puzzle) -> SolverResult {
-    let expected = get_solution_for_puzzle(puzzle)?;
-    let actual = run_puzzle(puzzle)?;
+    let expected = get_solution_for_puzzle(puzzle)?
+        .replace("\r\n", "")
+        .replace('\n', "");
 
-    if expected == actual.to_string() { Ok(actual) }
+    let result = run_puzzle(puzzle)?;
+    let actual = result.to_string()
+        .replace("\r\n", "")
+        .replace('\n', "");
+
+    if expected == actual { Ok(result) }
     else { Err(format!("expected: '{}', got: '{}'", expected, actual).into()) }
 }
