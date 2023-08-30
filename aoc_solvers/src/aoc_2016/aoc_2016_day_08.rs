@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use aoc_lib::{geometry::{Grid, Dimensions, Light, GridView, InvalidGridAreaError}, parsing::{Runnable, self, parse_lines}};
+use aoc_lib::{geometry::{Grid, Dimensions, Light, InvalidGridAreaError, LightGrid}, parsing::{Runnable, self, parse_lines}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::preceded, bytes::complete::tag, Parser, branch::alt};
@@ -64,12 +64,6 @@ fn rotate_slice<T>(slice: &mut [T], amount: usize) {
     slice.rotate_right(amount % slice.len());
 }
 
-fn count_lit_pixels(grid: &GridView<Light>) -> usize {
-    grid.into_iter()
-        .filter(|&pixel| pixel.is_on())
-        .count()
-}
-
 fn final_grid(input: &str) -> Result<Grid<Light>, Box<dyn Error>> {
     let grid = Grid::<Light>::empty(Dimensions(50, 6));
     let instructions = parse_lines(Instruction::parse, input)?;
@@ -82,8 +76,7 @@ fn final_grid(input: &str) -> Result<Grid<Light>, Box<dyn Error>> {
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let grid = final_grid(input)?;
-    let lit = count_lit_pixels(&grid.view());
-    Ok(Box::new(lit))
+    Ok(Box::new(grid.count_lit()))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {

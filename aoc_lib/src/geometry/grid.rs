@@ -1,8 +1,56 @@
-use std::{fmt::{Display, Formatter, self, Debug}, error::Error, vec, slice, iter::FlatMap, ops::Index};
+use std::{fmt::{Display, Formatter, self, Debug}, error::Error, vec, slice, ops::Index};
 
 use crate::parsing::InvalidTokenError;
 
 use super::{Point2D, Dimensions, WrongDimensionsError, Area};
+
+pub trait GridLike: Sized {
+    type GridItem;
+
+    fn area(&self) -> Area<usize>;
+    fn get(&self, location: Point2D<usize>) -> Option<&Self::GridItem>;
+    fn get_column(&self, column: usize) -> Option<Vec<&Self::GridItem>>;
+    fn get_row(&self, row: usize) -> Option<&[Self::GridItem]>;
+
+    fn iter(&self) -> impl Iterator<Item=&Self::GridItem> {
+        self.iter_rows().flat_map(IntoIterator::into_iter)
+    }
+
+    fn enumerate(&self) -> impl Iterator<Item=(Point2D<usize>, &Self::GridItem)> {
+        self.area().iter().zip(self.iter())
+    }
+
+    fn iter_rows(&self) -> GridRowIterator<Self> {
+        GridRowIterator { grid: self, row: 0 }
+    }
+
+    fn iter_columns(&self) -> GridColumnIterator<Self> {
+        GridColumnIterator { grid: self, column: 0 }
+    }
+
+    fn map<U>(&self, mapper: impl Fn(&Self::GridItem) -> U) -> Grid<U> {
+        let items = self.iter().map(mapper);
+        Grid::from_iter(self.area().dimensions(), items).unwrap()
+    }
+
+    fn enumerate_map<U: Debug>(&self, mapper: impl Fn((Point2D<usize>, &Self::GridItem)) -> U) -> Grid<U> {
+        let items = self.enumerate().map(mapper);
+        Grid::from_iter(self.area().dimensions(), items).unwrap()
+    }
+}
+
+fn debug_grid<T: Debug, G: GridLike<GridItem=T>>(grid: &G, f: &mut Formatter<'_>) -> fmt::Result {
+    let rows: Vec<Vec<_>> = grid.iter_rows()
+        .map(Iterator::collect)
+        .collect();
+    
+    writeln!(f)?;
+    for row in rows {
+        writeln!(f, "{:?}", row)?;
+    }
+
+    Ok(())
+}
 
 #[derive(Clone)]
 pub struct Grid<T>
@@ -10,6 +58,61 @@ pub struct Grid<T>
     pub dimensions: Dimensions,
     tiles: Box<[T]>
 }
+
+impl<T> GridLike for Grid<T> {
+    type GridItem = T;
+
+    fn get(&self, location: Point2D<usize>) -> Option<&T> {
+        if !self.area().contains(location) { return None }
+        self.tiles.get(self.backing_index(location))
+    }
+
+    fn get_row(&self, row: usize) -> Option<&[T]> {
+        if row >= self.dimensions.height() { return None }
+        let start = self.backing_index(Point2D(0, row));
+        Some(&self.tiles[start..start + self.dimensions.width()])
+    }
+
+    fn get_column(&self, column: usize) -> Option<Vec<&T>> {
+        if column >= self.dimensions.width() { return None };
+
+        let column = self.tiles[column..]
+            .iter()
+            .step_by(self.dimensions.width())
+            .collect();
+
+        Some(column)
+    }
+
+    fn area(&self) -> Area<usize> {
+        self.dimensions.into()
+    }
+}
+
+impl<T: Debug> Debug for Grid<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        debug_grid(self, f)
+    }
+}
+
+#[derive(Debug)]
+pub enum GridParseError {
+    InvalidToken(InvalidTokenError<char>),
+    WrongDimensions(WrongDimensionsError)
+}
+
+impl Display for GridParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let err = match self {
+            GridParseError::InvalidToken(err) => err.to_string(),
+            GridParseError::WrongDimensions(err) => err.to_string()
+        };
+
+        write!(f, "{}", err)
+    }
+}
+
+impl Error for GridParseError {}
 
 impl<T> Grid<T>
 {
@@ -57,12 +160,20 @@ impl<T> Grid<T>
     pub fn view(&self) -> GridView<T> { self.into() }
     pub fn view_mut(&mut self) -> GridViewMut<T> { self.into() }
 
-    pub fn area(&self) -> Area<usize> {
-        self.dimensions.into()
-    }
-
     fn backing_index(&self, Point2D(x, y): Point2D<usize>) -> usize {
         y * self.dimensions.width() + x
+    }
+
+    pub fn parse(dimensions: Dimensions, input: &str) -> Result<Grid<T>, GridParseError>
+        where T: TryFrom<char, Error = InvalidTokenError<char>>
+    {
+        let cells = input.lines()
+            .flat_map(|line| line.chars().map(TryInto::<T>::try_into))
+            .collect::<Result<Vec<T>, InvalidTokenError<char>>>()
+            .map_err(GridParseError::InvalidToken)?;
+
+        Grid::from_iter(dimensions, cells)
+            .map_err(GridParseError::WrongDimensions)
     }
 }
 
@@ -74,7 +185,7 @@ impl<'a, T> Into<GridView<'a, T>> for &'a Grid<T> {
 
 impl<'a, T> Into<GridViewMut<'a, T>> for &'a mut Grid<T> {
     fn into(self) -> GridViewMut<'a, T> {
-        self.sub_grid_mut(self.area()).unwrap()
+        self.sub_grid_mut(self.dimensions.into()).unwrap()
     }
 }
 
@@ -84,12 +195,6 @@ impl<T> IntoIterator for Grid<T> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.tiles.into_vec().into_iter()
-    }
-}
-
-impl<T: Debug> Debug for Grid<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        Debug::fmt(&self.view(), f)
     }
 }
 
@@ -113,10 +218,10 @@ pub struct GridView<'a, T> {
     pub area: Area<usize>
 }
 
-impl<'a, T> GridView<'a, T> {
-    pub fn area(&self) -> Area<usize> { self.area }
-    
-    pub fn get(&self, location: Point2D<usize>) -> Option<&T> {
+impl<'a, T> GridLike for GridView<'a, T> {
+    type GridItem = T;
+
+    fn get(&self, location: Point2D<usize>) -> Option<&T> {
         if !self.area.contains(location) { return None; }
 
         let location = location + self.area.top_left();
@@ -124,7 +229,7 @@ impl<'a, T> GridView<'a, T> {
         self.grid.tiles.get(index)
     }
 
-    pub fn get_row(&self, row: usize) -> Option<&[T]> {
+    fn get_row(&self, row: usize) -> Option<&[T]> {
         if row > self.area.bottom() { return None };
 
         let row = row + self.area.top();
@@ -134,7 +239,7 @@ impl<'a, T> GridView<'a, T> {
         Some(&self.grid.tiles[start..end])
     }
 
-    pub fn get_column(&self, column: usize) -> Option<Vec<&T>> {
+    fn get_column(&self, column: usize) -> Option<Vec<&T>> {
         if column > self.area.right() { return None };
 
         let offset = self.area.left() + column;
@@ -148,30 +253,18 @@ impl<'a, T> GridView<'a, T> {
         Some(column)
     }
 
-    pub fn enumerate(&self) -> impl Iterator<Item=(Point2D<usize>, &T)> {
-        self.area.iter().zip(self.into_iter())
-    }
+    fn area(&self) -> Area<usize> { self.area }
+}
 
-    pub fn iter_rows(&'a self) -> GridRowIterator<'a, T> {
-        GridRowIterator { grid: self, row: 0 }
+impl<T: Debug> Debug for GridView<'_, T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        debug_grid(self, f)
     }
+}
 
-    pub fn iter_columns(&'a self) -> GridColumnIterator<'a, T> {
-        GridColumnIterator { grid: self, column: 0 }
-    }
-
+impl<'a, T> GridView<'a, T> {
     pub fn into_grid(&self) -> Grid<T> where T: Clone {
-        let items = self.into_iter().cloned();
-        Grid::from_iter(self.area.dimensions(), items).unwrap()
-    }
-
-    pub fn map<U>(&self, mapper: impl Fn(&T) -> U) -> Grid<U> {
-        let items = self.into_iter().map(mapper);
-        Grid::from_iter(self.area.dimensions(), items).unwrap()
-    }
-
-    pub fn enumerate_map<U: Debug>(&self, mapper: impl Fn((Point2D<usize>, &T)) -> U) -> Grid<U> {
-        let items = self.enumerate().map(mapper);
+        let items = self.iter().cloned();
         Grid::from_iter(self.area.dimensions(), items).unwrap()
     }
 }
@@ -184,40 +277,13 @@ impl<'a, T> Index<Point2D<usize>> for GridView<'a, T> {
     }
 }
 
-impl<'a, T> IntoIterator for &'a GridView<'a, T> {
-    type Item = &'a T;
-    type IntoIter = FlatMap<
-        GridRowIterator<'a, T>,
-        slice::Iter<'a, T>,
-        fn(slice::Iter<'a, T>) -> <slice::Iter<'a, T> as IntoIterator>::IntoIter>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter_rows().flat_map(IntoIterator::into_iter)
-    }
+pub struct GridColumnIterator<'a, G: GridLike> {
+    grid: &'a G,
+    column: usize,
 }
 
-impl<'a, T> Debug for GridView<'a, T> where T: Debug {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let rows: Vec<Vec<_>> = self.iter_rows()
-            .map(Iterator::collect)
-            .collect();
-        
-        writeln!(f)?;
-        for row in rows {
-            writeln!(f, "{:?}", row)?;
-        }
-
-        Ok(())
-    }
-}
-
-pub struct GridColumnIterator<'a, T> {
-    grid: &'a GridView<'a, T>,
-    column: usize
-}
-
-impl<'a, T> Iterator for GridColumnIterator<'a, T> {
-    type Item = vec::IntoIter<&'a T>;
+impl<'a, G: GridLike> Iterator for GridColumnIterator<'a, G> {
+    type Item = vec::IntoIter<&'a G::GridItem>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.column += 1;
@@ -225,13 +291,13 @@ impl<'a, T> Iterator for GridColumnIterator<'a, T> {
     }
 }
 
-pub struct GridRowIterator<'a, T> {
-    grid: &'a GridView<'a, T>,
-    row: usize
+pub struct GridRowIterator<'a, G: GridLike> {
+    grid: &'a G,
+    row: usize,
 }
 
-impl<'a, T> Iterator for GridRowIterator<'a, T> {
-    type Item = slice::Iter<'a, T>;
+impl<'a, G: GridLike> Iterator for GridRowIterator<'a, G> {
+    type Item = slice::Iter<'a, G::GridItem>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.row += 1;
@@ -284,36 +350,5 @@ impl<'a, T> GridViewMut<'a, T> {
             let row = self.get_row_mut(row).unwrap();
             row.fill(value.clone());
         }
-    }
-}
-
-#[derive(Debug)]
-pub enum GridParseError {
-    InvalidToken(InvalidTokenError<char>),
-    WrongDimensions(WrongDimensionsError)
-}
-
-impl Display for GridParseError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let err = match self {
-            GridParseError::InvalidToken(err) => err.to_string(),
-            GridParseError::WrongDimensions(err) => err.to_string()
-        };
-
-        write!(f, "{}", err)
-    }
-}
-
-impl Error for GridParseError {}
-
-impl<T: TryFrom<char, Error = InvalidTokenError<char>>> Grid<T> {
-    pub fn parse(dimensions: Dimensions, input: &str) -> Result<Grid<T>, GridParseError> {
-        let cells = input.lines()
-            .flat_map(|line| line.chars().map(TryInto::<T>::try_into))
-            .collect::<Result<Vec<T>, InvalidTokenError<char>>>()
-            .map_err(GridParseError::InvalidToken)?;
-
-        Grid::from_iter(dimensions, cells)
-            .map_err(GridParseError::WrongDimensions)
     }
 }

@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 use crate::parsing::InvalidTokenError;
 
-use super::{GridView, Grid};
+use super::{GridView, Grid, GridLike};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Light {
@@ -58,5 +58,17 @@ impl Display for GridView<'_, Light> {
 impl Display for Grid<Light> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
         Display::fmt(&self.view(), f)
+    }
+}
+
+pub trait LightGrid: GridLike<GridItem = Light> {
+    fn count_lit(&self) -> usize;
+}
+
+impl<G: GridLike<GridItem = Light>> LightGrid for G {
+    fn count_lit(&self) -> usize {
+        self.iter()
+            .filter(|&light| light.is_on())
+            .count()
     }
 }
