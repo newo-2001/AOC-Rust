@@ -1,6 +1,6 @@
-use std::{cmp::{max, min}, collections::{BinaryHeap, HashSet}, iter, hash::Hash};
+use std::{cmp::{max, min}, collections::{BinaryHeap, HashSet}, iter, hash::Hash, error::Error};
 
-use aoc_lib::parsing::{optional_newline, Runnable};
+use aoc_lib::{parsing::{optional_newline, Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use nom:: {
     sequence::delimited,
@@ -165,7 +165,7 @@ struct Enemy {
 }
 
 impl Enemy {
-    fn parse(input: &str) -> Result<Enemy, String> {
+    fn parse(input: &str) -> Result<Enemy, ParseError> {
         let kv = |key| delimited(tag(key).and(tag(": ")), complete::u32, optional_newline);
 
         kv("Hit Points").and(kv("Damage"))
@@ -287,7 +287,7 @@ fn least_amount_of_mana_for_victory(battle: Battle) -> Option<u32> {
     best_mana
 }
 
-fn least_mana_for_input(input: &str, difficulty: Difficulty) -> Result<u32, String>{
+fn least_mana_for_input<'a>(input: &'a str, difficulty: Difficulty) -> Result<u32, Box<dyn Error + 'a>> {
     let enemy = Enemy::parse(input)?;
 
     let player = Player {
@@ -298,11 +298,13 @@ fn least_mana_for_input(input: &str, difficulty: Difficulty) -> Result<u32, Stri
 
     let battle = Battle::new(player, enemy, difficulty);
 
-    least_amount_of_mana_for_victory(battle.clone())
-        .ok_or(String::from("Player can't win"))
+    let mana = least_amount_of_mana_for_victory(battle.clone())
+        .ok_or(NoSolutionError)?;
+
+    Ok(mana)
 }
 
-pub fn solve_part_1(input: &str) -> SolverResult {
+pub fn solve_part_1<'a>(input: &'a str) -> SolverResult {
     let mana = least_mana_for_input(input, Difficulty::Normal)?;
     Ok(Box::from(mana))
 }

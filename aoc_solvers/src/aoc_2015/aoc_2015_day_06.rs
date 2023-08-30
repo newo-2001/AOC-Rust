@@ -1,6 +1,6 @@
 use std::cmp;
 
-use aoc_lib::{geometry::Point2D, parsing::{parse_lines, Runnable}};
+use aoc_lib::{geometry::Point2D, parsing::{parse_lines, Runnable, ParseError}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{bytes::complete::tag, branch::alt, combinator::value, sequence::{tuple, preceded}, Parser};
@@ -54,7 +54,7 @@ fn set_square<T : Togglable>(grid: &mut Grid<T>, step: &Step) {
     }
 }
 
-fn parse_step(str: &str) -> Result<Step, String> {
+fn parse_step(str: &str) -> Result<Step, ParseError> {
     let action = alt((
         value(Action::Off, tag("turn off ")),
         value(Action::On, tag("turn on ")),

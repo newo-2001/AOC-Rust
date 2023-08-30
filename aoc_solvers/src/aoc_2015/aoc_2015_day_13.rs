@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use aoc_lib::parsing::{parse_lines, Runnable};
+use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -60,7 +60,7 @@ impl Graph<'_> {
     }
 }
 
-fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, String> {
+fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, ParseError> {
     #[derive(Clone)]
     enum Sign {
         Positive,
@@ -80,7 +80,7 @@ fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, String> {
         .run(input)
 }
 
-fn build_graph(input: &str) -> Result<Graph, String> {
+fn build_graph(input: &str) -> Result<Graph, ParseError> {
     let edges = parse_lines(parse_edge, input)?;
     Ok(Graph::from_edges(edges))
 }

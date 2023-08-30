@@ -1,4 +1,4 @@
-use aoc_lib::parsing::{TextParserResult, parse_lines, Runnable};
+use aoc_lib::parsing::{TextParserResult, parse_lines, Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use nom::{
     Parser,
@@ -77,7 +77,7 @@ impl State {
     }
 }
 
-fn parse_instruction(input: &str) -> Result<Instruction, String> {
+fn parse_instruction(input: &str) -> Result<Instruction, ParseError> {
     fn register(input: &str) -> TextParserResult<Register> {
         value(Register::A, complete::char('a'))
             .or(value(Register::B, complete::char('b')))

@@ -1,5 +1,5 @@
 extern crate queues;
-use aoc_lib::parsing::{parse_lines, Runnable};
+use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use queues::*;
 
@@ -27,7 +27,7 @@ struct Ingredient<'a> {
 }
 
 impl Ingredient<'_> {
-    fn parse(input: &str) -> Result<Ingredient, String> {
+    fn parse(input: &str) -> Result<Ingredient, ParseError> {
         let property = |name| preceded(
             tuple((complete::char(' '), tag(name), complete::char(' '))),
             terminated(complete::i32, opt(complete::char(','))));
@@ -97,12 +97,12 @@ fn all_cookies<'a>(teaspoons: u32, ingredients: &'a Ingredients) -> impl Iterato
         .map(HashMap::from_iter)
 }
 
-fn best_score<'a>(cookies: impl Iterator<Item=&'a Cookie<'a>>, ingredients: &Ingredients) -> u64 {
+fn best_score<'a>(cookies: impl Iterator<Item=&'a Cookie<'a>>, ingredients: &Ingredients) -> Result<u64, NoSolutionError> {
     cookies.map(|cookie| cookie_score(&cookie, ingredients))
-        .max().expect("No cookie could be made because of lack of ingredients")
+        .max().ok_or(NoSolutionError)
 }
 
-fn parse_ingredients(input: &str) -> Result<Ingredients, String> {
+fn parse_ingredients(input: &str) -> Result<Ingredients, ParseError> {
     let ingredients = parse_lines(Ingredient::parse, input)?;
 
     Ok(HashMap::from_iter(
@@ -116,7 +116,7 @@ const TEASPOONS: u32 = 100;
 pub fn solve_part_1(input: &str) -> SolverResult {
     let ingredients = parse_ingredients(input)?;
     let cookies: Vec<Cookie> = all_cookies(TEASPOONS, &ingredients).collect();
-    let best = best_score(cookies.iter(), &ingredients);
+    let best = best_score(cookies.iter(), &ingredients)?;
 
     Ok(Box::new(best))
 }
@@ -128,7 +128,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let exact_calories = cookies.iter()
         .filter(|cookie| cookie_property(cookie, &ingredients, |cookie| cookie.calories) == 500);
     
-    let best = best_score(exact_calories, &ingredients);
+    let best = best_score(exact_calories, &ingredients)?;
 
     Ok(Box::new(best))
 }

@@ -5,3 +5,6 @@ pub mod math;
 pub mod geometry;
 pub mod iteration;
 pub mod functional;
+
+mod errors;
+pub use errors::*;

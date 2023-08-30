@@ -1,6 +1,6 @@
 use std::{cmp::min, collections::HashMap};
 
-use aoc_lib::parsing::{parse_lines, Runnable};
+use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded}, bytes::complete::tag, character::complete::{self, alpha1}, Parser};
@@ -13,7 +13,7 @@ struct Reindeer<'a> {
 }
 
 impl Reindeer<'_> {
-    fn parse(input: &str) -> Result<Reindeer, String> {
+    fn parse(input: &str) -> Result<Reindeer, ParseError> {
         let speed = preceded(tag(" can fly "), complete::u32);
         let stamina = preceded(tag(" km/s for "), complete::u32);
         let recovery = preceded(tag(" seconds, but then must rest for "), complete::u32);

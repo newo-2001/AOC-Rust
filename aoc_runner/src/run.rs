@@ -28,13 +28,14 @@ fn get_solution_for_puzzle(puzzle: &Puzzle) -> Result<String, String> {
     Ok(solution.to_owned())
 }
 
-pub fn run_puzzle(puzzle: &Puzzle) -> SolverResult {
+pub fn run_puzzle(puzzle: &Puzzle) -> SolverResult<'_> {
     let solver = aoc_solvers::get_solver(puzzle)
         .ok_or(format!("Failed to resolve solver for {}-{}-{}", puzzle.year, puzzle.day, puzzle.part))?;
 
     let input = get_input_for_puzzle(puzzle)?;
 
-    solver(&input)
+    let result = solver(&input).map_err(|err| err.to_string())?;
+    Ok(result)
 }
 
 pub fn verify_puzzle(puzzle: &Puzzle) -> SolverResult {

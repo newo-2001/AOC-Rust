@@ -1,4 +1,4 @@
-use aoc_lib::{geometry::{CardinalDirection, Point2D}, parsing::{parse_lines, Runnable}};
+use aoc_lib::{geometry::{CardinalDirection, Point2D}, parsing::{parse_lines, Runnable, ParseError}};
 use aoc_runner_api::SolverResult;
 use nom::multi::many0;
 
@@ -7,7 +7,7 @@ enum KeyPad {
     Round
 }
 
-fn parse_instruction(line: &str) -> Result<Vec<CardinalDirection>, String> {
+fn parse_instruction(line: &str) -> Result<Vec<CardinalDirection>, ParseError> {
     many0(CardinalDirection::parse).run(line)
 }
 

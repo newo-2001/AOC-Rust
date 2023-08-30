@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use aoc_lib::{geometry::{Grid, Dimensions, Light, InvalidGridAreaError, LightGrid}, parsing::{Runnable, self, parse_lines}};
+use aoc_lib::{geometry::{Grid, Dimensions, Light, InvalidGridAreaError, LightGrid}, parsing::{Runnable, self, parse_lines, ParseError}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::preceded, bytes::complete::tag, Parser, branch::alt};
@@ -17,7 +17,7 @@ enum Instruction {
 }
 
 impl Instruction {
-    fn parse(input: &str) -> Result<Instruction, String> {
+    fn parse(input: &str) -> Result<Instruction, ParseError> {
         let rotate_instruction = || parsing::usize.and(preceded(tag(" by "), parsing::usize))
             .map(|(index, amount)| RotateInstruction { index, amount });
 
@@ -64,7 +64,7 @@ fn rotate_slice<T>(slice: &mut [T], amount: usize) {
     slice.rotate_right(amount % slice.len());
 }
 
-fn final_grid(input: &str) -> Result<Grid<Light>, Box<dyn Error>> {
+fn final_grid(input: &str) -> Result<Grid<Light>, Box<dyn Error + '_>> {
     let grid = Grid::<Light>::empty(Dimensions(50, 6));
     let instructions = parse_lines(Instruction::parse, input)?;
 

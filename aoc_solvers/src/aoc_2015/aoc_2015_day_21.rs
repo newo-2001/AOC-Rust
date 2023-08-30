@@ -1,6 +1,6 @@
 use std::{cmp::{max, min}, collections::HashMap, iter};
 
-use aoc_lib::parsing::{optional_newline, Runnable};
+use aoc_lib::parsing::{optional_newline, Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -25,7 +25,7 @@ impl Entity {
         target.health -= min(damage, target.health);
     }
 
-    fn parse(input: &str) -> Result<Entity, String> {
+    fn parse(input: &str) -> Result<Entity, ParseError> {
         let kv = |key| terminated(preceded(tag(key).and(tag(": ")), complete::u32), optional_newline);
 
         tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use aoc_lib::parsing::{parse_lines, Runnable};
+use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -25,7 +25,7 @@ struct Sue {
     compounds: Compounds
 }
 
-fn parse_sue(input: &str) -> Result<Sue, String> {
+fn parse_sue(input: &str) -> Result<Sue, ParseError> {
     let number = delimited(tag("Sue "), complete::u16, complete::char(':'));
     let compound = delimited(complete::char(' '), alpha1, tag(": "))
         .and(terminated(complete::u8, opt(complete::char(','))));

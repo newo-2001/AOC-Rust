@@ -1,4 +1,4 @@
-use aoc_lib::parsing::{skip_until, Runnable};
+use aoc_lib::parsing::{skip_until, Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use nom::{character::complete, bytes::complete::tag, sequence::preceded, Parser};
 
@@ -25,7 +25,7 @@ impl Position {
     }
 }
 
-fn parse_input(input: &str) -> Result<Position, String> {
+fn parse_input(input: &str) -> Result<Position, ParseError> {
     let row = preceded(tag("row "), complete::u32);
     let col = preceded(tag(", column "), complete::u32);
     

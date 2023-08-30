@@ -34,13 +34,13 @@ pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
 }
 
 pub trait Runnable<'a, O> {
-    fn run(&mut self, input: &'a str) -> Result<O, String>;
+    fn run(&mut self, input: &'a str) -> Result<O, super::ParseError<'a>>;
 }
 
 impl<'a, O, F> Runnable<'a, O> for F where
     F: Parser<&'a str, O, VerboseError<&'a str>>
 {
-    fn run(&mut self, input: &'a str) -> Result<O, String> {
-        Ok(self.parse(input).map_err(|err| err.to_string())?.1)
+    fn run(&mut self, input: &'a str) -> Result<O, super::ParseError<'a>> {
+        Ok(self.parse(input)?.1)
     }
 }

@@ -1,15 +1,14 @@
 use std::{error::Error, rc::Rc, collections::HashMap, cell::RefCell, sync::Mutex};
 
-use aoc_lib::parsing::{parse_lines, Runnable};
+use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use nom::{
     bytes::complete::tag,
     character::complete::{self, alpha1},
-    combinator::{complete, self},
     Parser,
     sequence::{preceded, tuple},
     branch::alt,
-    error::VerboseError
+    error::VerboseError, combinator
 };
 use once_cell::sync::Lazy;
 
@@ -102,7 +101,7 @@ impl Expression {
 
 static EXPRESSION_CACHE: Lazy<Mutex<HashMap<String, u16>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
-fn parse_expression<'a>(input: &'a str) -> Result<Assignment<'a>, Box<dyn Error>> {
+fn parse_expression(input: &str) -> Result<Assignment<'_>, ParseError> {
     use UnresolvedExpression::*;
     use BinaryOperator::*;
     use UnaryOperator::*;
@@ -134,11 +133,10 @@ fn parse_expression<'a>(input: &'a str) -> Result<Assignment<'a>, Box<dyn Error>
     ));
 
     let target = preceded(tag(" -> "), alpha1);
-    let assignment = expression.and(target)
+    let mut assignment = expression.and(target)
         .map(|(expression, target)| Assignment { expression, target });
 
-    complete(assignment).run(input)
-        .map_err(|err| err.into())
+    assignment.run(input)
 }
 
 fn build_expression_tree<'a>(assignments: &'a Vec<Assignment>) -> Result<ExpressionTree<'a>, Box<dyn Error>> {

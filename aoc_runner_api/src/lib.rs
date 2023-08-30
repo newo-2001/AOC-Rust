@@ -7,6 +7,6 @@ pub struct Puzzle {
     pub part: u8
 }
 
-pub type SolverResult = Result<Box<dyn Display>, Box<dyn Error>>;
+pub type SolverResult<'a> = Result<Box<dyn Display>, Box<dyn Error + 'a>>;
 pub type Solver = dyn Fn(&str) -> SolverResult;
 pub type SolverProvider = dyn Fn(&Puzzle) -> Option<Box<Solver>>;

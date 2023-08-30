@@ -1,6 +1,6 @@
 use std::{collections::HashMap, cmp::Ordering, iter::repeat};
 
-use aoc_lib::parsing::{parse_lines, Runnable};
+use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{character::{is_alphabetic, complete::{self, alpha1}}, bytes::complete::take_while1, sequence::{delimited, tuple}, Parser};
@@ -35,7 +35,7 @@ impl<'a> Room<'a> {
             .eq(self.checksum.chars())
     }
 
-    fn parse(input: &str) -> Result<Room, String> {
+    fn parse(input: &str) -> Result<Room, ParseError> {
         let name = take_while1(|c| is_alphabetic(c as u8) || c == '-');
         let sector_id = complete::u32;
         let checksum = delimited(complete::char('['), alpha1, complete::char(']'));

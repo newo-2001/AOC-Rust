@@ -1,5 +1,7 @@
 use std::{fmt::{Debug, Display}, error::Error};
 
+use nom::error::VerboseError;
+
 #[derive(Debug)]
 pub struct InvalidTokenError<T>(pub T) where T: Display + Debug;
 
@@ -10,3 +12,5 @@ impl<T: Display + Debug> Display for InvalidTokenError<T> {
 }
 
 impl<T: Display + Debug> Error for InvalidTokenError<T> {}
+
+pub type ParseError<'a> = nom::Err<VerboseError<&'a str>>;

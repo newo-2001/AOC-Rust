@@ -4,7 +4,7 @@ use std::{
     cmp::{max, min}
 };
 
-use aoc_lib::parsing::{parse_lines, Runnable};
+use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -37,7 +37,7 @@ impl PartialEq for Edge<'_> {
 
 type WeightedEdge<'a> = (Edge<'a>, u32);
 
-fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, String> {
+fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, ParseError> {
     let edge = alpha1::<&str, VerboseError<&str>>.and(preceded(tag(" to "), alpha1))
         .map(|(from, to)| Edge(from, to));
 
@@ -73,7 +73,7 @@ impl<'a> Graph<'a> {
     }
 }
 
-pub fn compute_distances(input: &str) -> Result<Vec<u32>, String> {
+pub fn compute_distances(input: &str) -> Result<Vec<u32>, ParseError> {
     let edges = parse_lines(parse_edge, input)?;
 
     let graph = Graph::from_edges(edges);
@@ -88,7 +88,7 @@ pub fn compute_distances(input: &str) -> Result<Vec<u32>, String> {
 pub fn solve_part_1(input: &str) -> SolverResult {
     let shortest_distance = *compute_distances(input)?
         .iter().min()
-        .ok_or("There is no valid path that visits all nodes")?;
+        .ok_or(NoSolutionError)?;
 
     Ok(Box::from(shortest_distance))
 }
@@ -96,7 +96,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 pub fn solve_part_2(input: &str) -> SolverResult {
     let longest_distance = *compute_distances(input)?
         .iter().max()
-        .ok_or("There is no valid path that visits all nodes")?;
+        .ok_or(NoSolutionError)?;
 
     Ok(Box::from(longest_distance))
 }

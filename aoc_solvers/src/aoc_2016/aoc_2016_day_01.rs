@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use aoc_lib::{parsing::{TextParserResult, Runnable}, geometry::{Point2D, CardinalDirection, RotationDirection}};
+use aoc_lib::{parsing::{TextParserResult, Runnable, ParseError}, geometry::{Point2D, CardinalDirection, RotationDirection}};
 use aoc_runner_api::SolverResult;
 use nom::{Parser, character::complete, combinator::value, multi::separated_list0, bytes::complete::tag};
 
@@ -22,7 +22,7 @@ impl State {
     }
 }
 
-fn parse_instructions(input: &str) -> Result<Vec<Instruction>, String> {
+fn parse_instructions(input: &str) -> Result<Vec<Instruction>, ParseError> {
     fn parse_instruction(input: &str) -> TextParserResult<Instruction> {
         let left = value(RotationDirection::Left, complete::char('L'));
         let right = value(RotationDirection::Right, complete::char('R'));

@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use aoc_lib::{parsing::{Runnable, parse_lines}, iteration::ExtraIter};
+use aoc_lib::{parsing::{Runnable, parse_lines, ParseError}, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 use itertools::{traits::HomogeneousTuple, Itertools, Either};
 use nom::{Parser, sequence::delimited, character::complete::{alpha0, self, alpha1}, multi::many0};
@@ -48,7 +48,7 @@ fn find_subseqs<'a, T>(str: &'a str, subseq: impl Fn(T) -> bool + 'a) -> impl It
         .filter(move |&seq| subseq(seq))
 }
 
-fn parse_ip(input: &str) -> Result<Ip, String> {
+fn parse_ip(input: &str) -> Result<Ip, ParseError> {
     let supernet = alpha1.map(|seq| (NetworkType::Supernet, seq));
     let hypernet = delimited(complete::char('['), alpha0, complete::char(']'))
         .map(|seq| (NetworkType::Hypernet, seq));
