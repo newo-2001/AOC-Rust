@@ -1,5 +1,3 @@
-#![feature(generators)]
-
 use aoc_2015::*;
 use aoc_2016::*;
 use aoc_runner_api::{Solver, Puzzle};
