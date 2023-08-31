@@ -1,6 +1,6 @@
 use std::{cmp::min, collections::HashMap};
 
-use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
+use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded}, bytes::complete::tag, character::complete::{self, alpha1}, Parser};
@@ -35,7 +35,7 @@ impl Reindeer<'_> {
     }
 }
 
-fn most_points_after_seconds(reindeers: &Vec<Reindeer>, duration: u32) -> u32 {
+fn most_points_after_seconds(reindeers: &Vec<Reindeer>, duration: u32) -> Result<u32, NoSolutionError> {
     let mut points: HashMap<&str, u32> = HashMap::from_iter(
         reindeers.iter().map(|reindeer| (reindeer.name, 0)));
     
@@ -48,7 +48,7 @@ fn most_points_after_seconds(reindeers: &Vec<Reindeer>, duration: u32) -> u32 {
         }
     }
 
-    *points.values().max().expect("There are no participants")
+    Ok(*points.values().max().ok_or(NoSolutionError)?)
 }
 
 const DURATION: u32 = 2503;
@@ -57,14 +57,14 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let reindeers = parse_lines(Reindeer::parse, input)?;
     let winning_distance = reindeers.iter()
         .map(|reindeer| reindeer.distance_after_seconds(DURATION))
-        .max().ok_or("Nobody won due to not having a participant")?;
+        .max().ok_or(NoSolutionError)?;
 
     Ok(Box::new(winning_distance))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
     let reindeers = parse_lines(Reindeer::parse, input)?;
-    let most_points = most_points_after_seconds(&reindeers, DURATION);
+    let most_points = most_points_after_seconds(&reindeers, DURATION)?;
 
     Ok(Box::new(most_points))
 }

@@ -45,6 +45,7 @@ dependencies = [
  "paste",
  "queues",
  "serde_json",
+ "thiserror",
  "transpose",
  "tupletools",
 ]

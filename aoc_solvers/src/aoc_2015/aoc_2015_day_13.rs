@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
+use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -52,11 +52,11 @@ impl Graph<'_> {
         self.nodes.clone().into_iter().permutations(self.nodes.len())
     }
 
-    fn most_happiness(&self) -> Result<i32, String> {
+    fn most_happiness(&self) -> Result<i32, NoSolutionError> {
         Vec::from_iter(self.all_arrangments())
             .into_iter()
             .map(|arrangement| self.arrangement_happiness(arrangement))
-            .max().ok_or(String::from("No valid arrangement found"))
+            .max().ok_or(NoSolutionError)
     }
 }
 

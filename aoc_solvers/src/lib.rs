@@ -57,15 +57,16 @@ pub fn get_solver(puzzle: &Puzzle) -> Option<Box<Solver>> {
     match puzzle.year {
         2015 => solver!(2015, puzzle.day, puzzle.part),
         2016 => match puzzle.day {
-            1 => solver!(2016, "01", puzzle.part),
-            2 => solver!(2016, "02", puzzle.part),
-            3 => solver!(2016, "03", puzzle.part),
-            4 => solver!(2016, "04", puzzle.part),
-            5 => solver!(2016, "05", puzzle.part),
-            6 => solver!(2016, "06", puzzle.part),
-            7 => solver!(2016, "07", puzzle.part),
-            8 => solver!(2016, "08", puzzle.part),
-            9 => solver!(2016, "09", puzzle.part),
+            1  => solver!(2016, "01", puzzle.part),
+            2  => solver!(2016, "02", puzzle.part),
+            3  => solver!(2016, "03", puzzle.part),
+            4  => solver!(2016, "04", puzzle.part),
+            5  => solver!(2016, "05", puzzle.part),
+            6  => solver!(2016, "06", puzzle.part),
+            7  => solver!(2016, "07", puzzle.part),
+            8  => solver!(2016, "08", puzzle.part),
+            9  => solver!(2016, "09", puzzle.part),
+            10 => solver!(2016, "10", puzzle.part),
             _ => None
         },
         _ => None
