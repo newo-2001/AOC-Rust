@@ -1,4 +1,4 @@
-use aoc_lib::{geometry::{Dimensions, Point2D, Grid, GridViewMut, Light, GridLike, LightGrid}, functional::repeat_apply};
+use aoc_lib::{geometry::{Dimensions, Point2D, Grid, Light, GridLike, LightGrid, GridLikeMut}, functional::repeat_apply};
 use aoc_runner_api::SolverResult;
 
 fn neighbours_on(grid: &Grid<Light>, cell: Point2D<usize>) -> usize {
@@ -17,7 +17,7 @@ fn next_state(grid: Grid<Light>) -> Grid<Light> {
     })
 }
 
-fn fix_corners(grid: &mut GridViewMut<Light>) {
+fn fix_corners(grid: &mut Grid<Light>) {
     let corners = grid.area().corners();
 
     for location in corners {
@@ -36,11 +36,11 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let grid = Grid::<Light>::parse(Dimensions(100, 100), input)?;
 
     let mut grid = repeat_apply(100, grid, |mut grid| {
-        fix_corners(&mut grid.view_mut());
+        fix_corners(&mut grid);
         next_state(grid)
     });
 
-    fix_corners(&mut grid.view_mut());
+    fix_corners(&mut grid);
 
     Ok(Box::new(grid.count_lit()))
 }

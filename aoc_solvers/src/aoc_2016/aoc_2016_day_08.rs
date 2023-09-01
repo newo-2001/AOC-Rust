@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use aoc_lib::{geometry::{Grid, Dimensions, Light, InvalidGridAreaError, LightGrid}, parsing::{Runnable, self, parse_lines, ParseError}};
+use aoc_lib::{geometry::{Grid, Dimensions, Light, InvalidGridAreaError, LightGrid, GridLikeMut}, parsing::{Runnable, self, parse_lines, ParseError}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::preceded, bytes::complete::tag, Parser, branch::alt};
@@ -34,14 +34,12 @@ impl Instruction {
                 grid.sub_grid_mut(dimensions.into())?.fill(Light::On);
             },
             Instruction::RotateRow(RotateInstruction { index, amount }) => {
-                let mut grid = grid.view_mut();
                 let mut row = grid.get_row_mut(index)
                     .expect(&format!("Grid row index out of range: {}", index));
 
                 rotate_slice(&mut row, amount);
             },
             Instruction::RotateColumn(RotateInstruction { index, amount }) => {
-                let mut grid = grid.view_mut();
                 let column = grid.get_column_mut(index)
                     .expect(&format!("Grid column index out of range: {}", index));
 
