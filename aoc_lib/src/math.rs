@@ -10,6 +10,10 @@ pub fn sum_range<T: Integer + FromPrimitive + Copy>(range: Range<T>) -> T {
     (range.start + range.end - One::one()) * amount / T::from_u32(2).unwrap()
 }
 
+pub fn min_max<T: Ord>(a: T, b: T) -> (T, T) {
+    if a > b { (b, a) } else { (a, b) }
+}
+
 pub struct NaturalNumbers<T: Integer + Unsigned + Copy> {
     next: T
 }
