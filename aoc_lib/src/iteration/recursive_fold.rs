@@ -1,16 +1,50 @@
 use std::{hash::Hash, collections::{VecDeque, HashSet}};
 
+use priority_queue::PriorityQueue;
+use tupletools::fst;
+
 pub enum FoldState<S, T, I: IntoIterator<Item=T>> {
     Branch(S, I),
     Leaf(S)
 }
 
-pub fn recursive_fold<S, T, I: IntoIterator<Item=T>, J: IntoIterator<Item=T>>(
-    iter: J, mut state: S,
-    mut folder: impl FnMut(S, T) -> FoldState<S, T, I>
-) -> S {
-    let mut queue = VecDeque::from_iter(iter);
-    while let Some(item) = queue.pop_front() {
+pub trait Queue: Extend<Self::In> {
+    type In;
+    type Out;
+
+    fn pop(&mut self) -> Option<Self::Out>;
+}
+
+impl<T, P> Queue for PriorityQueue<T, P>
+    where T: Hash + Eq,
+          P: Ord
+{
+    type In = (T, P);
+    type Out = T;
+
+    fn pop(&mut self) -> Option<T> {
+        self.pop().map(fst)
+    }
+}
+
+impl<T> Queue for VecDeque<T> {
+    type In = T;
+    type Out = T;
+
+    fn pop(&mut self) -> Option<T> {
+        self.pop_front()
+    }
+}
+
+fn recursive_fold<S, I, Q>(
+    mut queue: Q,
+    mut state: S,
+    mut folder: impl FnMut(S, Q::Out) -> FoldState<S, Q::In, I>
+) -> S
+    where Q: Queue,
+          I: IntoIterator<Item=Q::In>
+{
+    while let Some(item) = queue.pop() {
         state = match folder(state, item) {
             FoldState::Leaf(state) => state,
             FoldState::Branch(state, branches) => {
@@ -22,12 +56,16 @@ pub fn recursive_fold<S, T, I: IntoIterator<Item=T>, J: IntoIterator<Item=T>>(
     state
 }
 
-pub fn try_recursive_fold<S, T, I: IntoIterator<Item=T>, J: IntoIterator<Item=T>, E>(
-    iter: J, mut state: S,
-    mut folder: impl FnMut(S, T) -> Result<FoldState<S, T, I>, E>
-) -> Result<S, E> {
-    let mut queue = VecDeque::from_iter(iter);
-    while let Some(item) = queue.pop_front() {
+fn try_recursive_fold<S, I, Q, E>(
+    mut queue: Q,
+    mut state: S,
+    mut folder: impl FnMut(S, Q::Out) -> Result<FoldState<S, Q::In, I>, E>
+) -> Result<S, E>
+    where Q: Queue,
+          I: IntoIterator<Item=Q::In>
+          
+{
+    while let Some(item) = queue.pop() {
         state = match folder(state, item)? {
             FoldState::Leaf(state) => state,
             FoldState::Branch(state, branches) => {
@@ -39,53 +77,98 @@ pub fn try_recursive_fold<S, T, I: IntoIterator<Item=T>, J: IntoIterator<Item=T>
     Ok(state)
 }
 
-fn filter_duplicates<S, T, I, F>(mut folder: F) ->
-    impl FnMut(S, T) -> FoldState<S, T, I>
-    where I: Iterator<Item=T>,
-          F: FnMut(S, T) -> FoldState<S, T, I>,
-          T: Clone + Hash + Eq + PartialEq
+fn filter_duplicates<S, T, O, I, F>(mut folder: F) ->
+    impl FnMut(S, O) -> FoldState<S, T, I>
+    where I: IntoIterator<Item=T>,
+          F: FnMut(S, O) -> FoldState<S, T, I>,
+          O: Clone + Hash + Eq + PartialEq
 {
-    let mut seen = HashSet::<T>::new();
+    let mut seen = HashSet::<O>::new();
 
-    move |state: S, item: T| -> FoldState<S, T, I> {
+    move |state: S, item: O| -> FoldState<S, T, I> {
         if !seen.insert(item.clone()) { return FoldState::Leaf(state) }
         folder(state, item)
     }
 }
 
-fn try_filter_duplicates<S, T, I, F, E>(mut folder: F) ->
-    impl FnMut(S, T) -> Result<FoldState<S, T, I>, E>
-    where I: Iterator<Item=T>,
-          F: FnMut(S, T) -> Result<FoldState<S, T, I>, E>,
-          T: Clone + Hash + Eq + PartialEq
+fn try_filter_duplicates<S, T, O, I, F, E>(mut folder: F) ->
+    impl FnMut(S, O) -> Result<FoldState<S, T, I>, E>
+    where I: IntoIterator<Item=T>,
+          F: FnMut(S, O) -> Result<FoldState<S, T, I>, E>,
+          O: Clone + Hash + Eq + PartialEq
 {
-    let mut seen = HashSet::<T>::new();
+    let mut seen = HashSet::<O>::new();
 
-    move |state: S, item: T| -> Result<FoldState<S, T, I>, E> {
+    move |state: S, item: O| -> Result<FoldState<S, T, I>, E> {
         if !seen.insert(item.clone()) { return Ok(FoldState::Leaf(state)) }
         folder(state, item)
     }
 }
 
-pub struct DuplicatesFilter<I: Iterator> {
-    pub(crate) iter: I
-}
-
-impl<J, T> DuplicatesFilter<J>
-    where J: Iterator<Item=T>,
-          T: Clone + Eq + Hash
+pub trait RecursiveFold<S, I>
+    where I: IntoIterator<Item=Self::In>,
+          Self: Sized + Queue
 {
-    pub fn recursive_fold<S, I: Iterator<Item=T>>(
-        self, state: S,
-        folder: impl FnMut(S, T) -> FoldState<S, T, I>
+    fn recursive_fold(
+        self,
+        state: S,
+        folder: impl FnMut(S, Self::Out) -> FoldState<S, Self::In, I>
     ) -> S {
-        recursive_fold(self.iter, state, filter_duplicates(folder))
+        recursive_fold(self, state, folder)
     }
 
-    pub fn try_recursive_fold<S, I: Iterator<Item=T>, E>(
-        self, state: S,
-        folder: impl FnMut(S, T) -> Result<FoldState<S, T, I>, E>
+    fn try_recursive_fold<E>(
+        self,
+        state: S,
+        folder: impl FnMut(S, Self::Out) -> Result<FoldState<S, Self::In, I>, E>
     ) -> Result<S, E> {
-        try_recursive_fold(self.iter, state, try_filter_duplicates(folder))
+        try_recursive_fold(self, state, folder)
+    }
+}
+
+impl<S, I, Q> RecursiveFold<S, I> for Q
+    where I: IntoIterator<Item=Q::In>,
+          Q: Queue
+{ }
+
+pub struct DuplicateFilter<Q>
+    where Q: Queue
+{
+    pub(crate) queue: Q
+}
+
+pub trait Dedupable
+    where Self::Queue: Queue,
+          Self: Queue + Sized
+{
+    type Queue;
+
+    fn filter_duplicates(self) -> DuplicateFilter<Self> {
+        DuplicateFilter { queue: self }
+    }
+}
+
+impl<Q> Dedupable for Q where Q: Queue {
+    type Queue = Q;
+}
+
+impl<Q> DuplicateFilter<Q>
+    where Q::Out: Clone + Hash + Eq,
+          Q: Queue
+{
+    pub fn recursive_fold<S, I: IntoIterator<Item=Q::In>>(
+        self,
+        state: S,
+        folder: impl FnMut(S, Q::Out) -> FoldState<S, Q::In, I>
+    ) -> S {
+        recursive_fold(self.queue, state, filter_duplicates(folder))
+    }
+
+    pub fn try_recursive_fold<S, I: IntoIterator<Item=Q::In>, E>(
+        self,
+        state: S,
+        folder: impl FnMut(S, Q::Out) -> Result<FoldState<S, Q::In, I>, E>
+    ) -> Result<S, E> {
+        try_recursive_fold(self.queue, state, try_filter_duplicates(folder))
     }
 }

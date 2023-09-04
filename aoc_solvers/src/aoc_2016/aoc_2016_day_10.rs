@@ -1,6 +1,6 @@
-use std::{hash::Hash, collections::HashMap};
+use std::{hash::Hash, collections::{HashMap, VecDeque}};
 
-use aoc_lib::{parsing::{ParseError, Runnable, parse_lines}, iteration::{ExtraIter, FoldState}, math::min_max};
+use aoc_lib::{parsing::{ParseError, Runnable, parse_lines}, iteration::{FoldState, Dedupable}, math::min_max};
 use aoc_runner_api::SolverResult;
 use itertools::{Itertools, Either};
 use nom::{sequence::{preceded, delimited, tuple, terminated}, bytes::complete::tag, character::complete, Parser};
@@ -158,6 +158,7 @@ fn solve(instructions: Vec<Instruction>) -> Result<State, RobotError> {
     };
 
     state.transfer_chips(forwards)?
+        .collect::<VecDeque<_>>()
         .filter_duplicates()
         .try_recursive_fold(state, |mut state: State, robot: Robot| {
             if let Chips::Double((low_value, high_value)) = robot.values {

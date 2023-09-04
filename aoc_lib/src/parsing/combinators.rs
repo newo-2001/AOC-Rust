@@ -6,7 +6,7 @@ use nom::{
     combinator::value,
     error::{ParseError, VerboseError},
     Slice, InputIter, InputLength, AsChar,
-    multi::many_till, character::complete::anychar
+    multi::many_till, character::complete::anychar, bytes::complete::{take_until, self}, FindSubstring, InputTake, Compare
 };
 use tupletools::snd;
 
@@ -23,6 +23,14 @@ pub fn skip_until<I, O, E, F, C>(parser: F) -> impl Parser<I, O, E>
           C: AsChar
 {
     many_till(anychar, parser).map(snd)
+}
+
+pub fn skip_over<I, T, E>(tag: T) -> impl Parser<I, (), E>
+    where E: ParseError<I>,
+          I: FindSubstring<T> + InputTake + Compare<T>,
+          T: InputLength + Clone
+{
+    value((), take_until(tag.clone()).and(complete::tag(tag)))
 }
 
 pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
