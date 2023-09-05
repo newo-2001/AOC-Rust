@@ -1,14 +1,13 @@
 use std::{rc::Rc, collections::{BTreeSet, VecDeque}, hash::Hash, iter::once};
-use derive_more::Display;
-use aoc_lib::{parsing::{ParseError, parse_lines, Runnable, skip_over}, iteration::{FoldState, Dedupable}, NoSolutionError};
+use aoc_lib::{parsing::{ParseError, parse_lines, Runnable, skip_over}, iteration::queue::{Dedupable, FindState}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{bytes::complete::{tag, take_till}, sequence::{terminated, preceded}, Parser, multi::separated_list0, combinator::{opt, self}, character::complete};
 
-#[derive(Debug, PartialEq, Eq, Clone, Display, Ord, PartialOrd, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Ord, PartialOrd, Hash)]
 struct Material<'a>(Rc<&'a str>);
 
-#[derive(Debug, PartialEq, Eq, Clone, Display, Ord, PartialOrd, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Ord, PartialOrd, Hash)]
 enum Item<'a> {
     Chip(Material<'a>),
     Generator(Material<'a>)
@@ -31,6 +30,13 @@ impl<'a> Item<'a> {
             Self::Generator(material) => material
         }
     }
+
+    fn is_generator(&self) -> bool {
+        match self {
+            Self::Chip(..) => false,
+            Self::Generator(..) => true
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -50,6 +56,12 @@ struct Floor<'a>(BTreeSet<Item<'a>>);
 impl<'a> Floor<'a> {
     fn iter_items<'b>(&'b self) -> std::collections::btree_set::Iter<'b, Item<'a>> { self.0.iter() }
     fn is_empty<'b>(&'b self) -> bool { self.0.is_empty() }
+    
+    fn counts<'b>(&'b self) -> (usize, usize) {
+        let counts = self.iter_items()
+            .counts_by(|item| Item::is_generator(item));
+        (*counts.get(&false).unwrap_or(&0), *counts.get(&true).unwrap_or(&0))
+    }
     
     fn take_item<'b>(&'b mut self, item: &'b Item<'a>) -> Option<Item<'a>> {
         self.0.take(item)
@@ -115,15 +127,16 @@ struct Configuration<'a> {
 
 impl Hash for Configuration<'_> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.floors.hash(state);
         self.current_floor.hash(state);
+        self.state().hash(state)
     }
 }
 
 impl Eq for Configuration<'_> {}
 impl PartialEq for Configuration<'_> {
     fn eq(&self, other: &Self) -> bool {
-        self.floors == other.floors && self.current_floor == other.current_floor
+        self.current_floor == other.current_floor &&
+        self.state() == other.state()
     }
 }
 
@@ -132,6 +145,12 @@ impl Configuration<'_> {
         self.current_floor == 3 &&
         self.floors[0..3].iter()
             .all(|floor| floor.is_empty())
+    }
+
+    fn state(&self) -> Vec<(usize, usize)> {
+        self.floors.iter()
+            .map(Floor::counts)
+            .collect_vec()
     }
 }
 
@@ -180,12 +199,8 @@ fn initial_configuration(input: &str) -> Result<Configuration, ParseError> {
 fn min_moves_to_top(initial: Configuration) -> Result<usize, NoSolutionError> {
     VecDeque::from_iter(once(initial))
         .filter_duplicates()
-        .recursive_fold(None, |optimal: Option<usize>, state| {
-            if optimal.map_or(false, |optimal| state.depth >= optimal) {
-                return FoldState::Leaf(optimal)
-            }
-
-            if state.is_complete() { return FoldState::Leaf(Some(state.depth)) }
+        .recursive_find(|state| {
+            if state.is_complete() { return FindState::Result(state.depth) }
 
             let current_floor = &state.floors[state.current_floor];
             let inventories = current_floor.iter_items()
@@ -198,7 +213,7 @@ fn min_moves_to_top(initial: Configuration) -> Result<usize, NoSolutionError> {
                 state.with(inventory, ElevatorDirection::Up)
             ]).flatten().collect_vec();
 
-            FoldState::Branch(optimal, branches)
+            FindState::Branch(branches)
         }).ok_or(NoSolutionError)
 }
 

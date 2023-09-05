@@ -2,10 +2,9 @@ use std::hash::Hash;
 
 mod single;
 mod mode;
-mod recursive_fold;
+pub mod queue;
 
 pub use self::single::SingleError;
-pub use recursive_fold::{Dedupable, DuplicateFilter, FoldState, RecursiveFold};
 
 pub trait ExtraIter : Iterator + Sized {
     fn single(self) -> Result<Self::Item, SingleError>

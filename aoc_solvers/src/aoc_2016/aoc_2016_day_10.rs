@@ -1,6 +1,6 @@
 use std::{hash::Hash, collections::{HashMap, VecDeque}};
 
-use aoc_lib::{parsing::{ParseError, Runnable, parse_lines}, iteration::{FoldState, Dedupable}, math::min_max};
+use aoc_lib::{parsing::{ParseError, Runnable, parse_lines}, math::min_max, iteration::queue::{Dedupable, FoldState}};
 use aoc_runner_api::SolverResult;
 use itertools::{Itertools, Either};
 use nom::{sequence::{preceded, delimited, tuple, terminated}, bytes::complete::tag, character::complete, Parser};
