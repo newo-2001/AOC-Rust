@@ -2,7 +2,7 @@ use std::{rc::Rc, collections::{BTreeSet, VecDeque}, hash::Hash, iter::once};
 use aoc_lib::{parsing::{ParseError, parse_lines, Runnable, skip_over}, iteration::queue::{Dedupable, FindState}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{bytes::complete::{tag, take_till}, sequence::{terminated, preceded}, Parser, multi::separated_list0, combinator::{opt, self}, character::complete};
+use nom::{bytes::complete::{tag, take_till}, sequence::{terminated, preceded}, Parser, multi::separated_list0, combinator::{all_consuming, opt}, character::complete};
 
 #[derive(Debug, PartialEq, Eq, Clone, Ord, PartialOrd, Hash)]
 struct Material<'a>(Rc<&'a str>);
@@ -112,7 +112,7 @@ fn parse_floor(input: &str) -> Result<Floor, ParseError> {
     
     let sep = preceded(opt(complete::char(',')), tag(" and ")).or(tag(", "));
 
-    let floor = combinator::complete(terminated(separated_list0(sep, item), complete::char('.')))
+    let floor = all_consuming(terminated(separated_list0(sep, item), complete::char('.')))
         .map(|items| Floor(BTreeSet::from_iter(items.into_iter())));
 
     preceded(skip_over("contains "), floor).run(input)
