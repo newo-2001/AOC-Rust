@@ -1,4 +1,4 @@
-use std::{fs, fmt::Display};
+use std::{fs, fmt::Display, time::{Duration, Instant}};
 
 use aoc_runner_api::Puzzle;
 use thiserror::Error;
@@ -27,6 +27,11 @@ pub enum RunPuzzleError {
     ExecutionError(String)
 }
 
+pub struct RunStats {
+    pub result: Box<dyn Display>,
+    pub duration: Duration
+}
+
 fn get_input_for_puzzle(puzzle: &Puzzle) -> Result<String, RunPuzzleError> {
     let path = format!("inputs/{}/day_{:02}.txt", puzzle.year, puzzle.day);
     fs::read_to_string(&path)
@@ -48,24 +53,33 @@ fn get_solution_for_puzzle(puzzle: &Puzzle) -> Result<String, RunPuzzleError> {
     Ok(solution.to_owned())
 }
 
-pub fn run_puzzle(puzzle: &Puzzle) -> Result<Box<dyn Display>, RunPuzzleError> {
+pub fn run_puzzle(puzzle: &Puzzle) -> Result<RunStats, RunPuzzleError> {
     let solver = aoc_solvers::get_solver(puzzle)
         .ok_or(RunPuzzleError::MissingSolver)?;
 
+    let start_time = Instant::now();
+
     let input = get_input_for_puzzle(puzzle)?;
-    solver(&input).map_err(|err| RunPuzzleError::ExecutionError(err.to_string()))
+    let result = solver(&input)
+        .map_err(|err| RunPuzzleError::ExecutionError(err.to_string()))?;
+
+    let end_time = Instant::now();
+    Ok(RunStats {
+        duration: end_time - start_time,
+        result
+    })
 }
 
-pub fn verify_puzzle(puzzle: &Puzzle) -> Result<Box<dyn Display>, RunPuzzleError> {
+pub fn verify_puzzle(puzzle: &Puzzle) -> Result<RunStats, RunPuzzleError> {
     let expected = get_solution_for_puzzle(puzzle)?
         .replace("\r\n", "")
         .replace('\n', "");
 
-    let result = run_puzzle(puzzle)?;
-    let actual = result.to_string()
+    let stats = run_puzzle(puzzle)?;
+    let actual = stats.result.to_string()
         .replace("\r\n", "")
         .replace('\n', "");
 
-    if expected == actual { Ok(result) }
+    if expected == actual { Ok(stats) }
     else { Err(RunPuzzleError::WrongAnswer { expected, actual }) }
 }

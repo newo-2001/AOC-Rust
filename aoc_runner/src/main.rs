@@ -1,8 +1,8 @@
-use std::{env, num::ParseIntError, fmt::Display};
+use std::{env, num::ParseIntError};
 
 use aoc_runner_api::Puzzle;
 use colored::{Colorize, Color};
-use run::{RunnerAction, run_puzzle, verify_puzzle, RunPuzzleError};
+use run::{RunnerAction, run_puzzle, verify_puzzle, RunPuzzleError, RunStats};
 
 mod arguments;
 mod run;
@@ -22,15 +22,24 @@ fn main() -> Result<(), ParseIntError> {
     Ok(())
 }
 
-fn execute<'a>(runner: fn(&Puzzle) -> Result<Box<dyn Display>, RunPuzzleError>, puzzles: &Vec<Puzzle>) {
+fn execute<'a>(runner: fn(&Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &Vec<Puzzle>) {
     println!("Executing {} puzzle(s)...", puzzles.len());
 
     let results = puzzles.into_iter().map(|puzzle| {
         let result = runner(puzzle);
         let puzzle = format!("[{}]", puzzle).bright_yellow().bold();
         match &result {
-            Ok(answer) => println!("{} {} {}", puzzle, "(Success)".bright_green().bold(), answer),
-            Err(err) => println!("{} {} {}", puzzle, "(Failure)".bright_red().bold(), err.to_string().bright_red())
+            Err(err) => println!("{} {} {}", puzzle, "(Failure)".bright_red().bold(), err.to_string().bright_red()),
+            Ok(RunStats { result, duration }) => {
+                let mins = (duration.as_secs_f32() / 60f32) as u32;
+                let secs = duration.as_secs() % 60;
+                let millis = duration.as_millis() % 1000;
+                let duration = format!("[{:02}:{:02}.{:03}]", mins, secs, millis)
+                    .bright_blue().bold();
+
+                let status = "(Success)".bright_green().bold();
+                println!("{} {} {} {}", puzzle, duration, status, result)
+            }
         }
 
         result
