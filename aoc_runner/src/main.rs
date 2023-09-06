@@ -1,4 +1,4 @@
-use std::{env, num::ParseIntError};
+use std::{env, num::ParseIntError, time::Instant};
 
 use aoc_runner_api::Puzzle;
 use colored::{Colorize, Color};
@@ -6,6 +6,7 @@ use run::{RunnerAction, run_puzzle, verify_puzzle, RunPuzzleError, RunStats};
 
 mod arguments;
 mod run;
+mod utils;
 
 fn main() -> Result<(), ParseIntError> {
     let arguments = env::args()
@@ -25,20 +26,16 @@ fn main() -> Result<(), ParseIntError> {
 fn execute<'a>(runner: fn(&Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &Vec<Puzzle>) {
     println!("Executing {} puzzle(s)...", puzzles.len());
 
+    let start_time = Instant::now();
     let results = puzzles.into_iter().map(|puzzle| {
         let result = runner(puzzle);
         let puzzle = format!("[{}]", puzzle).bright_yellow().bold();
         match &result {
             Err(err) => println!("{} {} {}", puzzle, "(Failure)".bright_red().bold(), err.to_string().bright_red()),
             Ok(RunStats { result, duration }) => {
-                let mins = (duration.as_secs_f32() / 60f32) as u32;
-                let secs = duration.as_secs() % 60;
-                let millis = duration.as_millis() % 1000;
-                let duration = format!("[{:02}:{:02}.{:03}]", mins, secs, millis)
-                    .bright_blue().bold();
 
                 let status = "(Success)".bright_green().bold();
-                println!("{} {} {} {}", puzzle, duration, status, result)
+                println!("{} {} {} {}", puzzle, utils::format_duration(duration), status, result)
             }
         }
 
@@ -46,7 +43,10 @@ fn execute<'a>(runner: fn(&Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles:
     });
 
     let passed = results.filter(Result::is_ok).count();
-    let msg = format!("{} / {} puzzles executed successfully", passed, puzzles.len())
+    let end_time = Instant::now();
+    let duration = end_time - start_time;
+
+    let msg = format!("{} {} / {} puzzles executed successfully", utils::format_duration(&duration), passed, puzzles.len())
         .color(if passed == puzzles.len() { Color::BrightGreen } else { Color::BrightRed })
         .bold();
 
