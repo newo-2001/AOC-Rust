@@ -17,6 +17,7 @@ pub trait Queue: Extend<Self::In> + Sized {
     type In;
     type Out;
 
+    fn push(&mut self, item: Self::In);
     fn pop(&mut self) -> Option<Self::Out>;
 
     fn recursive_fold<F, S, I>(self, state: S, folder: F) -> S
@@ -55,8 +56,12 @@ impl<T, P> Queue for PriorityQueue<T, P>
     type In = (T, P);
     type Out = T;
 
-    fn pop(&mut self) -> Option<T> {
+    fn pop(&mut self) -> Option<Self::Out> {
         self.pop().map(fst)
+    }
+
+    fn push(&mut self, (priority, item): Self::In) {
+        self.push(priority, item);
     }
 }
 
@@ -64,7 +69,11 @@ impl<T> Queue for VecDeque<T> {
     type In = T;
     type Out = T;
 
-    fn pop(&mut self) -> Option<T> {
+    fn pop(&mut self) -> Option<Self::Out> {
         self.pop_front()
+    }
+
+    fn push(&mut self, item: Self::In) {
+        self.push_back(item);
     }
 }

@@ -1,4 +1,4 @@
-#![feature(get_many_mut)]
+#![feature(get_many_mut, extract_if, result_option_inspect, iter_collect_into)]
 
 use aoc_2015::*;
 use aoc_2016::*;
@@ -72,6 +72,7 @@ pub fn get_solver(puzzle: &Puzzle) -> Option<Box<Solver>> {
             11 => solver!(2016, "11", puzzle.part),
             12 => solver!(2016, "12", puzzle.part),
             13 => solver!(2016, "13", puzzle.part),
+            14 => solver!(2016, "14", puzzle.part),
             _ => None
         },
         _ => None

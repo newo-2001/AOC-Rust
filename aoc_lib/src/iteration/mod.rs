@@ -13,22 +13,18 @@ pub trait ExtraIter : Iterator + Sized {
         single::single(self)
     }
 
-    fn empty(mut self) -> bool
-        where Self: Sized
-    {
+    fn empty(mut self) -> bool {
         self.next().is_none()
     }
 
     fn mode(self) -> Option<Self::Item>
-        where Self: Sized,
-              Self::Item: Eq + Hash
+        where Self::Item: Eq + Hash
     {
         mode::mode(self)
     }
 
     fn multi_mode(self) -> Vec<Self::Item>
-        where Self: Sized,
-              Self::Item: Eq + Hash
+        where Self::Item: Eq + Hash
     {
         mode::multi_mode(self)
     }
