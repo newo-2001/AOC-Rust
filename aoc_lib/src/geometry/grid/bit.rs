@@ -7,20 +7,28 @@ use crate::parsing::InvalidTokenError;
 use super::{GridView, Grid, GridLike};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Light {
+pub enum Bit {
     On,
     Off
 }
 
-impl Light {
-    pub fn is_on(self) -> bool { self == Light::On }
+impl Bit {
+    pub fn is_enabled(self) -> bool { self == Bit::On }
+    pub fn is_on(self) -> bool { self == Bit::On }
+    pub fn is_solid(self) -> bool { self == Bit::On }
 }
 
-impl Into<bool> for Light {
-    fn into(self) -> bool { self.is_on() }
+impl Into<bool> for Bit {
+    fn into(self) -> bool { self == Bit::On }
 }
 
-impl TryFrom<char> for Light {
+impl From<bool> for Bit {
+    fn from(value: bool) -> Self {
+        if value { Bit::On } else { Bit::Off }
+    }
+}
+
+impl TryFrom<char> for Bit {
     type Error = InvalidTokenError<char>;
 
     fn try_from(value: char) -> Result<Self, Self::Error> {
@@ -32,17 +40,17 @@ impl TryFrom<char> for Light {
     }
 }
 
-impl Display for Light {
+impl Display for Bit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", if self.is_on() { '#' } else { '.' })
     }
 }
 
-impl Default for Light {
-    fn default() -> Self { Light::Off }
+impl Default for Bit {
+    fn default() -> Self { Bit::Off }
 }
 
-impl Display for GridView<'_, Light> {
+impl Display for GridView<'_, Bit> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         writeln!(f)?;
         for row in self.iter_rows() {
@@ -55,18 +63,20 @@ impl Display for GridView<'_, Light> {
     }
 }
 
-impl Display for Grid<Light> {
+impl Display for Grid<Bit> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
         Display::fmt(&self.view(), f)
     }
 }
 
-pub trait LightGrid: GridLike<GridItem = Light> {
-    fn count_lit(&self) -> usize;
+pub trait BitGrid: GridLike<GridItem = Bit> {
+    fn count_enabled(&self) -> usize;
+    fn count_lit(&self) -> usize { self.count_enabled() }
+    fn count_solid(&self) -> usize { self.count_enabled() }
 }
 
-impl<G: GridLike<GridItem = Light>> LightGrid for G {
-    fn count_lit(&self) -> usize {
+impl<G: GridLike<GridItem = Bit>> BitGrid for G {
+    fn count_enabled(&self) -> usize {
         self.iter()
             .filter(|&light| light.is_on())
             .count()

@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use aoc_lib::{geometry::{Grid, Dimensions, Light, InvalidGridAreaError, LightGrid, GridLikeMut}, parsing::{Runnable, self, parse_lines, ParseError}};
+use aoc_lib::{geometry::{Dimensions, grid::{Grid, Bit, InvalidGridAreaError, GridLikeMut, BitGrid}}, parsing::{Runnable, self, parse_lines, ParseError}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::preceded, bytes::complete::tag, Parser, branch::alt};
@@ -28,10 +28,10 @@ impl Instruction {
         alt((fill, rotate_row, rotate_column)).run(input)
     }
 
-    fn apply(self, mut grid: Grid<Light>) -> Result<Grid<Light>, InvalidGridAreaError> {
+    fn apply(self, mut grid: Grid<Bit>) -> Result<Grid<Bit>, InvalidGridAreaError> {
         match self {
             Instruction::Fill(dimensions) => {
-                grid.sub_grid_mut(dimensions.into())?.fill(Light::On);
+                grid.sub_grid_mut(dimensions.into())?.fill(Bit::On);
             },
             Instruction::RotateRow(RotateInstruction { index, amount }) => {
                 let mut row = grid.get_row_mut(index)
@@ -62,8 +62,8 @@ fn rotate_slice<T>(slice: &mut [T], amount: usize) {
     slice.rotate_right(amount % slice.len());
 }
 
-fn final_grid(input: &str) -> Result<Grid<Light>, Box<dyn Error + '_>> {
-    let grid = Grid::<Light>::empty(Dimensions(50, 6));
+fn final_grid(input: &str) -> Result<Grid<Bit>, Box<dyn Error + '_>> {
+    let grid = Grid::<Bit>::empty(Dimensions(50, 6));
     let instructions = parse_lines(Instruction::parse, input)?;
 
     let grid = instructions.into_iter()

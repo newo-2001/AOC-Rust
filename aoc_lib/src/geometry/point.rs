@@ -8,7 +8,7 @@ use crate::parsing::TextParserResult;
 use super::{Direction, CardinalDirection, OrdinalDirection};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Point2D<T>(pub T, pub T) where T: Integer;
+pub struct Point2D<T = i32>(pub T, pub T) where T: Integer;
 
 impl<T: Integer + Copy> Copy for Point2D<T> {}
 
@@ -74,20 +74,29 @@ impl<T: Integer + Copy> Point2D<T> {
         Point2D(x, y)
     }
 
-    pub fn neighbours(self) -> impl Iterator<Item=Point2D<T>>
+    pub fn direct_neighbours(self) -> impl Iterator<Item=Point2D<T>>
         where T: CheckedAdd + NumCast
     {
         [
             Direction::Cardinal(CardinalDirection::North),
-            Direction::Ordinal(OrdinalDirection::NorthEast),
             Direction::Cardinal(CardinalDirection::East),
-            Direction::Ordinal(OrdinalDirection::SouthEast),
             Direction::Cardinal(CardinalDirection::South),
-            Direction::Ordinal(OrdinalDirection::SouthWest),
             Direction::Cardinal(CardinalDirection::West),
+        ].into_iter()
+            .filter_map(move |direction| self.checked_add(direction.direction_vector::<i64>()))
+    }
+
+    pub fn neighbours(self) -> impl Iterator<Item=Point2D<T>>
+        where T: CheckedAdd + NumCast
+    {
+        [
+            Direction::Ordinal(OrdinalDirection::NorthEast),
+            Direction::Ordinal(OrdinalDirection::SouthEast),
+            Direction::Ordinal(OrdinalDirection::SouthWest),
             Direction::Ordinal(OrdinalDirection::NorthWest)
         ].into_iter()
             .filter_map(move |direction| self.checked_add(direction.direction_vector::<i64>()))
+            .chain(self.direct_neighbours())
     }
 }
 

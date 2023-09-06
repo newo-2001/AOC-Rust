@@ -1,0 +1,82 @@
+use std::{collections::VecDeque, iter::once, hash::Hash};
+
+use aoc_lib::{geometry::{Point2D, grid::Bit}, iteration::queue::{Dedupable, FindState, IterState}, NoSolutionError};
+use aoc_runner_api::SolverResult;
+use itertools::Itertools;
+
+struct Grid {
+    magic: usize
+}
+
+#[derive(Clone, Copy)]
+struct SearchState {
+    location: Point2D<usize>,
+    depth: usize
+}
+
+impl Eq for SearchState {}
+impl PartialEq for SearchState {
+    fn eq(&self, other: &Self) -> bool {
+        self.location == other.location
+    }
+}
+
+impl Hash for SearchState {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.location.hash(state);
+    }
+}
+
+impl Grid {
+    fn new(magic: usize) -> Grid {
+        Grid { magic }
+    }
+
+    fn get(&self, Point2D(x, y): Point2D::<usize>) -> Bit {
+        let value = x*x + 3*x + 2*x*y + y + y*y + self.magic;
+        (value.count_ones() % 2 == 1).into()
+    }
+
+    fn moves_at(&self, SearchState { location, depth }: SearchState) -> Vec<SearchState> {
+        location.direct_neighbours()
+            .filter(|&location| !self.get(location).is_solid())
+            .map(|location| SearchState { location, depth: depth + 1 })
+            .collect_vec()
+    }
+
+    fn shortest_distance(&self, from: Point2D<usize>, to: Point2D<usize>) -> Option<usize> {
+        VecDeque::from_iter(
+            once(SearchState { location: from, depth: 0 })
+        ).filter_duplicates().recursive_find(|state| {
+            if state.location == to { FindState::Result(state.depth) }
+            else { FindState::Branch(self.moves_at(state)) }
+        })
+    }
+
+    fn tiles_within_range(&self, from: Point2D<usize>, range: usize) -> usize {
+        let mut filter = VecDeque::from_iter(once(SearchState { location: from, depth: 0 }))
+            .filter_duplicates();
+
+        filter.recursive_iter(|state| {
+            if state.depth == range { IterState::Leaf }
+            else { IterState::Branch(self.moves_at(state)) }
+        });
+
+        filter.seen.len()
+    }
+}
+
+pub fn solve_part_1(input: &str) -> SolverResult {
+    let grid = Grid::new(input.parse::<usize>()?);
+    let distance = grid.shortest_distance(Point2D::one(), Point2D(31, 39))
+        .ok_or(NoSolutionError)?;
+
+    Ok(Box::new(distance))
+}
+
+pub fn solve_part_2(input: &str) -> SolverResult {
+    let grid = Grid::new(input.parse::<usize>()?);
+    let tiles = grid.tiles_within_range(Point2D::one(), 50);
+
+    Ok(Box::new(tiles))
+}

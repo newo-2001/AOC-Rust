@@ -10,3 +10,4 @@ pub mod aoc_2016_day_09;
 pub mod aoc_2016_day_10;
 pub mod aoc_2016_day_11;
 pub mod aoc_2016_day_12;
+pub mod aoc_2016_day_13;

@@ -3,12 +3,14 @@ use std::{hash::Hash, collections::VecDeque};
 use priority_queue::PriorityQueue;
 use tupletools::fst;
 
+mod recursive_iter;
 mod recursive_find;
 mod recursive_fold;
 mod dedup;
 
 pub use recursive_find::FindState;
 pub use recursive_fold::FoldState;
+pub use recursive_iter::IterState;
 pub use dedup::{Dedupable, DuplicateFilter};
 
 pub trait Queue: Extend<Self::In> + Sized {
@@ -17,27 +19,32 @@ pub trait Queue: Extend<Self::In> + Sized {
 
     fn pop(&mut self) -> Option<Self::Out>;
 
-    fn recursive_fold<S, I: IntoIterator<Item=Self::In>>(
-        self,
-        state: S,
-        folder: impl FnMut(S, Self::Out) -> FoldState<S, I>
-    ) -> S {
+    fn recursive_fold<F, S, I>(self, state: S, folder: F) -> S
+        where F: FnMut(S, Self::Out) -> FoldState<S, I>,
+              I: IntoIterator<Item=Self::In>
+    {
         recursive_fold::recursive_fold(self, state, folder)
     }
 
-    fn try_recursive_fold<S, I: IntoIterator<Item=Self::In>, E>(
-        self,
-        state: S,
-        folder: impl FnMut(S, Self::Out) -> Result<FoldState<S, I>, E>
-    ) -> Result<S, E> {
+    fn try_recursive_fold<F, S, I, E>(self, state: S, folder: F) -> Result<S, E>
+        where F: FnMut(S, Self::Out) -> Result<FoldState<S, I>, E>,
+              I: IntoIterator<Item=Self::In>
+    {
         recursive_fold::try_recursive_fold(self, state, folder)
     }
 
-    fn recursive_find<R, I: IntoIterator<Item=Self::In>>(
-        self,
-        finder: impl FnMut(Self::Out) -> FindState<R, I>
-    ) -> Option<R> {
+    fn recursive_find<F, R, I>(self, finder: F) -> Option<R>
+        where F: FnMut(Self::Out) -> FindState<R, I>,
+              I: IntoIterator<Item=Self::In>
+    {
         recursive_find::recursive_find(self, finder)
+    }
+
+    fn recursive_iter<F, I>(self, action: F)
+        where F: FnMut(Self::Out) -> IterState<I>,
+              I: IntoIterator<Item=Self::In>
+    {
+        recursive_iter::recursive_iter(self, action)
     }
 }
 

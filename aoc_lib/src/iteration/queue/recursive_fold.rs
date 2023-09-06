@@ -5,13 +5,10 @@ pub enum FoldState<S, I: IntoIterator> {
     Leaf(S)
 }
 
-pub(crate) fn recursive_fold<S, I, Q>(
-    mut queue: Q,
-    mut state: S,
-    mut folder: impl FnMut(S, Q::Out) -> FoldState<S, I>
-) -> S
-    where Q: Queue,
-          I: IntoIterator<Item=Q::In>
+pub(super) fn recursive_fold<F, S, I, Q>(mut queue: Q, mut state: S, mut folder: F) -> S
+    where F: FnMut(S, Q::Out) -> FoldState<S, I>,
+          I: IntoIterator<Item=Q::In>,
+          Q: Queue,
 {
     while let Some(item) = queue.pop() {
         state = match folder(state, item) {
@@ -25,13 +22,10 @@ pub(crate) fn recursive_fold<S, I, Q>(
     state
 }
 
-pub(crate) fn try_recursive_fold<S, I, Q, E>(
-    mut queue: Q,
-    mut state: S,
-    mut folder: impl FnMut(S, Q::Out) -> Result<FoldState<S, I>, E>
-) -> Result<S, E>
-    where Q: Queue,
-          I: IntoIterator<Item=Q::In>
+pub(super) fn try_recursive_fold<F, S, I, Q, E>(mut queue: Q, mut state: S, mut folder: F) -> Result<S, E>
+    where F: FnMut(S, Q::Out) -> Result<FoldState<S, I>, E>,
+          I: IntoIterator<Item=Q::In>,
+          Q: Queue,
 {
     while let Some(item) = queue.pop() {
         state = match folder(state, item)? {

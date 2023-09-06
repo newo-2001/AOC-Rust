@@ -1,27 +1,27 @@
-use aoc_lib::{geometry::{Dimensions, Point2D, Grid, Light, GridLike, LightGrid, GridLikeMut}, functional::repeat_apply};
+use aoc_lib::{geometry::{Dimensions, Point2D, grid::{Grid, Bit, GridLike, BitGrid, GridLikeMut}}, functional::repeat_apply};
 use aoc_runner_api::SolverResult;
 
-fn neighbours_on(grid: &Grid<Light>, cell: Point2D<usize>) -> usize {
+fn neighbours_on(grid: &Grid<Bit>, cell: Point2D<usize>) -> usize {
     cell.neighbours()
         .filter_map(|location| grid.get(location)?.is_on().then_some(()))
         .count()
 }
 
-fn next_state(grid: Grid<Light>) -> Grid<Light> {
+fn next_state(grid: Grid<Bit>) -> Grid<Bit> {
     grid.enumerate_map(|(location, &light)| {
         match (light, neighbours_on(&grid, location)) {
-            (Light::On, 2) | (Light::On, 3) => Light::On,
-            (Light::Off, 3) => Light::On,
-            _ => Light::Off
+            (Bit::On, 2) | (Bit::On, 3) => Bit::On,
+            (Bit::Off, 3) => Bit::On,
+            _ => Bit::Off
         }
     })
 }
 
-fn fix_corners(grid: &mut Grid<Light>) {
+fn fix_corners(grid: &mut Grid<Bit>) {
     let corners = grid.area().corners();
 
     for location in corners {
-        *grid.get_mut(location).unwrap() = Light::On;
+        *grid.get_mut(location).unwrap() = Bit::On;
     }
 }
 
@@ -33,7 +33,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let grid = Grid::<Light>::parse(Dimensions(100, 100), input)?;
+    let grid = Grid::<Bit>::parse(Dimensions(100, 100), input)?;
 
     let mut grid = repeat_apply(100, grid, |mut grid| {
         fix_corners(&mut grid);
