@@ -51,7 +51,7 @@ impl<T: Integer + Copy> Mul<T> for Point2D<T> {
 }
 
 impl<T: Integer + Copy> Point2D<T> {
-    fn checked_add<U>(self, rhs: Point2D<U>) -> Option<Point2D<T>>
+    pub fn checked_add<U>(self, rhs: Point2D<U>) -> Option<Point2D<T>>
         where U: Integer + NumCast + Signed,
               T: NumCast
     {

@@ -5,13 +5,13 @@ use crate::parsing::TextParserResult;
 
 use super::Point2D;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum RotationDirection {
     Left,
     Right
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum CardinalDirection {
     North,
     East,
@@ -48,15 +48,33 @@ impl CardinalDirection {
 
     pub fn parse(input: &str) -> TextParserResult<CardinalDirection> {
         alt((
-            value(CardinalDirection::North, one_of("UuNn^")),
-            value(CardinalDirection::East, one_of("RrEe>")),
-            value(CardinalDirection::South, one_of("DdSsVv")),
-            value(CardinalDirection::West, one_of("LlWw<"))
+            value(Self::North, one_of("UuNn^")),
+            value(Self::East, one_of("RrEe>")),
+            value(Self::South, one_of("DdSsVv")),
+            value(Self::West, one_of("LlWw<"))
         ))(input)
+    }
+
+    pub fn relative_char(self) -> char {
+        match self {
+            Self::North => 'U',
+            Self::East => 'R',
+            Self::South => 'D',
+            Self::West => 'L'
+        }
+    }
+
+    pub fn absolute_char(self) -> char {
+        match self {
+            Self::North => 'N',
+            Self::East => 'E',
+            Self::South => 'S',
+            Self::West => 'W'
+        }
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 
 pub enum OrdinalDirection {
     NorthEast,
@@ -80,7 +98,7 @@ impl OrdinalDirection {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum Direction {
     Cardinal(CardinalDirection),
     Ordinal(OrdinalDirection)
