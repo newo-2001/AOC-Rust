@@ -1,212 +1,110 @@
-use std::{error::Error, rc::Rc, collections::HashMap, cell::RefCell, sync::Mutex};
+use std::{collections::HashMap, cell::RefCell};
 
-use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
+use aoc_lib::{functional::swap, parsing::{ParseError, parse_lines, Runnable}};
 use aoc_runner_api::SolverResult;
-use nom::{
-    bytes::complete::tag,
-    character::complete::{self, alpha1},
-    Parser,
-    sequence::{preceded, tuple},
-    branch::alt,
-    error::VerboseError, combinator
-};
-use once_cell::sync::Lazy;
+use nom::{character::complete::{alpha1, self}, sequence::{terminated, preceded}, bytes::complete::tag, combinator::all_consuming, Parser, branch::alt};
 
-#[derive(Clone, Copy)]
-enum UnaryOperator {
-    Not
+#[derive(Clone, Hash, PartialEq, Eq)]
+struct Wire<'a>(&'a str);
+
+#[derive(Clone, Hash, PartialEq, Eq)]
+enum Value<'a> {
+    Wire(Wire<'a>),
+    Literal(u32)
 }
 
-#[derive(Clone, Copy)]
-enum BinaryOperator {
-    And,
-    Or,
-    LeftShift,
-    RightShift
+#[derive(Clone, Hash, PartialEq, Eq)]
+enum Expression<'a> {
+    Constant(Value<'a>),
+    And(Value<'a>, Value<'a>),
+    Or(Value<'a>, Value<'a>),
+    Not(Value<'a>),
+    LeftShift(Value<'a>, u8),
+    RightShift(Value<'a>, u8)
 }
 
-enum Value<T> {
-    Constant(u16),
-    Variable(T)
+struct ExpressionTree<'a> {
+    nodes: HashMap<Wire<'a>, Expression<'a>>,
+    cache: RefCell<HashMap<Wire<'a>, u32>>
 }
 
-type SubExpression = Rc<RefCell<NamedExpression>>;
-type ExpressionTree<'a> = HashMap<&'a str, SubExpression>;
-
-struct NamedExpression {
-    name: String,
-    expression: Expression
-}
-
-enum Expression {
-    Unresolved,
-    Literal(Value<SubExpression>),
-    Unary(UnaryOperator, Value<SubExpression>),
-    Binary(Value<SubExpression>, BinaryOperator, Value<SubExpression>)
-}
-
-enum UnresolvedExpression<'a> {
-    Literal(Value<&'a str>),
-    Unary(UnaryOperator, Value<&'a str>),
-    Binary(Value<&'a str>, BinaryOperator, Value<&'a str>)
-}
-
-struct Assignment<'a> {
-    target: &'a str,
-    expression: UnresolvedExpression<'a>
-}
-
-impl Value<SubExpression> {
-    fn evaluate(&self) -> Result<u16, Box<dyn Error>> {
-        match self {
-            Value::Constant(value) => Ok(*value),
-            Value::Variable(variable) => variable.borrow().evaluate()
+impl<'a> ExpressionTree<'a> {
+    fn new(nodes: HashMap<Wire<'a>, Expression<'a>>) -> ExpressionTree<'a> {
+        ExpressionTree {
+            cache: RefCell::new(HashMap::<Wire, u32>::new()), nodes
         }
     }
-}
-
-impl NamedExpression {
-    fn evaluate(&self) -> Result<u16, Box<dyn Error>> {
-        let mutex = (*EXPRESSION_CACHE).lock()?;
-        let cache = mutex.get(&self.name);
-        if cache.is_some() { return Ok(*cache.unwrap()); }
-        
-        drop(mutex);
-        let result = self.expression.evaluate()?;
-
-        let mut mutex = (*EXPRESSION_CACHE).lock()?;
-        mutex.insert(self.name.clone(), result);
-        
-        return Ok(result);
-    }
-}
-
-impl Expression {
-    fn evaluate(&self) -> Result<u16, Box<dyn Error>> {
-        match self {
-            Expression::Unresolved => Err(String::from("Expression tree contained unresolved value during evaluation").into()),
-            Expression::Literal(value) => value.evaluate(),
-            Expression::Unary(operator, expression) => Ok(match operator {
-                UnaryOperator::Not => !expression.evaluate()?
-            }),
-            Expression::Binary(left, operator, right) => Ok(match operator {
-                BinaryOperator::And => left.evaluate()? & right.evaluate()?,
-                BinaryOperator::Or => left.evaluate()? | right.evaluate()?,
-                BinaryOperator::LeftShift => left.evaluate()? << right.evaluate()?,
-                BinaryOperator::RightShift => left.evaluate()? >> right.evaluate()?
-            })
-        }
-    }
-}
-
-static EXPRESSION_CACHE: Lazy<Mutex<HashMap<String, u16>>> = Lazy::new(|| Mutex::new(HashMap::new()));
-
-fn parse_expression(input: &str) -> Result<Assignment<'_>, ParseError> {
-    use UnresolvedExpression::*;
-    use BinaryOperator::*;
-    use UnaryOperator::*;
-
-    let constant = || complete::u16::<&str, VerboseError<&str>>.map(Value::Constant);
-    let reference = || alpha1.map(Value::Variable);
-    let value = || constant().or(reference());
     
-    let binary_operator = alt((
-        combinator::value(And, tag(" AND ")),
-        combinator::value(Or, tag(" OR ")),
-        combinator::value(LeftShift, tag(" LSHIFT ")),
-        combinator::value(RightShift, tag(" RSHIFT "))
-    ));
+    fn parse(input: &'a str) -> Result<ExpressionTree<'a>, ParseError<'a>> {
+        let nodes = parse_lines(parse_wire, input)?
+            .into_iter()
+            .collect::<HashMap<Wire, Expression>>();
 
-    let binary_operation = tuple((value(), binary_operator, value()))
-        .map(|(left, operator, right)| Binary(left, operator, right));
-
-    let unary_operator = combinator::value(Not, tag("NOT "));
-    let unary_operation = tuple((unary_operator, value()))
-        .map(|(operator, expression)| Unary(operator, expression));
-
-    let literal = value().map(Literal);
-
-    let expression = alt((
-        unary_operation,
-        binary_operation,
-        literal
-    ));
-
-    let target = preceded(tag(" -> "), alpha1);
-    let mut assignment = expression.and(target)
-        .map(|(expression, target)| Assignment { expression, target });
-
-    assignment.run(input)
-}
-
-fn build_expression_tree<'a>(assignments: &'a Vec<Assignment>) -> Result<ExpressionTree<'a>, Box<dyn Error>> {
-    use Value::*;
-
-    let mut nodes = HashMap::<&str, SubExpression>::new();
-
-    for assignment in assignments {
-        nodes.insert(assignment.target, Rc::new(RefCell::new(
-            NamedExpression { expression: Expression::Unresolved, name: assignment.target.to_owned() }
-        )));
+        Ok(ExpressionTree::new(nodes))
     }
 
-    let find_node = |name: &str| nodes.get(name).ok_or(format!("'{}' is undefined", name));
-    let map_value = |value: &Value<&str>| -> Result<Value<SubExpression>, Box<dyn Error>> {
+    fn reset(&mut self) {
+        self.cache.replace(HashMap::new());
+    }
+
+    fn evaluate_value(&self, value: &Value<'a>) -> u32 {
         match value {
-            Constant(x) => Ok(Constant(*x)),
-            Variable(variable) =>  Ok(Variable(Rc::clone(find_node(variable)?)))
+            Value::Literal(value) => *value,
+            Value::Wire(wire) => self.evaluate_wire(wire)
         }
-    };
+    }
 
-    let map_expression = |expression: &UnresolvedExpression| -> Result<Expression, Box<dyn Error>> {
-        match expression {
-            UnresolvedExpression::Literal(value) => Ok(Expression::Literal(map_value(value)?)),
-            UnresolvedExpression::Unary(operator, value) => Ok(Expression::Unary(*operator, map_value(value)?)),
-            UnresolvedExpression::Binary(left, operator, right) => Ok(Expression::Binary(map_value(left)?, *operator, map_value(right)?))
-        }
-    };
+    // TODO: using stack recursion is possibly dangerous
+    // This can be solved by moving the stack to the heap
+    fn evaluate_wire(&self, wire: &Wire<'a>) -> u32 {
+        if let Some(value) = self.cache.borrow().get(wire) { return *value; }
+        let expression = self.nodes.get(wire).unwrap();
+        let value = match expression {
+            Expression::Constant(value) => self.evaluate_value(value),
+            Expression::And(left, right) => self.evaluate_value(left) & self.evaluate_value(right),
+            Expression::Or(left, right) => self.evaluate_value(left) | self.evaluate_value(right),
+            Expression::Not(value) => !self.evaluate_value(value),
+            Expression::LeftShift(value, amount) => self.evaluate_value(value) << amount,
+            Expression::RightShift(value, amount) => self.evaluate_value(value) >> amount
+        };
 
-    for assignment in assignments {
-        let node = nodes.get(assignment.target).unwrap();
-        
-        node.replace(NamedExpression { name: assignment.target.to_owned(), expression: map_expression(&assignment.expression)? });
-    };
-
-    return Ok(nodes);
+        self.cache.borrow_mut().insert(wire.clone(), value);
+        value
+    }
 }
 
-fn evaulate_tree(tree: &ExpressionTree) -> Result<u16, Box<dyn Error>> {
-    let result = tree.get("a")
-        .ok_or(String::from("'a' was undefined"))?
-        .borrow()
-        .evaluate()?;
+fn parse_wire<'a>(input: &'a str) -> Result<(Wire<'a>, Expression<'a>), ParseError<'a>> {
+    let wire = || alpha1.map(Wire);
+    let literal = || complete::u32.map(Value::Literal);
+    let value = || wire().map(Value::Wire).or(literal());
 
-    Ok(result)
+    let constant = value().map(Expression::Constant);
+    let and = terminated(value(), tag(" AND ")).and(value()).map(|(left, right)| Expression::And(left, right));
+    let or = terminated(value(), tag(" OR ")).and(value()).map(|(left, right)| Expression::Or(left, right));
+    let lshift = terminated(value(), tag(" LSHIFT ")).and(complete::u8).map(|(value, amount)| Expression::LeftShift(value, amount));
+    let rshift = terminated(value(), tag(" RSHIFT ")).and(complete::u8).map(|(value, amount)| Expression::RightShift(value, amount));
+    let not = preceded(tag("NOT "), value()).map(Expression::Not);
+
+    let expression = alt((and, or, lshift, rshift, not, constant));    
+    all_consuming(terminated(expression, tag(" -> ")).and(wire()))
+        .map(swap).run(input)
 }
+
+const WIRE_A: Wire<'static> = Wire("a");
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let assignments = parse_lines(parse_expression, input)?;
-    let tree = build_expression_tree(&assignments)?;
-    Ok(Box::new(evaulate_tree(&tree)?))
+    let tree = ExpressionTree::parse(input)?;
+    let value = tree.evaluate_wire(&WIRE_A);
+    Ok(Box::new(value))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let assignments = parse_lines(parse_expression, input)?;
-    let tree = build_expression_tree(&assignments)?;
+    let mut tree = ExpressionTree::parse(input)?;
+    let value = tree.evaluate_wire(&WIRE_A);
 
-    let b = tree.get("b")
-        .ok_or(String::from("'b' was undefined"))?;
+    tree.reset();
+    tree.nodes.insert(Wire("b"), Expression::Constant(Value::Literal(value)));
+    let value = tree.evaluate_wire(&WIRE_A);
 
-    let result = evaulate_tree(&tree)?;
-    
-    b.replace(NamedExpression {
-        name: String::from("b"),
-        expression: Expression::Literal(Value::Constant(result))
-    });
-
-    let mut cache = (*EXPRESSION_CACHE).lock()?;
-    cache.clear();
-    drop(cache);
-
-    Ok(Box::from(evaulate_tree(&tree)?))
+    Ok(Box::new(value))
 }

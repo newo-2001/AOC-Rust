@@ -5,3 +5,5 @@ pub fn repeat_apply<T>(times: usize, mut seed: T, f: impl Fn(T) -> T) -> T {
 
     seed
 }
+
+pub fn swap<T, U>((a, b): (T, U)) -> (U, T) { (b, a) }
