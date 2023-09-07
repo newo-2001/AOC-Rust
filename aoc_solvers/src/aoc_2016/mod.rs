@@ -15,3 +15,4 @@ pub mod aoc_2016_day_14;
 pub mod aoc_2016_day_15;
 pub mod aoc_2016_day_16;
 pub mod aoc_2016_day_17;
+pub mod aoc_2016_day_18;
