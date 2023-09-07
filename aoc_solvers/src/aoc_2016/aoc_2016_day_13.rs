@@ -1,8 +1,9 @@
 use std::{collections::VecDeque, iter::once, hash::Hash};
 
-use aoc_lib::{geometry::{Point2D, grid::Bit}, iteration::queue::{Dedupable, FindState, IterState}, NoSolutionError};
+use aoc_lib::{geometry::Point2D, iteration::queue::{Dedupable, FindState, IterState}, NoSolutionError, math::Bit};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
+use num::Integer;
 
 struct Grid {
     magic: usize
@@ -34,7 +35,7 @@ impl Grid {
 
     fn get(&self, Point2D(x, y): Point2D::<usize>) -> Bit {
         let value = x*x + 3*x + 2*x*y + y + y*y + self.magic;
-        (value.count_ones() % 2 == 1).into()
+        (value.count_ones().is_odd()).into()
     }
 
     fn moves_at(&self, SearchState { location, depth }: SearchState) -> Vec<SearchState> {

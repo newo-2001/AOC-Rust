@@ -1,4 +1,4 @@
-use aoc_lib::{geometry::{Dimensions, Point2D, grid::{Grid, Bit, GridLike, BitGrid, GridLikeMut}}, functional::repeat_apply};
+use aoc_lib::{geometry::{Dimensions, Point2D, grid::{Grid, GridLike, BitGrid, GridLikeMut}}, functional::repeat_apply, math::Bit};
 use aoc_runner_api::SolverResult;
 
 fn neighbours_on(grid: &Grid<Bit>, cell: Point2D<usize>) -> usize {

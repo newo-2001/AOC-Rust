@@ -2,6 +2,7 @@ use std::{f32::consts::E, iter::repeat};
 
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
+use num::Integer;
 
 const GAMMA: f32 = 0.5772156649;
 
@@ -19,7 +20,7 @@ fn prime_factors(mut n: usize, primes: &Vec<usize>) -> Vec<usize> {
 }
 
 fn factors(n: usize, limit: usize) -> Vec<usize> {
-    (1..limit).filter(|&x| n % x == 0).collect()
+    (1..limit).filter(|x| n.is_multiple_of(x)).collect()
 }
 
 fn smallest_prime_factor(n: usize, primes: &Vec<usize>) -> usize {

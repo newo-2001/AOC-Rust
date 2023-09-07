@@ -1,3 +1,6 @@
+mod bit;
+pub use bit::*;
+
 use std::ops::Range;
 use num::{FromPrimitive, Integer, One};
 

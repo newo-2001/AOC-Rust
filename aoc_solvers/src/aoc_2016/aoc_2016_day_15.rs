@@ -1,6 +1,7 @@
 use aoc_lib::parsing::{ParseError, self, Runnable, parse_lines};
 use aoc_runner_api::SolverResult;
 use nom::{bytes::complete::tag, sequence::{delimited, terminated, tuple}, character::complete, combinator::all_consuming, Parser};
+use num::Integer;
 
 struct Disc {
     positions: usize,
@@ -21,7 +22,7 @@ impl Disc {
     }
 
     fn is_aligned_at(&self, time: usize) -> bool {
-        (self.starting_position + self.index + time) % self.positions == 0
+        (self.starting_position + self.index + time).is_multiple_of(&self.positions)
     }
 }
 

@@ -1,4 +1,5 @@
 use aoc_runner_api::SolverResult;
+use itertools::Itertools;
 
 fn parse_floor(char: char) -> Result<i32, String> {
     match char {
@@ -23,7 +24,7 @@ fn find_basement<'a>(directions: impl Iterator<Item=&'a i32>) -> Option<usize> {
 fn parse_directions(input: &str) -> Result<Vec<i32>, String> {
     input.chars()
         .map(parse_floor)
-        .collect::<Result<Vec<i32>, String>>()
+        .try_collect()
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {

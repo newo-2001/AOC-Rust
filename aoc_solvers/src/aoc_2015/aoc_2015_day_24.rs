@@ -7,7 +7,7 @@ use tupletools::fst;
 fn parse_items(str: &str) -> Result<Vec<u32>, ParseIntError> {
     str.lines()
         .map(str::parse::<u32>)
-        .collect::<Result<Vec<u32>, ParseIntError>>()
+        .try_collect()
 }
 
 fn target_weight(items: &[u32], groups: u32) -> u32 {

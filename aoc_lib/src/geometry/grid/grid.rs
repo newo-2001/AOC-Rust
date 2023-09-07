@@ -1,5 +1,6 @@
 use std::{fmt::Debug, vec};
 
+use itertools::Itertools;
 use thiserror::Error;
 
 use crate::{parsing::InvalidTokenError, geometry::{Point2D, Area, WrongDimensionsError, Dimensions}};
@@ -131,9 +132,9 @@ impl<T> Grid<T>
     pub fn parse(dimensions: Dimensions, input: &str) -> Result<Grid<T>, GridParseError>
         where T: TryFrom<char, Error = InvalidTokenError<char>>
     {
-        let cells = input.lines()
+        let cells: Vec<T> = input.lines()
             .flat_map(|line| line.chars().map(TryInto::<T>::try_into))
-            .collect::<Result<Vec<T>, InvalidTokenError<char>>>()
+            .try_collect()
             .map_err(GridParseError::InvalidToken)?;
 
         Grid::from_iter(dimensions, cells)

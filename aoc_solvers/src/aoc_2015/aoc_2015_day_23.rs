@@ -7,6 +7,7 @@ use nom::{
     branch::alt, combinator::value,
     bytes::complete::tag
 };
+use num::Integer;
 
 #[derive(Clone)]
 enum Register {
@@ -42,7 +43,7 @@ impl State {
                 return;
             },
             Instruction::JumpIfEven(register, offset) => {
-                if self.read_register(register) % 2 == 0 {
+                if self.read_register(register).is_even() {
                     return self.execute(&Instruction::Jump(*offset));
                 }
             },

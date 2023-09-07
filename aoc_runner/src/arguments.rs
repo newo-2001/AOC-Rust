@@ -1,6 +1,7 @@
 use std::num::ParseIntError;
 
 use aoc_runner_api::Puzzle;
+use itertools::Itertools;
 
 use crate::RunnerAction;
 
@@ -27,10 +28,10 @@ pub fn parse_puzzles<'a>(mut arguments: impl Iterator<Item=String>) -> Result<im
         let year = year.parse::<u16>()?;
         if let Some(day) = arguments.next() {
             let day = day.parse::<u8>()?;
-            let parts = arguments.next()
+            let parts: Vec<_> = arguments.next()
                 .map(|part| vec![part.parse::<u8>()])
                 .unwrap_or_else(|| if day == 25 { vec![Ok(1u8)] } else { vec![Ok(1u8), Ok(2u8)] })
-                .into_iter().collect::<Result<Vec<u8>, ParseIntError>>()?;
+                .into_iter().try_collect()?;
 
             Box::new(parts.into_iter().map(move |part| Puzzle { year, day, part }))
         } else {

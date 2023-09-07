@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use aoc_lib::{geometry::{Dimensions, grid::{Grid, Bit, InvalidGridAreaError, GridLikeMut, BitGrid}}, parsing::{Runnable, self, parse_lines, ParseError}};
+use aoc_lib::{geometry::{Dimensions, grid::{Grid, InvalidGridAreaError, GridLikeMut, BitGrid}}, parsing::{Runnable, self, parse_lines, ParseError}, math::Bit};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::preceded, bytes::complete::tag, Parser, branch::alt};
