@@ -2,7 +2,7 @@ use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded}, character::complete::{self, multispace1}, Parser};
-use transpose::transpose;
+use tupletools::snd;
 
 struct Triangle(u32, u32, u32);
 
@@ -25,19 +25,6 @@ impl Triangle {
     }
 }
 
-fn transpose_triangles(triangles: impl IntoIterator<Item=Triangle>) -> impl Iterator<Item=Triangle> {
-    let origin: Vec<u32> = triangles.into_iter()
-        .flat_map(|Triangle(x, y, z)| [x, y, z])
-        .collect();
-
-    let mut dest = [0u32; 9];
-    transpose(&origin, &mut dest, 3, 3);
-
-    dest.into_iter()
-        .tuples()
-        .map(|(x, y, z)| Triangle(x, y, z))
-}
-
 pub fn solve_part_1(input: &str) -> SolverResult {
     let number_valid = parse_lines(Triangle::parse, input)?
         .iter()
@@ -50,9 +37,14 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 pub fn solve_part_2(input: &str) -> SolverResult {
     let number_valid = parse_lines(Triangle::parse, input)?
         .into_iter()
-        .chunks(3)
-        .into_iter()
-        .flat_map(transpose_triangles)
+        .flat_map(|Triangle(a, b, c)| [a, b, c])
+        .enumerate()
+        .into_group_map_by(|(index, _)| index % 3)
+        .into_values()
+        .flatten()
+        .map(snd)
+        .tuples()
+        .map(|(a, b, c)| Triangle(a, b, c))
         .filter(Triangle::is_valid)
         .count();
 

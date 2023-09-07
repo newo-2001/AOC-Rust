@@ -38,19 +38,16 @@ dependencies = [
  "aoc_runner_api",
  "composing",
  "derive_more",
- "gen-iter",
  "hex",
  "itertools",
  "md5",
  "nom",
  "num",
  "paste",
- "priority-queue",
  "queues",
  "rayon",
  "serde_json",
  "thiserror",
- "transpose",
  "tupletools",
 ]
 
@@ -186,12 +183,6 @@ dependencies = [
  "cc",
  "libc",
 ]
-
-[[package]]
-name = "gen-iter"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33ab36ccf1ed3d9c719f4c8725b34482c530f6d569c084ea762490b5e19f77bf"
 
 [[package]]
 name = "hashbrown"
@@ -525,12 +516,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "strength_reduce"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe895eb47f22e2ddd4dabc02bce419d2e643c8e3b585c78158b349195bc24d82"
-
-[[package]]
 name = "syn"
 version = "1.0.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -570,16 +555,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.29",
-]
-
-[[package]]
-name = "transpose"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6522d49d03727ffb138ae4cbc1283d3774f0d10aa7f9bf52e6784c45daf9b23"
-dependencies = [
- "num-integer",
- "strength_reduce",
 ]
 
 [[package]]
