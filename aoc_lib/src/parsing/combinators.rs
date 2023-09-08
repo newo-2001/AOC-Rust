@@ -6,7 +6,7 @@ use nom::{
     combinator::value,
     error::{ParseError, VerboseError},
     Slice, InputIter, InputLength, AsChar,
-    multi::many_till, character::complete::anychar, bytes::complete::{take_until, self}, FindSubstring, InputTake, Compare
+    multi::many_till, character::complete::anychar, bytes::complete::{take_until, self}, FindSubstring, InputTake, Compare, sequence::terminated
 };
 use tupletools::snd;
 
@@ -31,6 +31,15 @@ pub fn skip_over<I, T, E>(tag: T) -> impl Parser<I, (), E>
           T: InputLength + Clone
 {
     value((), take_until(tag.clone()).and(complete::tag(tag)))
+}
+
+pub fn sep_by<I, E, L, LO, S, SO, R, RO>(left: L, sep: S, right: R) -> impl Parser<I, (LO, RO), E>
+    where L: Parser<I, LO, E>,
+          S: Parser<I, SO, E>,
+          R: Parser<I, RO, E>,
+          E: ParseError<I>
+{
+    terminated(left, sep).and(right)
 }
 
 pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
