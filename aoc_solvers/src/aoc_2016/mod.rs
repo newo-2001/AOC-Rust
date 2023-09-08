@@ -17,3 +17,4 @@ pub mod aoc_2016_day_16;
 pub mod aoc_2016_day_17;
 pub mod aoc_2016_day_18;
 pub mod aoc_2016_day_20;
+pub mod aoc_2016_day_21;
