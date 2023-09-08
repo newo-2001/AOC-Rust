@@ -46,7 +46,7 @@ fn execute(runner: fn(&Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &Ve
     let end_time = Instant::now();
     let duration = end_time - start_time;
 
-    let msg = format!("{} {} / {} puzzles executed successfully", utils::format_duration(&duration), passed, puzzles.len())
+    let msg = format!("{} {} / {} puzzle(s) executed successfully", utils::format_duration(&duration), passed, puzzles.len())
         .color(if passed == puzzles.len() { Color::BrightGreen } else { Color::BrightRed })
         .bold();
 
