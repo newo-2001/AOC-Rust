@@ -5,6 +5,8 @@ use thiserror::Error;
 
 use crate::parsing::{TextParserResult, self};
 
+use super::Point2D;
+
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Dimensions(pub usize, pub usize);
 
@@ -43,6 +45,12 @@ impl Display for Dimensions {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let Self(width, height) = self;
         write!(f, "{width}x{height}")
+    }
+}
+
+impl From<Point2D<usize>> for Dimensions {
+    fn from(value: Point2D<usize>) -> Self {
+        Self(value.x() + 1, value.y() + 1)
     }
 }
 

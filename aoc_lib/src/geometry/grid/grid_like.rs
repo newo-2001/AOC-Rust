@@ -123,6 +123,21 @@ macro_rules! impl_grid_traits {
                 Ok(())
             }
         }
+
+        impl<T: std::fmt::Display> std::fmt::Display for $type {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                use itertools::Itertools;
+
+                writeln!(f)?;
+                for row in self.iter_rows() {
+                    let line = row.map(ToString::to_string).join("");
+
+                    writeln!(f, "{line}")?;
+                }
+
+                Ok(())
+            }
+        }
     }
 }
 

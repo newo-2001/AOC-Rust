@@ -6,7 +6,7 @@ pub enum FindState<R, I: IntoIterator> {
     Leaf
 }
 
-pub(super) fn recursive_find<F, R, I, Q>( mut queue: Q, mut finder: F) -> Option<R>
+pub(super) fn recursive_find<F, R, I, Q>(mut queue: Q, mut finder: F) -> Option<R>
     where F: FnMut(Q::Out) -> FindState<R, I>,
           I: IntoIterator<Item=Q::In>,
           Q: Queue

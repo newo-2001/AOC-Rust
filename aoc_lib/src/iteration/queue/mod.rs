@@ -6,11 +6,13 @@ use tupletools::fst;
 mod recursive_iter;
 mod recursive_find;
 mod recursive_fold;
+mod search_depth;
 mod dedup;
 
 pub use recursive_find::FindState;
 pub use recursive_fold::FoldState;
 pub use recursive_iter::IterState;
+pub use search_depth::SearchDepth;
 pub use dedup::{Dedupable, DuplicateFilter};
 
 pub trait Queue: Extend<Self::In> + Sized {
