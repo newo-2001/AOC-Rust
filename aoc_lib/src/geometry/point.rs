@@ -5,7 +5,7 @@ use num::{Integer, clamp, Zero, One, CheckedAdd, NumCast, Signed, FromPrimitive}
 
 use crate::parsing::TextParserResult;
 
-use super::{Direction, CardinalDirection, OrdinalDirection};
+use super::{Direction, CardinalDirection, OrdinalDirection, Dimensions};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Point2D<T = i32>(pub T, pub T) where T: Integer;
@@ -132,6 +132,12 @@ impl<T: Integer> Point2D<T> {
 impl<T: Integer> From<(T, T)> for Point2D<T> {
     fn from((x, y): (T, T)) -> Self {
         Point2D(x, y)
+    }
+}
+
+impl<T: Integer + From<usize>> From<Dimensions> for Point2D<T> {
+    fn from(Dimensions(width, height): Dimensions) -> Self {
+        Point2D(width.into(), height.into())
     }
 }
 

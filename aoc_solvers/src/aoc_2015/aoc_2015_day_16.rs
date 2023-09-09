@@ -11,7 +11,7 @@ use nom::{
 };
 
 const DIMENSIONS: usize = 10;
-const COMPOUNDS: [&'static str; DIMENSIONS] = [
+const COMPOUNDS: [&str; DIMENSIONS] = [
     "children", "cats", "samoyeds", "pomeranians", "akitas",
     "vizslas", "goldfish", "trees", "cars", "perfumes"
 ];
@@ -32,7 +32,7 @@ fn parse_sue(input: &str) -> Result<Sue, ParseError> {
 
     let compounds = many0(compound)
         .map(|x| x.into_iter().collect::<HashMap<&str, u8>>())
-        .map(|compounds| COMPOUNDS.iter().map(|compound| compounds.get(compound).map(|x| *x)).collect_vec().try_into());
+        .map(|compounds| COMPOUNDS.iter().map(|compound| compounds.get(compound).copied()).collect_vec().try_into());
     
     number.and(compounds)
         .map(|(number, compounds)| Sue { number, compounds: compounds.unwrap() })
@@ -55,7 +55,7 @@ fn is_valid_solution_range(fact: Fact, solution: &Sue) -> bool {
         })
 }
 
-fn solve<'a>(fact: Fact, system: Vec<Sue>, predicate: impl Fn(Fact, &Sue) -> bool) -> Result<Sue, String> {
+fn solve(fact: Fact, system: Vec<Sue>, predicate: impl Fn(Fact, &Sue) -> bool) -> Result<Sue, String> {
     let system = system.into_iter()
         .filter(|solution| predicate(fact, solution))
         .collect_vec();

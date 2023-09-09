@@ -70,13 +70,12 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     fn extractor(hash: &str) -> Option<(usize, char)> {
         let mut chars = hash.chars();
         let index = chars.nth(5)?.to_digit(8)? as usize;
-        let char = chars.nth(0)?;
+        let char = chars.next()?;
         Some((index, char))
     }
 
     let password: String = PasswordIterator::new(input, extractor)
         .unique_by(|&(index, _)| index)
-        .into_iter()
         .take(8)
         .sorted_unstable_by_key(|&(index, _)| index)
         .map(snd)

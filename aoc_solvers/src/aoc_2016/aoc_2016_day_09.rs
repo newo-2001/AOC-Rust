@@ -19,7 +19,7 @@ enum Chunk<'a> {
     Uncompressed(String)
 }
 
-fn parse_marker<'a>(input: &'a str) -> TextParserResult<'a, Marker<'a>> {
+fn parse_marker(input: &str) -> TextParserResult<Marker> {
     let parse_marker = parsing::usize.and(preceded(complete::char('x'), parsing::usize));
 
     let (input, (length, times)) = delimited(complete::char('('), parse_marker, complete::char(')')).parse(input)?;
@@ -28,7 +28,7 @@ fn parse_marker<'a>(input: &'a str) -> TextParserResult<'a, Marker<'a>> {
     Ok((remaining, Marker { data, times }))
 }
 
-fn decompress<'a>(input: &'a str) -> Result<Vec<Chunk<'a>>, String> {
+fn decompress(input: &str) -> Result<Vec<Chunk>, String> {
     let (remaining, chunks) = many0(many_till(anychar, parse_marker))
         .parse(input)
         .map_err(|err| err.to_string())?;
@@ -45,8 +45,8 @@ fn decompress<'a>(input: &'a str) -> Result<Vec<Chunk<'a>>, String> {
         .collect()
 }
 
-fn decompressed_length(chunks: &Vec<Chunk>, compressed_length: impl Fn(&CompressedChunk) -> usize) -> usize {
-    chunks.into_iter()
+fn decompressed_length(chunks: &[Chunk], compressed_length: impl Fn(&CompressedChunk) -> usize) -> usize {
+    chunks.iter()
         .map(|chunk| match chunk {
             Chunk::Uncompressed(chunk) => chunk.len(),
             Chunk::Compressed(chunk) => compressed_length(chunk) * chunk.marker.times

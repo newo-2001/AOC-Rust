@@ -2,10 +2,11 @@ use std::fmt::Display;
 
 use crate::parsing::InvalidTokenError;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum Bit {
-    On,
-    Off
+    #[default]
+    Off,
+    On
 }
 
 impl Bit {
@@ -26,10 +27,6 @@ impl Bit {
             Self::On => Self::Off
         }
     }
-}
-
-impl Into<bool> for Bit {
-    fn into(self) -> bool { self == Bit::On }
 }
 
 impl From<bool> for Bit {
@@ -56,8 +53,4 @@ impl Display for Bit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", if self.is_on() { '#' } else { '.' })
     }
-}
-
-impl Default for Bit {
-    fn default() -> Self { Bit::Off }
 }

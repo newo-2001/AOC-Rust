@@ -74,8 +74,8 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     
     let mut seen = HashSet::<Point2D<i32>>::new();
     let first_duplicate = path.into_iter()
-        .skip_while(|&location| seen.insert(location))
-        .next().ok_or("No location is visited twice")?;
+        .find(|&location| !seen.insert(location))
+        .ok_or("No location is visited twice")?;
 
     let distance = start.manhattan_distance(&first_duplicate);
     Ok(Box::from(distance))

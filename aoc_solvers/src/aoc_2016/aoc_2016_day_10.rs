@@ -81,11 +81,13 @@ impl Hash for Robot {
 
 impl Robot {
     fn give(&mut self, value: u16) -> Result<(), RobotError> {
-        Ok(self.values = match self.values {
+        self.values = match self.values {
             Chips::None => Chips::Single(value),
             Chips::Single(first) => Chips::Double(min_max(first, value)),
             Chips::Double(..) => return Err(RobotError::TooManyChips)
-        })
+        };
+
+        Ok(())
     }
 }
 
@@ -190,7 +192,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let outputs = solve(instructions)?.outputs;
 
     let output: u16 = [0, 1, 2].into_iter()
-        .map(|bin| outputs.get(&bin).map(|x| *x))
+        .map(|bin| outputs.get(&bin).copied())
         .collect::<Option<Vec<u16>>>()
         .ok_or(RobotError::MissingOutput)?
         .into_iter()

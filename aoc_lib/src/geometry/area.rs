@@ -21,7 +21,7 @@ impl<T> Area<T> where T: Integer + Copy {
     
     pub fn from_dimensions_at(top_left: Point2D<T>, dimensions: Dimensions) -> Area<T> where T: From<usize> {
         Area {
-            top_left: top_left.clone(),
+            top_left,
             bottom_right: top_left + dimensions.into()
         }
     }

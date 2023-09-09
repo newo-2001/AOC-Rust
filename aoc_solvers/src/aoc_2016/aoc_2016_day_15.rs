@@ -34,8 +34,7 @@ impl Machine {
     }
 
     fn first_aligned_time(&self) -> usize {
-        (0..).into_iter()
-            .find(|&time| self.0.iter().all(|disc| disc.is_aligned_at(time)))
+        (0..).find(|&time| self.0.iter().all(|disc| disc.is_aligned_at(time)))
             .unwrap()
     }
 

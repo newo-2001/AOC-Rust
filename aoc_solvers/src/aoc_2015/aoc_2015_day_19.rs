@@ -10,10 +10,16 @@ struct Replacement<'a> {
     to: &'a str
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Clone)]
+#[derive(PartialEq, Eq, Clone)]
 struct Mutation {
     chemical: String,
     distance: usize,
+}
+
+impl PartialOrd for Mutation {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl Ord for Mutation {
@@ -22,7 +28,7 @@ impl Ord for Mutation {
     }
 }
 
-fn parse_replacement<'a>(input: &'a str) -> Result<Replacement, String> {
+fn parse_replacement(input: &str) -> Result<Replacement, String> {
     let mut replacement = alpha1.and(preceded(tag(" => "), alpha1))
         .map(|(from, to): (&str, &str)| Replacement { from, to });
     
@@ -42,14 +48,14 @@ fn mutations(chemical: &str, from: &str, to: &str) -> Vec<String> {
 }
 
 fn forward_mutations(chemical: &str, replacement: &Replacement) -> Vec<String> {
-    mutations(chemical, &replacement.from, &replacement.to)
+    mutations(chemical, replacement.from, replacement.to)
 }
 
 fn backwards_mutations(chemical: &str, replacement: &Replacement) -> Vec<String> {
-    mutations(chemical, &replacement.to, &replacement.from)
+    mutations(chemical, replacement.to, replacement.from)
 }
 
-fn fastest_synthesis(target: &str, replacements: &Vec<Replacement>) -> Result<usize, String> {
+fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize, String> {
     let mut queue: BTreeSet<Mutation> = BTreeSet::new();
     let mut cache: HashSet<String> = HashSet::new();
     

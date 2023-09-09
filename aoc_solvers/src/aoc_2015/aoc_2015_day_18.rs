@@ -27,7 +27,7 @@ fn fix_corners(grid: &mut Grid<Bit>) {
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let grid = Grid::parse(Dimensions(100, 100), input)?;
-    let grid = repeat_apply(100, grid, |grid| next_state(grid));
+    let grid = repeat_apply(100, grid, next_state);
 
     Ok(Box::new(grid.count_lit()))
 }

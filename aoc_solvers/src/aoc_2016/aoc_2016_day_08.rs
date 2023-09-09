@@ -34,14 +34,14 @@ impl Instruction {
                 grid.sub_grid_mut(dimensions.into())?.fill(Bit::On);
             },
             Instruction::RotateRow(RotateInstruction { index, amount }) => {
-                let mut row = grid.get_row_mut(index)
-                    .expect(&format!("Grid row index out of range: {}", index));
+                let row = grid.get_row_mut(index)
+                    .unwrap_or_else(|| panic!("Grid row index out of range: {}", index));
 
-                rotate_slice(&mut row, amount);
+                rotate_slice(row, amount);
             },
             Instruction::RotateColumn(RotateInstruction { index, amount }) => {
                 let column = grid.get_column_mut(index)
-                    .expect(&format!("Grid column index out of range: {}", index));
+                    .unwrap_or_else(|| panic!("Grid column index out of range: {}", index));
 
                 let mut rotated = column.iter()
                     .map(|light| **light)

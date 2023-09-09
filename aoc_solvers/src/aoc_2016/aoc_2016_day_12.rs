@@ -90,9 +90,7 @@ impl Cpu {
     }
 
     fn get_register_mut(&mut self, register: Register) -> &mut i32 {
-        if !self.registers.contains_key(&register) {
-            self.registers.insert(register, 0);
-        }
+        self.registers.entry(register).or_insert(0);
         self.registers.get_mut(&register).unwrap()
     }
 }

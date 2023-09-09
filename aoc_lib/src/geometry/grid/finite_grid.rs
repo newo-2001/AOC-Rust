@@ -100,7 +100,7 @@ impl<T> Grid<T>
             .into_boxed_slice();
 
         if tiles.len() == dimensions.surface_area() {
-            Ok(Grid { dimensions, tiles: tiles })
+            Ok(Grid { dimensions, tiles })
         } else {
             Err(WrongDimensionsError { expected: dimensions })
         }

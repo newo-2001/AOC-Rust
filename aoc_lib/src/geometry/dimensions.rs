@@ -1,12 +1,9 @@
 use std::fmt::{Display, Formatter, self, Debug};
 
 use nom::{sequence::preceded, character::complete, Parser};
-use num::Integer;
 use thiserror::Error;
 
 use crate::parsing::{TextParserResult, self};
-
-use super::Point2D;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Dimensions(pub usize, pub usize);
@@ -24,13 +21,6 @@ impl Dimensions {
         size.and(preceded(complete::char('x'), size))
             .map(|(width, height)| Dimensions(width, height))
             .parse(input)
-    }
-}
-
-impl<T: Integer + From<usize>> Into<Point2D<T>> for Dimensions {
-    fn into(self) -> Point2D<T> {
-        let Self(x, y) = self;
-        Point2D(x.into(), y.into())
     }
 }
 

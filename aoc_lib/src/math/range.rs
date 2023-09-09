@@ -79,9 +79,9 @@ impl<T: Display> Display for Range<T> {
     }
 }
 
-impl<T> Into<(T, T)> for Range<T> {
-    fn into(self) -> (T, T) {
-        (self.start, self.end)
+impl<T: Step> From<(T, T)> for Range<T> {
+    fn from((start, end): (T, T)) -> Self {
+        Range::<T>::exclusive(start, end)
     }
 }
 

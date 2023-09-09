@@ -26,7 +26,7 @@ struct Graph<'a> {
 }
 
 impl Graph<'_> {
-    fn from_edges<'a>(edges: Vec<WeightedEdge<'a>>) -> Graph<'a> {
+    fn from_edges(edges: Vec<WeightedEdge>) -> Graph {
         Graph {
             edges: HashMap::from_iter(edges.clone().into_iter()
                 .map(|WeightedEdge { edge, weight }| (edge, weight))),
@@ -38,7 +38,7 @@ impl Graph<'_> {
 
     fn edge_happiness(&self, edge: &Edge) -> i32 {
         *self.edges.get(edge)
-            .expect(format!("Missing weight for edge: {} -> {}", edge.0, edge.1).as_str())
+            .unwrap_or_else(|| panic!("Missing weight for edge: {} -> {}", edge.0, edge.1))
     }
 
     fn arrangement_happiness(&self, arrangement: Vec<&str>) -> i32 {
@@ -60,7 +60,7 @@ impl Graph<'_> {
     }
 }
 
-fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, ParseError> {
+fn parse_edge(input: &str) -> Result<WeightedEdge, ParseError> {
     #[derive(Clone)]
     enum Sign {
         Positive,
@@ -101,7 +101,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
             (Edge(person, "me"), 0)
         ]);
     
-    graph.edges.extend(me.into_iter());
+    graph.edges.extend(me);
     graph.nodes.insert("me");
 
     Ok(Box::new(graph.most_happiness()?))

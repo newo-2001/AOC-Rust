@@ -30,11 +30,10 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 
 pub fn solve_part_2(input: &str) -> SolverResult {
     let ranges = parse_lines(parse_range, input)?;
-    let valid_ips: u64 = merge_ranges(ranges)
-        .tuple_windows()
-        .map(|(Range { end, .. }, Range { start, ..})| {
-            Range::exclusive(end, start).interval()
-        }).sum();
+    let invalid_ips: u64 = merge_ranges(ranges)
+        .map(|range| range.interval())
+        .sum();
 
-    Ok(Box::new(valid_ips))
+    // u32::MAX + 1 is the amount of values u32 can hold
+    Ok(Box::new((u32::MAX as u64 + 1) - invalid_ips))
 }

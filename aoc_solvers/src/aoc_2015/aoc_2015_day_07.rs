@@ -73,7 +73,7 @@ impl<'a> ExpressionTree<'a> {
     }
 }
 
-fn parse_wire<'a>(input: &'a str) -> Result<(Wire<'a>, Expression<'a>), ParseError<'a>> {
+fn parse_wire(input: &str) -> Result<(Wire, Expression), ParseError> {
     let wire = || alpha1.map(Wire);
     let literal = || complete::u32.map(Value::Literal);
     let value = || wire().map(Value::Wire).or(literal());

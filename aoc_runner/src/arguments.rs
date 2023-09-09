@@ -23,7 +23,7 @@ fn locate_puzzles(year: Option<u16>) -> impl Iterator<Item=Puzzle> {
         })
 }
 
-pub fn parse_puzzles<'a>(mut arguments: impl Iterator<Item=String>) -> Result<impl Iterator<Item=Puzzle>, ParseIntError> {
+pub fn parse_puzzles(mut arguments: impl Iterator<Item=String>) -> Result<impl Iterator<Item=Puzzle>, ParseIntError> {
     let puzzles: Box<dyn Iterator<Item=Puzzle>> = if let Some(year) = arguments.next() {
         let year = year.parse::<u16>()?;
         if let Some(day) = arguments.next() {

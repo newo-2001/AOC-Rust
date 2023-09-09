@@ -35,7 +35,7 @@ impl Ip<'_> {
 
         let is_bab = |bab| babs.contains(&bab);
         let has_bab = |&seq| !find_subseqs(seq, is_bab).empty();
-        hypernets.into_iter().any(has_bab)
+        hypernets.iter().any(has_bab)
     }
 }
 
@@ -43,7 +43,6 @@ fn find_subseqs<'a, T>(str: &'a str, subseq: impl Fn(T) -> bool + 'a) -> impl It
     where T: HomogeneousTuple<Item = char> + Copy + 'a
 {
     str.chars()
-        .into_iter()
         .tuple_windows()
         .filter(move |&seq| subseq(seq))
 }

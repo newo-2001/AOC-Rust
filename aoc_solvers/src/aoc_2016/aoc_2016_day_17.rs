@@ -20,7 +20,7 @@ impl Display for Path {
 
 impl PartialOrd for Path {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.len().partial_cmp(&other.len())
+        Some(self.cmp(other))
     }
 }
 
@@ -53,7 +53,7 @@ impl Default for State {
 }
 
 impl State {
-    fn valid_moves<'a, 'b>(&'b self, grid: &'b Grid<'a>) -> Vec<Self> {
+    fn valid_moves<'a>(&'a self, grid: &'a Grid) -> Vec<Self> {
         let key = format!("{}{}", grid.passcode, self.path);
         let hash: Vec<char> = md5::compute(key).encode_hex();
         
@@ -78,7 +78,7 @@ struct Grid<'a> {
 }
 
 impl Grid<'_> {
-    fn new<'a>(passcode: &'a str) -> Grid<'a> {
+    fn new(passcode: &str) -> Grid {
         Grid { passcode, area: Dimensions(4, 4).into() }
     }
 

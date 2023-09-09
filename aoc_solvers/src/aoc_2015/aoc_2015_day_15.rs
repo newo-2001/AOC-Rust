@@ -93,12 +93,12 @@ fn all_cookies<'a>(teaspoons: u32, ingredients: &'a Ingredients) -> impl Iterato
     } 
 
     results.into_iter()
-        .map(|spoons| ingredients.clone().into_keys().zip(spoons.into_iter()))
+        .map(|spoons| ingredients.clone().into_keys().zip(spoons))
         .map(HashMap::from_iter)
 }
 
 fn best_score<'a>(cookies: impl Iterator<Item=&'a Cookie<'a>>, ingredients: &Ingredients) -> Result<u64, NoSolutionError> {
-    cookies.map(|cookie| cookie_score(&cookie, ingredients))
+    cookies.map(|cookie| cookie_score(cookie, ingredients))
         .max().ok_or(NoSolutionError)
 }
 

@@ -77,7 +77,7 @@ impl<'a, G: GridLike> Iterator for GridRowIterator<'a, G> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.row += 1;
-        Some(self.grid.get_row(self.row - 1)?.into_iter())
+        Some(self.grid.get_row(self.row - 1)?.iter())
     }
 }
 

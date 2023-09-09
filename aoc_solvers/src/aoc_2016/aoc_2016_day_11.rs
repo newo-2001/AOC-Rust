@@ -1,11 +1,11 @@
-use std::{rc::Rc, collections::{BTreeSet, VecDeque}, hash::Hash, iter::once};
+use std::{collections::{BTreeSet, VecDeque}, hash::Hash, iter::once};
 use aoc_lib::{parsing::{ParseError, parse_lines, Runnable, skip_over}, iteration::queue::{Dedupable, FindState}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{bytes::complete::{tag, take_till}, sequence::{terminated, preceded}, Parser, multi::separated_list0, combinator::{all_consuming, opt}, character::complete};
 
 #[derive(Debug, PartialEq, Eq, Clone, Ord, PartialOrd, Hash)]
-struct Material<'a>(Rc<&'a str>);
+struct Material<'a>(&'a str);
 
 #[derive(Debug, PartialEq, Eq, Clone, Ord, PartialOrd, Hash)]
 enum Item<'a> {
@@ -55,11 +55,10 @@ struct Floor<'a>(BTreeSet<Item<'a>>);
 
 impl<'a> Floor<'a> {
     fn iter_items<'b>(&'b self) -> std::collections::btree_set::Iter<'b, Item<'a>> { self.0.iter() }
-    fn is_empty<'b>(&'b self) -> bool { self.0.is_empty() }
+    fn is_empty(&self) -> bool { self.0.is_empty() }
     
-    fn counts<'b>(&'b self) -> (usize, usize) {
-        let counts = self.iter_items()
-            .counts_by(|item| Item::is_generator(item));
+    fn counts(&self) -> (usize, usize) {
+        let counts = self.iter_items().counts_by(Item::is_generator);
         (*counts.get(&false).unwrap_or(&0), *counts.get(&true).unwrap_or(&0))
     }
     
@@ -104,7 +103,7 @@ fn parse_floor(input: &str) -> Result<Floor, ParseError> {
     if input.contains("nothing relevant") { return Ok(Floor(BTreeSet::new()))}
 
     let material = || take_till(|c| " -".contains(c))
-        .map(|name: &str| Material(Rc::new(name)));
+        .map(|name: &str| Material(name));
 
     let generator = terminated(material(), tag(" generator")).map(Item::Generator);
     let microchip = terminated(material(), tag("-compatible microchip")).map(Item::Chip);
@@ -113,7 +112,7 @@ fn parse_floor(input: &str) -> Result<Floor, ParseError> {
     let sep = preceded(opt(complete::char(',')), tag(" and ")).or(tag(", "));
 
     let floor = all_consuming(terminated(separated_list0(sep, item), complete::char('.')))
-        .map(|items| Floor(BTreeSet::from_iter(items.into_iter())));
+        .map(|items| Floor(BTreeSet::from_iter(items)));
 
     preceded(skip_over("contains "), floor).run(input)
 }
@@ -165,7 +164,11 @@ impl<'a> Configuration<'a> {
         let mut floors = self.floors.clone();
         let [floor, target_floor] = floors.get_many_mut([self.current_floor, target_floor_number]).ok()?;
         
-        let mut move_item = |item| Some(target_floor.place_item(floor.take_item(item)?));
+        let mut move_item = |item| {
+            target_floor.place_item(floor.take_item(item)?);
+            Some(())
+        };
+
         match inventory {
             Inventory::Single(item) => move_item(item),
             Inventory::Double((first, second)) => {
@@ -227,8 +230,8 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let mut initial_configuration = initial_configuration(input)?;
     let ground_floor = &mut initial_configuration.floors[0];
 
-    let elerium = Material(Rc::new("elerium"));
-    let dilithium = Material(Rc::new("dilithium"));
+    let elerium = Material("elerium");
+    let dilithium = Material("dilithium");
     
     for item in [
         Item::Generator(elerium.clone()),

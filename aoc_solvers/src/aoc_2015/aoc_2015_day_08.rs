@@ -17,7 +17,7 @@ use nom::{
 
 fn hex_escape_code(input: &str) -> IResult<&str, char> {
     map_res(
-        preceded(tag("\\x"), take_while_m_n(2, 2, |x: char| x.is_digit(16))),
+        preceded(tag("\\x"), take_while_m_n(2, 2, |x: char| x.is_ascii_hexdigit())),
         |x| u8::from_str_radix(x, 16).map(char::from)
     )(input)
 }

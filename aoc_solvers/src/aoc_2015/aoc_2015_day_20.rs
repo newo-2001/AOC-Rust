@@ -4,9 +4,9 @@ use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use num::Integer;
 
-const GAMMA: f32 = 0.5772156649;
+const GAMMA: f32 = 0.577_215_7;
 
-fn prime_factors(mut n: usize, primes: &Vec<usize>) -> Vec<usize> {
+fn prime_factors(mut n: usize, primes: &[usize]) -> Vec<usize> {
     let mut factors = Vec::new();
     
     while n != 1 {
@@ -23,10 +23,10 @@ fn factors(n: usize, limit: usize) -> Vec<usize> {
     (1..limit).filter(|x| n.is_multiple_of(x)).collect()
 }
 
-fn smallest_prime_factor(n: usize, primes: &Vec<usize>) -> usize {
+fn smallest_prime_factor(n: usize, primes: &[usize]) -> usize {
     *primes.iter()
-        .skip_while(|&x| n % x != 0)
-        .next().expect(&format!("Failed to compute spf({})", n))
+        .find(|&x| n % x == 0)
+        .unwrap_or_else(|| panic!("Failed to compute spf({})", n))
 }
 
 fn sieve_eratosthenes(n: usize) -> Vec<usize> {
@@ -77,11 +77,11 @@ fn lower_bound_sum_of_divisors(sum: usize) -> usize {
 fn first_house_with_n_presents_infinite(presents: usize) -> usize {
     let primes = sieve_eratosthenes(presents / 10);
 
-    fn presents_for_house(house: usize, primes: &Vec<usize>) -> usize {
+    fn presents_for_house(house: usize, primes: &[usize]) -> usize {
         prime_factors(house, primes).into_iter()
             .counts().into_iter()
             .map(|(base, amount)| {
-                (1..=amount).into_iter()
+                (1..=amount)
                     .fold(1, |acc, exponent| acc + base.pow(exponent as u32))
             }).product::<usize>() * 10
     }

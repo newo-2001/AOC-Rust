@@ -39,7 +39,7 @@ fn optimal_group(items: Vec<u32>, groups: u32) -> Result<Vec<u32>, &'static str>
 }
 
 fn entanglement_optimal_group(input: &str, groups: u32) -> Result<u64, Box<dyn Error>> {
-    let items = parse_items(&input)?;
+    let items = parse_items(input)?;
     let group = optimal_group(items, groups)?;
     Ok(quantum_entanglement(&group))
 }

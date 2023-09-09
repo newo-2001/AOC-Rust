@@ -37,7 +37,7 @@ impl PartialEq for Edge<'_> {
 
 type WeightedEdge<'a> = (Edge<'a>, u32);
 
-fn parse_edge<'a>(input: &'a str) -> Result<WeightedEdge<'a>, ParseError> {
+fn parse_edge(input: &str) -> Result<WeightedEdge, ParseError> {
     let edge = alpha1::<&str, VerboseError<&str>>.and(preceded(tag(" to "), alpha1))
         .map(|(from, to)| Edge(from, to));
 
@@ -52,7 +52,7 @@ struct Graph<'a> {
 
 impl<'a> Graph<'a> {
     fn distance(&'a self, edge: &'a Edge) -> Option<u32> {
-        self.adjacency_matrix.get(edge).map(|x| *x)
+        self.adjacency_matrix.get(edge).copied()
     }
 
     fn route_distance(&'a self, route: impl Iterator<Item = &'a str>) -> Option<u32> {
@@ -67,7 +67,7 @@ impl<'a> Graph<'a> {
             .chain(edges.clone().into_iter().map(|(Edge(_, to), _)| to));
 
         Self {
-            adjacency_matrix: HashMap::from_iter(edges.into_iter()),
+            adjacency_matrix: HashMap::from_iter(edges),
             nodes: HashSet::from_iter(nodes)
         }
     }

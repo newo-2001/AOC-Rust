@@ -55,7 +55,7 @@ fn is_valid(password: &Password) -> bool {
 fn change_password(password: &mut Password) {
     loop {
         increment(password);
-        if is_valid(&password) { break }
+        if is_valid(password) { break }
     }
 }
 

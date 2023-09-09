@@ -23,11 +23,11 @@ fn main() -> Result<(), ParseIntError> {
     Ok(())
 }
 
-fn execute<'a>(runner: fn(&Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &Vec<Puzzle>) {
+fn execute(runner: fn(&Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &Vec<Puzzle>) {
     println!("Executing {} puzzle(s)...", puzzles.len());
 
     let start_time = Instant::now();
-    let results = puzzles.into_iter().map(|puzzle| {
+    let results = puzzles.iter().map(|puzzle| {
         let result = runner(puzzle);
         let puzzle = format!("[{}]", puzzle).bright_yellow().bold();
         match &result {

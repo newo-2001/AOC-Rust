@@ -33,7 +33,7 @@ impl Entity {
             .run(input)
     }
 
-    fn with_gear(&self, gear: &Vec<&Item>) -> Entity {
+    fn with_gear(&self, gear: &[&Item]) -> Entity {
         let gear_armor: u32 = gear.iter().map(|item| item.armor).sum();
         let gear_damage: u32 = gear.iter().map(|item| item.damage).sum();
 
@@ -138,7 +138,7 @@ fn all_loadouts(shop: &Shop) -> Vec<Gear> {
 
     rings.iter().flat_map(|rings| armor_weapons.iter().map(|gear| {
         rings.clone().into_iter()
-            .chain(gear.clone().into_iter()).collect()
+            .chain(gear.clone()).collect()
     })).collect()
 }
 
@@ -148,14 +148,14 @@ const PLAYER: Entity = Entity {
     damage: 0
 };
 
-fn cheapest_victory(enemy: &Entity, loadouts: &Vec<Gear>) -> u32 {
+fn cheapest_victory(enemy: &Entity, loadouts: &[Gear]) -> u32 {
     loadouts.iter()
         .map(|gear| (PLAYER.with_gear(gear), gear_cost(gear)))
         .filter_map(|(player, cost)| player.fight(enemy.clone()).won().then_some(cost))
         .min().expect("Player can't defeat the enemy")
 }
 
-fn most_expensive_loss(enemy: &Entity, loadouts: &Vec<Gear>) -> u32 {
+fn most_expensive_loss(enemy: &Entity, loadouts: &[Gear]) -> u32 {
     loadouts.iter()
         .map(|gear| (PLAYER.with_gear(gear), gear_cost(gear)))
         .filter_map(|(player, cost)| (!player.fight(enemy.clone()).won()).then_some(cost))
@@ -165,7 +165,7 @@ fn most_expensive_loss(enemy: &Entity, loadouts: &Vec<Gear>) -> u32 {
 pub fn solve_part_1(input: &str) -> SolverResult {
     let shop = make_shop();
     let loadouts = all_loadouts(&shop);
-    let boss = Entity::parse(&input)?;
+    let boss = Entity::parse(input)?;
     let cost = cheapest_victory(&boss, &loadouts);
 
     Ok(Box::from(cost))
@@ -174,7 +174,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 pub fn solve_part_2(input: &str) -> SolverResult {
     let shop = make_shop();
     let loadouts = all_loadouts(&shop);
-    let boss = Entity::parse(&input)?;
+    let boss = Entity::parse(input)?;
     let cost = most_expensive_loss(&boss, &loadouts);
 
     Ok(Box::from(cost))

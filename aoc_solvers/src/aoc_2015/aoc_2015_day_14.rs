@@ -35,7 +35,7 @@ impl Reindeer<'_> {
     }
 }
 
-fn most_points_after_seconds(reindeers: &Vec<Reindeer>, duration: u32) -> Result<u32, NoSolutionError> {
+fn most_points_after_seconds(reindeers: &[Reindeer], duration: u32) -> Result<u32, NoSolutionError> {
     let mut points: HashMap<&str, u32> = HashMap::from_iter(
         reindeers.iter().map(|reindeer| (reindeer.name, 0)));
     
@@ -44,7 +44,7 @@ fn most_points_after_seconds(reindeers: &Vec<Reindeer>, duration: u32) -> Result
             .max_set_by_key(|reindeer| reindeer.distance_after_seconds(i));
 
         for winner in winners {
-            *points.get_mut(winner.name).expect("Winner did not participate") += 1
+            *points.get_mut(winner.name).expect("Winner did not participate") += 1;
         }
     }
 

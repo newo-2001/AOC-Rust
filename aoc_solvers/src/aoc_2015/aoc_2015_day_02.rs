@@ -14,7 +14,7 @@ fn parse_present(str: &str) -> Result<Present, ParseIntError> {
 fn required_wrapping_paper(present: &Present) -> u32 {
     let areas: Vec<u32> = present.iter()
         .combinations(2)
-        .map(|sides| sides.into_iter().fold(1, |acc, x| acc * x))
+        .map(|sides| sides.into_iter().product())
         .collect();
 
     let min_area: &u32 = areas.iter().min().unwrap_or(&0);
@@ -28,8 +28,7 @@ fn required_ribbon(present: &Present) -> u32 {
         .map(|sides| sides.into_iter().sum::<u32>() * 2)
         .min().unwrap_or(0);
 
-    let volume: u32 = present.iter()
-        .fold(1, |acc, x| acc * x);
+    let volume: u32 = present.iter().product();
     
     smallest_perimeter + volume
 }

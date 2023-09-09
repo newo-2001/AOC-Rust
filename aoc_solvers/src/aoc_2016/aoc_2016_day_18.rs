@@ -1,5 +1,3 @@
-use std::iter::once;
-
 use aoc_lib::parsing::InvalidTokenError;
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
@@ -42,12 +40,12 @@ fn parse_row(input: &str) -> Result<Vec<Tile>, InvalidTokenError<char>> {
 }
 
 struct RowIterator {
-    previous: Vec<Tile>
+    next: Vec<Tile>
 }
 
 impl RowIterator {
-    fn new(row: Vec<Tile>) -> impl Iterator<Item=Vec<Tile>> {
-        once(row.clone()).chain(RowIterator { previous: row })
+    fn new(row: Vec<Tile>) -> Self {
+        RowIterator { next: row }
     }
 }
 
@@ -55,16 +53,16 @@ impl Iterator for RowIterator {
     type Item = Vec<Tile>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let row = self.previous.iter()
+        let current = self.next.clone();
+        self.next = self.next.iter()
             .enumerate()
             .map(|(i, center)| {
-                let left = self.previous.get(i.wrapping_sub(1)).unwrap_or(&Tile::Safe);
-                let right = self.previous.get(i+1).unwrap_or(&Tile::Safe);
+                let left = self.next.get(i.wrapping_sub(1)).unwrap_or(&Tile::Safe);
+                let right = self.next.get(i+1).unwrap_or(&Tile::Safe);
                 Tile::from_neighbours((left, center, right))
             }).collect_vec();
         
-        self.previous = row.clone();
-        Some(row)
+        Some(current)
     }
 }
 

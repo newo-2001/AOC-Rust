@@ -87,10 +87,10 @@ fn parse_instruction(input: &str) -> Result<Instruction, ParseError> {
     
     let offset = complete::i64;
     alt((
-        preceded(tag("hlf "), register).map(|register| Instruction::Half(register)),
-        preceded(tag("tpl "), register).map(|register| Instruction::Triple(register)),
-        preceded(tag("inc "), register).map(|register| Instruction::Increment(register)),
-        preceded(tag("jmp "), offset).map(|offset| Instruction::Jump(offset)),
+        preceded(tag("hlf "), register).map(Instruction::Half),
+        preceded(tag("tpl "), register).map(Instruction::Triple),
+        preceded(tag("inc "), register).map(Instruction::Increment),
+        preceded(tag("jmp "), offset).map(Instruction::Jump),
         preceded(tag("jie "), terminated(register, tag(", ")).and(offset))
             .map(|(register, offset)| Instruction::JumpIfEven(register, offset)),
         preceded(tag("jio "), terminated(register, tag(", ")).and(offset))
@@ -98,7 +98,7 @@ fn parse_instruction(input: &str) -> Result<Instruction, ParseError> {
     )).run(input)
 }
 
-fn run_program(program: &Vec<Instruction>, mut state: State) -> State {
+fn run_program(program: &[Instruction], mut state: State) -> State {
     while let Some(instruction) = program.get(state.ip) {
         state.execute(instruction);
     }

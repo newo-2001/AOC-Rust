@@ -1,7 +1,7 @@
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 
-fn look_and_say(look: &Vec<u8>) -> Vec<u8> {
+fn look_and_say(look: &[u8]) -> Vec<u8> {
     let mut say = look.iter()
         .tuple_windows::<(&u8, &u8)>()
         .fold(vec![1], |mut acc: Vec<u8>, (prev, current)| {
@@ -19,8 +19,8 @@ fn look_and_say(look: &Vec<u8>) -> Vec<u8> {
     say
 }
 
-fn serialize(number: &Vec<u8>) -> String {
-    number.iter().map(|c| (c + '0' as u8) as char).collect()
+fn serialize(number: &[u8]) -> String {
+    number.iter().map(|c| (c + b'0') as char).collect()
 }
 
 fn look_and_say_rounds(seed: Vec<u8>, rounds: u8) -> Vec<u8> {

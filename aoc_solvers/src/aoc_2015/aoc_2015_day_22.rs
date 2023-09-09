@@ -69,19 +69,19 @@ enum Spell {
 impl Spell {
     fn cost(&self) -> u32 {
         match self {
-            &Self::MagicMissile => 53,
-            &Self::Drain        => 73,
-            &Self::Shield       => 113,
-            &Self::Poison       => 173,
-            &Self::Recharge     => 229
+            Self::MagicMissile => 53,
+            Self::Drain        => 73,
+            Self::Shield       => 113,
+            Self::Poison       => 173,
+            Self::Recharge     => 229
         }
     }
 
     fn effect(&self) -> Option<StatusEffect> {
         match self {
-            &Self::Poison   => Some(StatusEffect { effect: Effect::Poisoned,   duration: 6 }),
-            &Self::Shield   => Some(StatusEffect { effect: Effect::Shielded,   duration: 6 }),
-            &Self::Recharge => Some(StatusEffect { effect: Effect::Recharging, duration: 5 }),
+            Self::Poison   => Some(StatusEffect { effect: Effect::Poisoned,   duration: 6 }),
+            Self::Shield   => Some(StatusEffect { effect: Effect::Shielded,   duration: 6 }),
+            Self::Recharge => Some(StatusEffect { effect: Effect::Recharging, duration: 5 }),
             _ => None
         }
     }
@@ -120,14 +120,14 @@ impl Spell {
         battle.mana_expended += self.cost();
 
         match self {
-            &Self::MagicMissile => {
+            Self::MagicMissile => {
                 battle.enemy.hurt(4);
             },
-            &Self::Drain => {
+            Self::Drain => {
                 battle.enemy.hurt(2);
                 battle.player.heal(2);
             },
-            &Self::Shield => {
+            Self::Shield => {
                 battle.player.armor += 7;
             },
             _ => { }
@@ -198,7 +198,7 @@ impl Ord for Battle {
 
 impl PartialOrd for Battle {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(&other))
+        Some(self.cmp(other))
     }
 }
 
@@ -254,7 +254,7 @@ impl Battle {
             Spell::Drain,
             Spell::Recharge,
             Spell::Shield
-        ].iter().filter(|spell| spell.castable(&self))
+        ].iter().filter(|spell| spell.castable(self))
             .map(|spell| self.clone().with_spell(spell))
             .collect()
     }
@@ -304,7 +304,7 @@ fn least_mana_for_input<'a>(input: &'a str, difficulty: Difficulty) -> Result<u3
     Ok(mana)
 }
 
-pub fn solve_part_1<'a>(input: &'a str) -> SolverResult {
+pub fn solve_part_1(input: &str) -> SolverResult {
     let mana = least_mana_for_input(input, Difficulty::Normal)?;
     Ok(Box::from(mana))
 }
