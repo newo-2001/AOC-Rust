@@ -23,7 +23,7 @@ impl<'a, T> GridLikeMut for GridViewMut<'a, T> {
     }
 
     fn get_row_mut(&mut self, row: usize) -> Option<&mut [T]> {
-        if row > self.area.bottom() { return None };
+        if row >= self.area.dimensions().height() { return None };
 
         let row = row + self.area.top();
         let start = row * self.grid.dimensions.width() + self.area.left();
@@ -33,7 +33,7 @@ impl<'a, T> GridLikeMut for GridViewMut<'a, T> {
     }
     
     fn get_column_mut(&mut self, column: usize) -> Option<Vec<&mut T>> {
-        if column > self.area.right() { return None };
+        if column >= self.area.dimensions().width() { return None };
 
         let offset = self.area.left() + column;
         let step_size = self.grid.dimensions.width();
@@ -73,7 +73,7 @@ macro_rules! impl_grid_like_for_view {
             }
 
             fn get_row(&self, row: usize) -> Option<&[T]> {
-                if row > self.area.bottom() { return None };
+                if row >= self.area.dimensions().height() { return None };
 
                 let row = row + self.area.top();
                 let start = row * self.grid.dimensions.width() + self.area.left();
@@ -83,7 +83,7 @@ macro_rules! impl_grid_like_for_view {
             }
 
             fn get_column(&self, column: usize) -> Option<Vec<&T>> {
-                if column > self.area.right() { return None };
+                if column >= self.area.dimensions().width() { return None };
 
                 let offset = self.area.left() + column;
                 let step_size = self.grid.dimensions.width();
@@ -100,6 +100,7 @@ macro_rules! impl_grid_like_for_view {
         }
 
         impl<T> $type {
+            #[must_use]
             pub fn into_grid(&self) -> Grid<T> where T: Clone {
                 let items = self.iter().cloned();
                 Grid::from_iter(self.area.dimensions(), items).unwrap()

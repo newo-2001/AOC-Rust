@@ -20,6 +20,7 @@ pub enum CardinalDirection {
 }
 
 impl CardinalDirection {
+    #[must_use]
     pub fn direction_vector<T>(self) -> Point2D<T>
         where T: Signed + Integer
     {
@@ -33,16 +34,17 @@ impl CardinalDirection {
         }
     }
 
+    #[must_use]
     pub fn rotate(self, rotation_direction: RotationDirection) -> CardinalDirection {
         match (self, rotation_direction) {
-            (Self::North, RotationDirection::Left) => Self::West,
-            (Self::North, RotationDirection::Right) => Self::East,
-            (Self::East, RotationDirection::Left) => Self::North,
-            (Self::East, RotationDirection::Right) => Self::South,
-            (Self::South, RotationDirection::Left) => Self::East,
-            (Self::South, RotationDirection::Right) => Self::West,
-            (Self::West, RotationDirection::Left) => Self::South,
-            (Self::West, RotationDirection::Right) => Self::North
+            | (Self::North, RotationDirection::Left)
+            | (Self::South, RotationDirection::Right) => Self::West,
+            | (Self::North, RotationDirection::Right)
+            | (Self::South, RotationDirection::Left) => Self::East,
+            | (Self::East, RotationDirection::Left)
+            | (Self::West, RotationDirection::Right) => Self::North,
+            | (Self::East, RotationDirection::Right)
+            | (Self::West, RotationDirection::Left) => Self::South
         }
     }
 
@@ -55,6 +57,7 @@ impl CardinalDirection {
         ))(input)
     }
 
+    #[must_use]
     pub fn relative_char(self) -> char {
         match self {
             Self::North => 'U',
@@ -64,6 +67,7 @@ impl CardinalDirection {
         }
     }
 
+    #[must_use]
     pub fn absolute_char(self) -> char {
         match self {
             Self::North => 'N',
@@ -84,16 +88,16 @@ pub enum OrdinalDirection {
 }
 
 impl OrdinalDirection {
+    #[must_use]
     pub fn direction_vector<T>(self) -> Point2D<T>
         where T: Integer + Signed
     {
-        use CardinalDirection::*;
-
+        use CardinalDirection as Dir;
         match self {
-            Self::NorthEast => North.direction_vector() + East.direction_vector(),
-            Self::NorthWest => North.direction_vector() + West.direction_vector(),
-            Self::SouthEast => South.direction_vector() + East.direction_vector(),
-            Self::SouthWest => South.direction_vector() + West.direction_vector()
+            Self::NorthEast => Dir::North.direction_vector() + Dir::East.direction_vector(),
+            Self::NorthWest => Dir::North.direction_vector() + Dir::West.direction_vector(),
+            Self::SouthEast => Dir::South.direction_vector() + Dir::East.direction_vector(),
+            Self::SouthWest => Dir::South.direction_vector() + Dir::West.direction_vector()
         }
     }
 }
@@ -105,6 +109,7 @@ pub enum Direction {
 }
 
 impl Direction {
+    #[must_use]
     pub fn direction_vector<T>(self) -> Point2D<T>
         where T: Integer + Signed
     {

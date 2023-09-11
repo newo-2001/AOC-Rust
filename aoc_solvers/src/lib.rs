@@ -1,7 +1,14 @@
-#![feature(get_many_mut, extract_if, result_option_inspect, iter_collect_into)]
+#![feature(
+    get_many_mut,
+    extract_if,
+    result_option_inspect,
+    iter_collect_into
+)]
 
-use aoc_2015::*;
-use aoc_2016::*;
+#![allow(
+    clippy::similar_names
+)]
+
 use aoc_runner_api::{Solver, Puzzle};
 
 mod aoc_2016;
@@ -11,7 +18,7 @@ mod aoc_2015;
 macro_rules! solver {
     ($year:literal, $day: literal, $part: literal) => {
         paste::expr! {
-            Some(Box::new([<aoc_ $year _day_ $day>]::[<solve_part_ $part>]))
+            Some(Box::new([<aoc_ $year>]::[<day_ $day>]::[<solve_part_ $part>]))
         }
     };
 
@@ -55,7 +62,7 @@ macro_rules! solver {
     }
 }
 
-pub fn get_solver(puzzle: &Puzzle) -> Option<Box<Solver>> {
+pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
     match puzzle.year {
         2015 => solver!(2015, puzzle.day, puzzle.part),
         2016 => match puzzle.day {

@@ -9,9 +9,13 @@ use crate::parsing::{TextParserResult, self};
 pub struct Dimensions(pub usize, pub usize);
 
 impl Dimensions {
+    #[must_use]
     pub fn width(&self) -> usize { self.0 }
+
+    #[must_use]
     pub fn height(&self) -> usize { self.1 }
     
+    #[must_use]
     pub fn surface_area(&self) -> usize {
         self.width() * self.height()
     }
@@ -38,7 +42,7 @@ impl PartialOrd for Dimensions {
 impl Display for Dimensions {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let Self(width, height) = self;
-        write!(f, "{}x{}", width, height)
+        write!(f, "{width}x{height}")
     }
 }
 

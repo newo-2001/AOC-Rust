@@ -1,4 +1,13 @@
-#![feature(step_trait, return_position_impl_trait_in_trait)]
+#![feature(
+    step_trait,
+    return_position_impl_trait_in_trait
+)]
+
+#![allow(
+    clippy::module_name_repetitions,
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc
+)]
 
 pub mod parsing;
 pub mod math;

@@ -80,7 +80,7 @@ impl<Q> DuplicateFilter<Q>
         where F: FnMut(Q::Out) -> IterState<I>,
               I: IntoIterator<Item=Q::In>
     {
-        recursive_iter(mem::take(&mut self.queue), self.filter_recursive_iter(action))
+        recursive_iter(mem::take(&mut self.queue), self.filter_recursive_iter(action));
     }    
 
     fn filter_recursive_iter<'a, I, F>(&'a mut self, mut action: F) -> impl FnMut(Q::Out) -> IterState<I> + 'a

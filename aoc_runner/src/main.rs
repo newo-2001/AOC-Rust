@@ -1,3 +1,7 @@
+#![allow(
+    clippy::module_name_repetitions,
+)]
+
 use std::{env, num::ParseIntError, time::Instant};
 
 use aoc_runner_api::Puzzle;
@@ -23,11 +27,11 @@ fn main() -> Result<(), ParseIntError> {
     Ok(())
 }
 
-fn execute(runner: fn(&Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &Vec<Puzzle>) {
+fn execute(runner: fn(Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &[Puzzle]) {
     println!("Executing {} puzzle(s)...", puzzles.len());
 
     let start_time = Instant::now();
-    let results = puzzles.iter().map(|puzzle| {
+    let results = puzzles.iter().map(|&puzzle| {
         let result = runner(puzzle);
         let puzzle = format!("[{}]", puzzle).bright_yellow().bold();
         match &result {
@@ -35,7 +39,7 @@ fn execute(runner: fn(&Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &Ve
             Ok(RunStats { result, duration }) => {
 
                 let status = "(Success)".bright_green().bold();
-                println!("{} {} {} {}", puzzle, utils::format_duration(duration), status, result)
+                println!("{} {} {} {}", puzzle, utils::format_duration(duration), status, result);
             }
         }
 
@@ -50,5 +54,5 @@ fn execute(runner: fn(&Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &Ve
         .color(if passed == puzzles.len() { Color::BrightGreen } else { Color::BrightRed })
         .bold();
 
-    println!("{}", msg);
+    println!("{msg}");
 }

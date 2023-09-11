@@ -45,7 +45,7 @@ pub trait Queue: Extend<Self::In> + Sized {
         where F: FnMut(Self::Out) -> IterState<I>,
               I: IntoIterator<Item=Self::In>
     {
-        recursive_iter::recursive_iter(self, action)
+        recursive_iter::recursive_iter(self, action);
     }
 }
 

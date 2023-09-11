@@ -17,7 +17,7 @@ fn available_puzzles() -> impl Iterator<Item=Puzzle> {
 
 fn locate_puzzles(year: Option<u16>) -> impl Iterator<Item=Puzzle> {
     available_puzzles()
-        .filter(move |puzzle| {
+        .filter(move |&puzzle| {
             aoc_solvers::get_solver(puzzle).is_some() &&
             year.map_or(true, |year| puzzle.year == year)
         })
@@ -29,8 +29,9 @@ pub fn parse_puzzles(mut arguments: impl Iterator<Item=String>) -> Result<impl I
         if let Some(day) = arguments.next() {
             let day = day.parse::<u8>()?;
             let parts: Vec<_> = arguments.next()
-                .map(|part| vec![part.parse::<u8>()])
-                .unwrap_or_else(|| if day == 25 { vec![Ok(1u8)] } else { vec![Ok(1u8), Ok(2u8)] })
+                .map_or_else(|| {
+                    if day == 25 { vec![Ok(1)] } else { vec![Ok(1), Ok(2)] }
+                }, |part| vec![part.parse::<u8>()])
                 .into_iter().try_collect()?;
 
             Box::new(parts.into_iter().map(move |part| Puzzle { year, day, part }))
@@ -45,16 +46,13 @@ pub fn parse_puzzles(mut arguments: impl Iterator<Item=String>) -> Result<impl I
 }
 
 pub fn parse(arguments: Vec<String>) -> Result<RunnerAction, ParseIntError> {
-    let action = arguments.first().map(|arg| arg.as_str());
-    let action = match action {
-        Some("verify") => {
-            let puzzles = parse_puzzles(arguments.into_iter().skip(1))?;
-            RunnerAction::Verify(puzzles.collect())
-        },
-        _ => {
-            let puzzles = parse_puzzles(arguments.into_iter())?;
-            RunnerAction::Run(puzzles.collect())
-        }
+    let action = arguments.first().map(String::as_str);
+    let action = if let Some("verify") = action {
+        let puzzles = parse_puzzles(arguments.into_iter().skip(1))?;
+        RunnerAction::Verify(puzzles.collect())
+    } else {
+        let puzzles = parse_puzzles(arguments.into_iter())?;
+        RunnerAction::Run(puzzles.collect())
     };
 
     Ok(action)

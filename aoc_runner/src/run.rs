@@ -32,13 +32,13 @@ pub struct RunStats {
     pub duration: Duration
 }
 
-fn get_input_for_puzzle(puzzle: &Puzzle) -> Result<String, RunPuzzleError> {
+fn get_input_for_puzzle(puzzle: Puzzle) -> Result<String, RunPuzzleError> {
     let path = format!("inputs/{}/day_{:02}.txt", puzzle.year, puzzle.day);
     fs::read_to_string(&path)
         .map_err(|_| RunPuzzleError::MissingInputFile(path))
 }
 
-fn get_solution_for_puzzle(puzzle: &Puzzle) -> Result<String, RunPuzzleError> {
+fn get_solution_for_puzzle(puzzle: Puzzle) -> Result<String, RunPuzzleError> {
     let path = format!("solutions/{}/day_{:02}.txt", puzzle.year, puzzle.day);
     let content = fs::read_to_string(&path)
         .map_err(|_| RunPuzzleError::MissingSolutionFile(path))?;
@@ -53,7 +53,7 @@ fn get_solution_for_puzzle(puzzle: &Puzzle) -> Result<String, RunPuzzleError> {
     Ok(solution.to_owned())
 }
 
-pub fn run_puzzle(puzzle: &Puzzle) -> Result<RunStats, RunPuzzleError> {
+pub fn run_puzzle(puzzle: Puzzle) -> Result<RunStats, RunPuzzleError> {
     let solver = aoc_solvers::get_solver(puzzle)
         .ok_or(RunPuzzleError::MissingSolver)?;
 
@@ -70,7 +70,7 @@ pub fn run_puzzle(puzzle: &Puzzle) -> Result<RunStats, RunPuzzleError> {
     })
 }
 
-pub fn verify_puzzle(puzzle: &Puzzle) -> Result<RunStats, RunPuzzleError> {
+pub fn verify_puzzle(puzzle: Puzzle) -> Result<RunStats, RunPuzzleError> {
     let expected = get_solution_for_puzzle(puzzle)?
         .replace("\r\n", "")
         .replace('\n', "");

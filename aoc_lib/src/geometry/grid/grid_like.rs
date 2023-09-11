@@ -1,8 +1,10 @@
 use std::{slice, vec, fmt::Debug};
 
-use crate::geometry::{Point2D, Area};
+use thiserror::Error;
 
-use super::Grid;
+use crate::geometry::{Point2D, Area, WrongDimensionsError};
+
+use super::{Grid, InvalidGridAreaError};
 
 pub trait GridLike: Sized {
     type GridItem;
@@ -50,6 +52,22 @@ pub trait GridLikeMut: GridLike {
             let row = self.get_row_mut(row).unwrap();
             row.fill(value.clone());
         }
+    }
+
+    fn replace(&mut self, grid: Grid<Self::GridItem>) -> Result<(), WrongDimensionsError>
+        where Self::GridItem: Clone
+    {
+        let area = self.area();
+        if area.dimensions() != grid.area().dimensions() {
+            return Err(WrongDimensionsError { expected: area.dimensions() })
+        }
+
+        for (row_index, new_row) in (0..area.dimensions().height()).zip(grid.into_rows()) {
+            let row = self.get_row_mut(row_index).unwrap();
+            row.clone_from_slice(&new_row);
+        }
+
+        Ok(())
     }
 }
 
@@ -106,6 +124,14 @@ macro_rules! impl_grid_traits {
             }
         }
     }
+}
+
+#[derive(Debug, Error)]
+pub enum GridError {
+    #[error("Wrong dimensions were supplied")]
+    WrongDimensions(#[from] WrongDimensionsError),
+    #[error("Invalid grid area was supplied")]
+    InvalidArea(#[from] InvalidGridAreaError)
 }
 
 macro_rules! impl_grid_traits_mut {

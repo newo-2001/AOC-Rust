@@ -68,7 +68,8 @@ impl<T: Integer + Copy> Point2D<T> {
         x + y
     }
 
-    pub fn clamp(&self, min: T, max: T) -> Point2D<T> {
+    #[must_use]
+    pub fn clamp(&self, min: T, max: T) -> Self {
         let x = clamp(self.0, min, max);
         let y = clamp(self.1, min, max);
         Point2D(x, y)
@@ -101,11 +102,13 @@ impl<T: Integer + Copy> Point2D<T> {
 }
 
 impl<T: Integer> Point2D<T> {
-    pub fn zero() -> Point2D<T> {
+    #[must_use]
+    pub fn zero() -> Self {
         Point2D(Zero::zero(), Zero::zero())
     }
 
-    pub fn one() -> Point2D<T> {
+    #[must_use]
+    pub fn one() -> Self {
         Point2D(One::one(), One::one())
     }
 

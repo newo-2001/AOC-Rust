@@ -10,10 +10,16 @@ pub enum Bit {
 }
 
 impl Bit {
+    #[must_use]
     pub fn is_enabled(self) -> bool { self == Bit::On }
+
+    #[must_use]
     pub fn is_on(self) -> bool { self == Bit::On }
+
+    #[must_use]
     pub fn is_solid(self) -> bool { self == Bit::On }
 
+    #[must_use]
     pub fn digit(self) -> char {
         match self {
             Self::Off => '0',
@@ -21,6 +27,7 @@ impl Bit {
         }
     }
 
+    #[must_use]
     pub fn invert(self) -> Self {
         match self {
             Self::Off => Self::On,

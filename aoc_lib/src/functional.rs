@@ -1,6 +1,6 @@
 pub fn repeat_apply<T>(times: usize, mut seed: T, f: impl Fn(T) -> T) -> T {
     for _ in 0..times {
-        seed = f(seed)
+        seed = f(seed);
     }
 
     seed
@@ -8,10 +8,12 @@ pub fn repeat_apply<T>(times: usize, mut seed: T, f: impl Fn(T) -> T) -> T {
 
 pub fn repeat_apply_while<T>(mut seed: T, f: impl Fn(T) -> T, predicate: impl Fn(&T) -> bool) -> T {
     while predicate(&seed) {
-        seed = f(seed)
+        seed = f(seed);
     }
 
     seed
 }
+
+pub fn consume<T, U>(f: impl Fn(&T) -> U) -> impl Fn(T) -> U { move |value| f(&value) }
 
 pub fn swap<T, U>((a, b): (T, U)) -> (U, T) { (b, a) }

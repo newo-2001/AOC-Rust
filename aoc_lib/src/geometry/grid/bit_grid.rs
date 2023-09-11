@@ -12,7 +12,7 @@ impl Display for GridView<'_, Bit> {
         for row in self.iter_rows() {
             let line = row.map(ToString::to_string).join("");
 
-            writeln!(f, "{}", line)?;
+            writeln!(f, "{line}")?;
         }
 
         Ok(())

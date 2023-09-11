@@ -81,6 +81,7 @@ pub enum GridParseError {
 
 impl<T> Grid<T>
 {
+    #[must_use]
     pub fn empty(dimensions: Dimensions) -> Grid<T>
         where T: Default + Clone
     {
@@ -92,10 +93,10 @@ impl<T> Grid<T>
         }
     }
 
-    pub fn from_iter<I>(dimensions: Dimensions, rows: I) -> Result<Grid<T>, WrongDimensionsError>
+    pub fn from_iter<I>(dimensions: Dimensions, tiles: I) -> Result<Grid<T>, WrongDimensionsError>
         where I: IntoIterator<Item=T>,
     {
-        let tiles = rows.into_iter()
+        let tiles = tiles.into_iter()
             .collect::<Vec<T>>()
             .into_boxed_slice();
 
@@ -122,6 +123,7 @@ impl<T> Grid<T>
         Ok(GridViewMut { grid: self, area })
     }
 
+    #[must_use]
     pub fn view(&self) -> GridView<T> { self.into() }
     pub fn view_mut(&mut self) -> GridViewMut<T> { self.into() }
 
@@ -140,11 +142,19 @@ impl<T> Grid<T>
         Grid::from_iter(dimensions, cells)
             .map_err(GridParseError::WrongDimensions)
     }
+
+    #[must_use]
+    pub fn into_rows(self) -> IntoRowIterator<T> {
+        IntoRowIterator {
+            tiles: self.tiles.into_vec(),
+            width: self.dimensions.width()
+        }
+    }
 }
 
 impl<T> IntoIterator for Grid<T> {
     type Item = T;
-    type IntoIter = std::vec::IntoIter<T>;
+    type IntoIter = vec::IntoIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.tiles.into_vec().into_iter()
@@ -156,4 +166,19 @@ impl<T> IntoIterator for Grid<T> {
 pub struct InvalidGridAreaError {
     pub dimensions: Dimensions,
     pub area: Area<usize>
+}
+
+pub struct IntoRowIterator<T> {
+    tiles: Vec<T>,
+    width: usize
+}
+
+impl<T> Iterator for IntoRowIterator<T> {
+    type Item = Vec<T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let row = self.tiles.drain(0..self.width).collect_vec();
+        if row.len() < self.width { None }
+        else { Some(row) }
+    }
 }

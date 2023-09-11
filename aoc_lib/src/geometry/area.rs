@@ -15,7 +15,7 @@ impl<T: Integer + Copy> Copy for Area<T> {}
 impl<T> Area<T> where T: Integer + Copy {
     pub fn from_corners(first: Point2D<T>, second: Point2D<T>) -> Area<T> {
         let top_left = Point2D(min(first.x(), second.x()), min(first.y(), second.y()));
-        let bottom_right = Point2D(max(first.x(), second.x()), max(second.x(), second.y()));
+        let bottom_right = Point2D(max(first.x(), second.x()), max(second.y(), second.y()));
         Area { top_left, bottom_right }
     }
     
@@ -27,8 +27,8 @@ impl<T> Area<T> where T: Integer + Copy {
     }
 
     pub fn dimensions(&self) -> Dimensions where T: ToPrimitive {
-        let Point2D(width, height) = self.bottom_right() - self.top_left();
-        Dimensions(T::to_usize(&width).unwrap() + 1, T::to_usize(&height).unwrap() + 1)
+        let Point2D(width, height) = self.bottom_right() - self.top_left() + Point2D::one();
+        Dimensions(T::to_usize(&width).unwrap(), T::to_usize(&height).unwrap())
     }
 
     pub fn top(&self) -> T { self.top_left.y() }
