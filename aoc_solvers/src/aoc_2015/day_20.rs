@@ -110,8 +110,7 @@ fn first_house_with_n_presents_finite(presents: usize, houses_per_elf: usize) ->
     };
 
     let upper_bound = presents / 11;
-    (2..upper_bound).map(presents_for_house)
-        .find(|&amount| amount >= presents)
+    (2..upper_bound).find(|&house| presents_for_house(house) >= presents)
         .unwrap()
 }
 

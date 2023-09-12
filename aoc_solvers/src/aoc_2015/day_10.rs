@@ -46,7 +46,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 
 pub fn solve_part_2(input: &str) -> SolverResult {
     let seed = parse_seed(input)?;
-    let seed = repeat_apply(40, seed, |seq| look_and_say(&seq));
+    let seed = repeat_apply(50, seed, |seq| look_and_say(&seq));
     let length = serialize(&seed).len();
 
     Ok(Box::new(length))
