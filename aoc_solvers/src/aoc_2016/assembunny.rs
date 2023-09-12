@@ -21,7 +21,9 @@ pub enum Instruction {
     Decrement(Register),
     JumpNotZero(Value, Value),
     Toggle(Register),
-    NoOperation(Value, Value)
+    NoOperation(Value),
+    NoOperation2(Value, Value),
+    Output(Value)
 }
 
 impl Instruction {
@@ -31,24 +33,25 @@ impl Instruction {
         let value = || constant().or(register().map(Value::Register));
 
         let copy = preceded(tag("cpy "), value().and(preceded(complete::char(' '), register())))
-            .map(|(value, register)| Instruction::Copy(value, register));
-
-        let inc = preceded(tag("inc "), register()).map(Instruction::Increment);
-        let dec = preceded(tag("dec "), register()).map(Instruction::Decrement);
+            .map(|(value, register)| Self::Copy(value, register));
 
         let jnz = preceded(tag("jnz "), value().and(preceded(complete::char(' '), value())))
-            .map(|(value, offset)| Instruction::JumpNotZero(value, offset));
+            .map(|(value, offset)| Self::JumpNotZero(value, offset));
         
-        let tgl = preceded(tag("tgl "), register()).map(Instruction::Toggle);
+        let inc = preceded(tag("inc "), register()).map(Self::Increment);
+        let dec = preceded(tag("dec "), register()).map(Self::Decrement);
+        let tgl = preceded(tag("tgl "), register()).map(Self::Toggle);
+        let out = preceded(tag("out "), value()).map(Self::Output);
 
-        all_consuming(alt((copy, inc, dec, jnz, tgl))).run(input)
+        all_consuming(alt((copy, inc, dec, jnz, tgl, out))).run(input)
     }
 }
 
+#[derive(Clone)]
 pub struct Cpu {
     instructions: Vec<Instruction>,
     registers: HashMap<Register, isize>,
-    ip: usize
+    ip: usize,
 }
 
 #[derive(Debug, Error)]
@@ -61,23 +64,35 @@ pub enum ExecutationError {
 
 impl Cpu {
     pub fn new(instructions: Vec<Instruction>) -> Cpu {
-        Cpu { instructions, registers: HashMap::new(), ip: 0 }
+        Cpu { 
+            instructions,
+            registers: HashMap::new(),
+            ip: 0
+        }
     }
 
-    pub fn execute(&mut self) -> Result<(), ExecutationError> {
+    pub fn execute(&mut self) -> CpuOutput {
+        CpuOutput { cpu: self }
+    }
+
+    fn execute_till_interrupt(&mut self) -> Result<Option<isize>, ExecutationError> {
         while let Some(&instruction) = self.instructions.get(self.ip) {
-            self.execute_instruction(instruction)?;
+            if let Some(output) = self.execute_instruction(instruction)? {
+                return Ok(Some(output))
+            }
+            
             self.optimize();
         }
 
-        Ok(())
+        Ok(None)
     }
 
-    fn execute_instruction(&mut self, instruction: Instruction) -> Result<(), ExecutationError> {
+    fn execute_instruction(&mut self, instruction: Instruction) -> Result<Option<isize>, ExecutationError> {
         self.ip += 1;
 
         match instruction {
-            Instruction::NoOperation(..) => {},
+            | Instruction::NoOperation(..)
+            | Instruction::NoOperation2(..) => {},
             Instruction::Copy(value, register) => {
                 let value = self.resolve_value(value);
                 *self.get_register_mut(register) = value;
@@ -106,19 +121,25 @@ impl Cpu {
                     *target = match *target {
                         | Instruction::Increment(register) => Instruction::Decrement(register),
                         | Instruction::Decrement(register)
+                        | Instruction::Output(Value::Register(register))
                         | Instruction::Toggle(register) => Instruction::Increment(register),
-                        | Instruction::NoOperation(register, offset) => Instruction::JumpNotZero(register, offset),
+                        | Instruction::NoOperation(value)
+                        | Instruction::Output(value) => Instruction::NoOperation(value),
+                        | Instruction::NoOperation2(register, offset) => Instruction::JumpNotZero(register, offset),
                         | Instruction::Copy(from, to) => Instruction::JumpNotZero(from, Value::Register(to)),
                         | Instruction::JumpNotZero(from, offset) => match offset {
                             Value::Register(to) => Instruction::Copy(from, to),
-                            Value::Constant(_) => Instruction::NoOperation(from, offset)
-                        }
+                            Value::Constant(_) => Instruction::NoOperation2(from, offset)
+                        },
                     }
                 }
+            },
+            Instruction::Output(value) => {
+                return Ok(Some(self.resolve_value(value)));
             }
         }
 
-        Ok(())
+        Ok(None)
     }
 
     fn optimize(&mut self) {
@@ -163,3 +184,21 @@ impl Cpu {
         Ok(Cpu::new(instructions))
     }
 }
+
+pub struct CpuOutput<'a> {
+    cpu: &'a mut Cpu
+}
+
+impl<'a> Iterator for CpuOutput<'a> {
+    type Item = Result<isize, ExecutationError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.cpu.execute_till_interrupt() {
+            Err(err) => Some(Err(err)),
+            Ok(Some(value)) => Some(Ok(value)),
+            Ok(None) => None,
+        }
+    }
+}
+
+pub const REG_A: Register = Register('a');
