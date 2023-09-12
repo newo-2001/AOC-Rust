@@ -14,6 +14,7 @@ use aoc_runner_api::{Solver, Puzzle};
 
 mod aoc_2016;
 mod aoc_2015;
+mod aoc_2017;
 
 // TODO: replace with procedural macro
 macro_rules! solver {
@@ -67,6 +68,10 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
     match puzzle.year {
         2015 => solver!(2015, puzzle.day, puzzle.part),
         2016 => solver!(2016, puzzle.day, puzzle.part),
+        2017 => match puzzle.day {
+            1 => solver!(2017, "01", puzzle.part),
+            _ => None
+        },
         _ => None
     }
 }
