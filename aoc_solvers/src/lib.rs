@@ -89,6 +89,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             21 => solver!(2016, "21", puzzle.part),
             22 => solver!(2016, "22", puzzle.part),
             23 => solver!(2016, "23", puzzle.part),
+            24 => solver!(2016, "24", puzzle.part),
             _ => None
         },
         _ => None
