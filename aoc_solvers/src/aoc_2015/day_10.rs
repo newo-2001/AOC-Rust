@@ -26,7 +26,7 @@ fn serialize(number: &[u8]) -> String {
     number.iter().map(|c| (c + b'0') as char).collect()
 }
 
-fn parse_seed(input: &str) -> Result<Vec<u8>, Box<dyn Error>> {
+fn parse_seed(input: &str) -> Result<Vec<u8>, Box<dyn Error + Send + Sync>> {
     Ok(input.chars()
         .map(|c| c.to_digit(10).ok_or(InvalidTokenError(c)))
         .collect::<Result<Vec<_>, _>>()?

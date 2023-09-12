@@ -24,6 +24,7 @@ dependencies = [
  "aoc_solvers",
  "colored",
  "itertools 0.11.0",
+ "rayon",
  "thiserror",
 ]
 

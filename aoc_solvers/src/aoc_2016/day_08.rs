@@ -62,7 +62,7 @@ fn rotate_slice<T>(slice: &mut [T], amount: usize) {
     slice.rotate_right(amount % slice.len());
 }
 
-fn final_grid(input: &str) -> Result<Grid<Bit>, Box<dyn Error + '_>> {
+fn final_grid(input: &str) -> Result<Grid<Bit>, Box<dyn Error + '_ + Send + Sync>> {
     let grid = Grid::<Bit>::empty(Dimensions(50, 6));
     let instructions = parse_lines(Instruction::parse, input)?;
 

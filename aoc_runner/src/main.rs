@@ -6,6 +6,7 @@ use std::{env, num::ParseIntError, time::Instant};
 
 use aoc_runner_api::Puzzle;
 use colored::{Colorize, Color};
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 use run::{RunnerAction, run_puzzle, verify_puzzle, RunPuzzleError, RunStats};
 
 mod arguments;
@@ -31,7 +32,7 @@ fn execute(runner: fn(Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &[Pu
     println!("Executing {} puzzle(s)...", puzzles.len());
 
     let start_time = Instant::now();
-    let results = puzzles.iter().map(|&puzzle| {
+    let results = puzzles.par_iter().map(|&puzzle| {
         let result = runner(puzzle);
         let puzzle = format!("[{}]", puzzle).bright_yellow().bold();
         match &result {

@@ -28,7 +28,7 @@ pub enum RunPuzzleError {
 }
 
 pub struct RunStats {
-    pub result: Box<dyn Display>,
+    pub result: Box<dyn Display + Send + Sync>,
     pub duration: Duration
 }
 

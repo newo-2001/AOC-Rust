@@ -286,7 +286,7 @@ fn least_amount_of_mana_for_victory(battle: Battle) -> Option<u32> {
     best_mana
 }
 
-fn least_mana_for_input<'a>(input: &'a str, difficulty: Difficulty) -> Result<u32, Box<dyn Error + 'a>> {
+fn least_mana_for_input<'a>(input: &'a str, difficulty: Difficulty) -> Result<u32, Box<dyn Error + 'a + Send + Sync>> {
     let enemy = Enemy::parse(input)?;
 
     let player = Player {
