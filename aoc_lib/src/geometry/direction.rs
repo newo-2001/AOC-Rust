@@ -11,6 +11,16 @@ pub enum RotationDirection {
     Right
 }
 
+impl RotationDirection {
+    #[must_use]
+    pub fn inverse(self) -> RotationDirection {
+        match self {
+            Self::Left => Self::Right,
+            Self::Right => Self::Left
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum CardinalDirection {
     North,

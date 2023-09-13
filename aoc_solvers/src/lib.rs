@@ -3,7 +3,8 @@
     extract_if,
     result_option_inspect,
     iter_collect_into,
-    try_find
+    try_find,
+    map_try_insert
 )]
 
 #![allow(
@@ -71,6 +72,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
         2017 => match puzzle.day {
             1 => solver!(2017, "01", puzzle.part),
             2 => solver!(2017, "02", puzzle.part),
+            3 => solver!(2017, "03", puzzle.part),
             _ => None
         },
         _ => None
