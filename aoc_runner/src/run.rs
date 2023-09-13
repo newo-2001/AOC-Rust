@@ -1,4 +1,4 @@
-use std::{fs, fmt::Display, time::{Duration, Instant}};
+use std::{fs, time::{Duration, Instant}};
 
 use aoc_runner_api::Puzzle;
 use thiserror::Error;
@@ -28,7 +28,7 @@ pub enum RunPuzzleError {
 }
 
 pub struct RunStats {
-    pub result: Box<dyn Display + Send + Sync>,
+    pub result: String,
     pub duration: Duration
 }
 
@@ -66,7 +66,7 @@ pub fn run_puzzle(puzzle: Puzzle) -> Result<RunStats, RunPuzzleError> {
     let end_time = Instant::now();
     Ok(RunStats {
         duration: end_time - start_time,
-        result
+        result: result.to_string()
     })
 }
 

@@ -13,6 +13,6 @@ impl Display for Puzzle {
     }
 }
 
-pub type SolverResult<'a> = Result<Box<dyn Display + Send + Sync>, Box<dyn Error + 'a + Send + Sync>>;
+pub type SolverResult<'a> = Result<Box<dyn Display + Send + Sync + 'a>, Box<dyn Error + 'a + Send + Sync>>;
 pub type Solver = dyn Fn(&str) -> SolverResult;
 pub type SolverProvider = dyn Fn(&Puzzle) -> Option<Box<Solver>>;

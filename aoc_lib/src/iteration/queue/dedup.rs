@@ -1,6 +1,6 @@
 use std::{collections::HashSet, hash::Hash, mem};
 
-use super::{Queue, recursive_fold::{recursive_fold, try_recursive_fold}, FoldState, FindState, recursive_find::recursive_find, IterState, recursive_iter::recursive_iter};
+use super::{Queue, recursive_fold::{recursive_fold, try_recursive_fold}, FoldState, FindState, recursive_find::{recursive_find, try_recursive_find}, IterState, recursive_iter::recursive_iter};
 
 pub struct DuplicateFilter<Q>
     where Q: Queue + Default
@@ -72,6 +72,23 @@ impl<Q> DuplicateFilter<Q>
     {
         move |item: Q::Out| -> FindState<R, I> {
             if !self.seen.insert(item.clone()) { return FindState::Leaf }
+            finder(item)
+        }
+    }
+
+    pub fn try_recursive_find<R, E, I, F>(&mut self, finder: F) -> Result<Option<R>, E>
+        where F: FnMut(Q::Out) -> Result<FindState<R, I>, E>,
+              I: IntoIterator<Item=Q::In>
+    {
+        try_recursive_find(mem::take(&mut self.queue), self.try_filter_find_duplicates(finder))
+    }
+
+    fn try_filter_find_duplicates<'a, R, E, I, F>(&'a mut self, mut finder: F) -> impl FnMut(Q::Out) -> Result<FindState<R, I>, E> + 'a
+        where F: FnMut(Q::Out) -> Result<FindState<R, I>, E> + 'a,
+              I: IntoIterator<Item=Q::In>
+    {
+        move |item: Q::Out| -> Result<FindState<R, I>, E> {
+            if !self.seen.insert(item.clone()) { return Ok(FindState::Leaf) }
             finder(item)
         }
     }

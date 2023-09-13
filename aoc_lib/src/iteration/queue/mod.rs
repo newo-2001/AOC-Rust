@@ -43,6 +43,13 @@ pub trait Queue: Extend<Self::In> + Sized {
         recursive_find::recursive_find(self, finder)
     }
 
+    fn try_recursive_find<F, R, E, I>(self, finder: F) -> Result<Option<R>, E>
+        where F: FnMut(Self::Out) -> Result<FindState<R, I>, E>,
+              I: IntoIterator<Item=Self::In>
+    {
+        recursive_find::try_recursive_find(self, finder)
+    }
+
     fn recursive_iter<F, I>(self, action: F)
         where F: FnMut(Self::Out) -> IterState<I>,
               I: IntoIterator<Item=Self::In>

@@ -38,7 +38,6 @@ fn execute(runner: fn(Puzzle) -> Result<RunStats, RunPuzzleError>, puzzles: &[Pu
         match &result {
             Err(err) => println!("{} {} {}", puzzle, "(Failure)".bright_red().bold(), err.to_string().bright_red()),
             Ok(RunStats { result, duration }) => {
-
                 let status = "(Success)".bright_green().bold();
                 println!("{} {} {} {}", puzzle, utils::format_duration(duration), status, result);
             }
