@@ -1,21 +1,24 @@
 use aoc_lib::parsing::parse_lines;
 use aoc_runner_api::SolverResult;
 
+// I don't like this
 fn iterations(jumps: &mut[isize], mutator: impl Fn(isize) -> isize) -> usize {
     let mut ip = 0;
+    let mut index = 0;
 
     #[allow(clippy::maybe_infinite_iter)]
-    (0..).find(|_| {
-        // I don't like this
+    loop {
         if let Some(instruction) = jumps.get_mut(ip) {
             if let Some(updated_ip) = ip.checked_add_signed(*instruction) {
                 *instruction += (mutator)(*instruction);
+                index += 1;
                 ip = updated_ip;
-                return false;
+                continue;
             }
         }
-        true
-    }).unwrap()
+
+        break index;
+    }
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
