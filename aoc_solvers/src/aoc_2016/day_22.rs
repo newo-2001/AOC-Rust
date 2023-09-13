@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, iter::once, collections::VecDeque};
 
-use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}}, parsing::{ParseError, Runnable, self}, NoSolutionError, math::Bit, iteration::queue::{Dedupable, FindState, SearchDepth}};
+use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}}, parsing::{ParseError, Runnable, self}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{preceded, delimited, tuple}, bytes::complete::tag, character::complete::{self, space1}, Parser, combinator::all_consuming};
@@ -66,8 +66,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
         .permutations(2)
         .flatten()
         .tuples()
-        .filter(|(a, b)| !a.is_empty() && a != b && a.fits_on_node(b))
-        .count();
+        .count_where(|(a, b)| !a.is_empty() && a != b && a.fits_on_node(&b));
 
     Ok(Box::new(viable_pairs))
 }

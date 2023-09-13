@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use aoc_lib::iteration::ExtraIter;
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 
@@ -7,7 +8,7 @@ fn is_vowel(char: char) -> bool {
 }
 
 fn count_vowels(str: &str) -> usize {
-    str.chars().filter(|&c| is_vowel(c)).count()
+    str.chars().count_where(is_vowel)
 }
 
 fn has_consecutive_duplicates(str: &str) -> bool {
@@ -68,18 +69,12 @@ fn real_is_nice(str: &str) -> bool {
 
 #[allow(clippy::unnecessary_wraps)]
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let nice_words = input.lines()
-        .filter(|&word| is_nice(word))
-        .count();
-
+    let nice_words = input.lines().count_where(is_nice);
     Ok(Box::new(nice_words))
 }
 
 #[allow(clippy::unnecessary_wraps)]
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let nice_words = input.lines()
-        .filter(|word| real_is_nice(word))
-        .count();
-
+    let nice_words = input.lines().count_where(real_is_nice);
     Ok(Box::new(nice_words))
 }

@@ -4,6 +4,8 @@ mod single;
 mod mode;
 pub mod queue;
 
+use itertools::Itertools;
+
 pub use self::single::SingleError;
 
 pub trait ExtraIter : Iterator + Sized {
@@ -27,6 +29,12 @@ pub trait ExtraIter : Iterator + Sized {
         where Self::Item: Eq + Hash
     {
         mode::multi_mode(self)
+    }
+
+    fn count_where(self, predicate: impl Fn(Self::Item) -> bool) -> usize {
+        *self.counts_by(predicate)
+            .get(&true)
+            .unwrap_or(&0)
     }
 }
 

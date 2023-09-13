@@ -1,4 +1,4 @@
-use aoc_lib::parsing::InvalidTokenError;
+use aoc_lib::{parsing::InvalidTokenError, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 
@@ -68,8 +68,7 @@ fn safe_tiles_in_rows(first_row: Vec<Tile>, rows: usize) -> usize {
     RowIterator::new(first_row)
         .take(rows)
         .flatten()
-        .filter(|&tile| tile == Tile::Safe)
-        .count()
+        .count_where(|tile| tile == Tile::Safe)
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {

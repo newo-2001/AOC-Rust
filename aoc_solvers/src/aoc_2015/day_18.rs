@@ -1,10 +1,9 @@
-use aoc_lib::{geometry::{Dimensions, Point2D, grid::{Grid, GridLike, BitGrid, GridLikeMut}}, functional::{repeat_apply, consume}, math::Bit};
+use aoc_lib::{geometry::{Dimensions, Point2D, grid::{Grid, GridLike, BitGrid, GridLikeMut}}, functional::{repeat_apply, consume}, math::Bit, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 
 fn neighbours_on(grid: &Grid<Bit>, cell: Point2D<usize>) -> usize {
     cell.neighbours()
-        .filter_map(|location| grid.get(location)?.is_on().then_some(()))
-        .count()
+        .count_where(|location| grid.get(location).is_some_and(|light| light.is_on()))
 }
 
 fn next_state(grid: &Grid<Bit>) -> Grid<Bit> {

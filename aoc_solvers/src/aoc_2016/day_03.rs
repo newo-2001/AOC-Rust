@@ -1,14 +1,15 @@
-use aoc_lib::parsing::{parse_lines, Runnable, ParseError};
+use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded}, character::complete::{self, multispace1}, Parser};
 use tupletools::snd;
 
+#[derive(Clone, Copy)]
 struct Triangle(u32, u32, u32);
 
 impl Triangle {
-    fn is_valid(&self) -> bool {
-        let &Self(x, y, z) = self;
+    fn is_valid(self) -> bool {
+        let Self(x, y, z) = self;
 
         x + y > z &&
         y + z > x &&
@@ -27,9 +28,8 @@ impl Triangle {
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let number_valid = parse_lines(Triangle::parse, input)?
-        .iter()
-        .filter(|&triangle| triangle.is_valid())
-        .count();
+        .into_iter()
+        .count_where(Triangle::is_valid);
 
     Ok(Box::new(number_valid))
 }
@@ -45,8 +45,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .map(snd)
         .tuples()
         .map(|(a, b, c)| Triangle(a, b, c))
-        .filter(Triangle::is_valid)
-        .count();
+        .count_where(Triangle::is_valid);
 
     Ok(Box::new(number_valid))
 }

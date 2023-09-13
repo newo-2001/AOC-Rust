@@ -1,4 +1,4 @@
-use crate::math::Bit;
+use crate::{math::Bit, iteration::ExtraIter};
 
 use super::GridLike;
 
@@ -10,8 +10,6 @@ pub trait BitGrid: GridLike<GridItem = Bit> {
 
 impl<G: GridLike<GridItem = Bit>> BitGrid for G {
     fn count_enabled(&self) -> usize {
-        self.iter()
-            .filter(|&light| light.is_on())
-            .count()
+        self.iter().count_where(|light| light.is_on())
     }
 }

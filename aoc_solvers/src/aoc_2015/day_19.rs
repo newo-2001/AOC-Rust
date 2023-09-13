@@ -100,7 +100,8 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 
     let unique_mutations = replacements.iter()
         .flat_map(|replacement| forward_mutations(target, replacement))
-        .unique().count();
+        .unique()
+        .count();
 
     Ok(Box::new(unique_mutations))
 }
