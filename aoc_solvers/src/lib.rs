@@ -5,7 +5,7 @@
     iter_collect_into,
     try_find,
     map_try_insert,
-    control_flow_enum
+    trait_alias
 )]
 
 #![allow(
@@ -78,6 +78,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             5 => solver!(2017, "05", puzzle.part),
             6 => solver!(2017, "06", puzzle.part),
             7 => solver!(2017, "07", puzzle.part),
+            8 => solver!(2017, "08", puzzle.part),
             _ => None
         },
         _ => None
