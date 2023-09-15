@@ -1,7 +1,4 @@
-use std::{hash::Hash, collections::VecDeque};
-
-use priority_queue::PriorityQueue;
-use tupletools::fst;
+use std::collections::VecDeque;
 
 mod recursive_iter;
 mod recursive_find;
@@ -55,22 +52,6 @@ pub trait Queue: Extend<Self::In> + Sized {
               I: IntoIterator<Item=Self::In>
     {
         recursive_iter::recursive_iter(self, action);
-    }
-}
-
-impl<T, P> Queue for PriorityQueue<T, P>
-    where T: Hash + Eq,
-          P: Ord
-{
-    type In = (T, P);
-    type Out = T;
-
-    fn pop(&mut self) -> Option<Self::Out> {
-        self.pop().map(fst)
-    }
-
-    fn push(&mut self, (priority, item): Self::In) {
-        self.push(priority, item);
     }
 }
 
