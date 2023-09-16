@@ -2,15 +2,14 @@ use std::ops::RangeFrom;
 
 use nom::{
     Parser,
-    IResult,
     combinator::value,
     error::{ParseError, VerboseError},
     Slice, InputIter, InputLength, AsChar,
-    multi::many_till, character::complete::anychar, bytes::complete::{take_until, self}, FindSubstring, InputTake, Compare, sequence::terminated
+    multi::many_till, character::complete::{anychar, char}, bytes::complete::{take_until, self}, FindSubstring, InputTake, Compare, sequence::{terminated, delimited}
 };
 use tupletools::snd;
 
-pub fn ignore<I, O, E, F>(parser: F) -> impl FnMut(I) -> IResult<I, (), E>
+pub fn ignore<I, O, E, F>(parser: F) -> impl Parser<I, (), E>
     where E : ParseError<I>,
           F : Parser<I, O, E> {
     value((), parser)
@@ -40,6 +39,42 @@ pub fn sep_by<I, E, L, LO, S, SO, R, RO>(left: L, sep: S, right: R) -> impl Pars
           E: ParseError<I>
 {
     terminated(left, sep).and(right)
+}
+
+pub fn curly_brackets<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
+    where F: Parser<I, O, E>,
+          E: ParseError<I>,
+          I: Slice<RangeFrom<usize>> + InputIter,
+          <I as InputIter>::Item: AsChar
+{
+    delimited(char('{'), parser, char('}'))
+}
+
+pub fn square_brackets<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
+    where F: Parser<I, O, E>,
+          E: ParseError<I>,
+          I: Slice<RangeFrom<usize>> + InputIter,
+          <I as InputIter>::Item: AsChar
+{
+    delimited(char('['), parser, char(']'))
+}
+
+pub fn angle_brackets<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
+    where F: Parser<I, O, E>,
+          E: ParseError<I>,
+          I: Slice<RangeFrom<usize>> + InputIter,
+          <I as InputIter>::Item: AsChar
+{
+    delimited(char('<'), parser, char('>'))
+}
+
+pub fn brackets<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
+    where F: Parser<I, O, E>,
+          E: ParseError<I>,
+          I: Slice<RangeFrom<usize>> + InputIter,
+          <I as InputIter>::Item: AsChar
+{
+    delimited(char('('), parser, char(')'))
 }
 
 pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
