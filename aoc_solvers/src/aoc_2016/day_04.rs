@@ -73,7 +73,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .into_iter()
         .filter(Room::is_real)
         .update(|room| {
-            room.name = repeat_apply(room.sector_id as usize, room.name.clone(), rotate_str);
+            room.name = repeat_apply(room.sector_id, room.name.clone(), rotate_str);
         }).find(|room| room.name.contains("northpole"))
         .ok_or("Could not find north pole")?;
     

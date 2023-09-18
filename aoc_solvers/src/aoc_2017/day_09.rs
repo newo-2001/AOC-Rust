@@ -2,7 +2,6 @@ use aoc_lib::parsing::{curly_brackets, TextParserResult, Runnable, angle_bracket
 use aoc_runner_api::SolverResult;
 use nom::{multi::{separated_list0, many0}, character::complete::{char, anychar, none_of}, Parser, combinator::{all_consuming, value}};
 
-#[derive(Debug, Clone, Eq, PartialEq)]
 enum Group {
     SubGroups(Vec<Group>),
     Garbage(String)

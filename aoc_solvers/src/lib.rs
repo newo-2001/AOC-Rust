@@ -5,7 +5,9 @@
     iter_collect_into,
     try_find,
     map_try_insert,
-    trait_alias
+    trait_alias,
+    iter_next_chunk,
+    iter_array_chunks
 )]
 
 #![allow(
@@ -80,6 +82,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             7 => solver!(2017, "07", puzzle.part),
             8 => solver!(2017, "08", puzzle.part),
             9 => solver!(2017, "09", puzzle.part),
+            10 => solver!(2017, "10", puzzle.part),
             _ => None
         },
         _ => None
