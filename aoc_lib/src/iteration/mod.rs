@@ -8,7 +8,7 @@ use itertools::Itertools;
 
 pub use self::single::SingleError;
 
-pub trait ExtraIter : Iterator + Sized {
+pub trait ExtraIter: Iterator + Sized {
     fn single(self) -> Result<Self::Item, SingleError>
         where Self: Sized
     {
