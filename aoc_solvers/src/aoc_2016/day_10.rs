@@ -3,7 +3,7 @@ use std::{hash::Hash, collections::{HashMap, VecDeque}};
 use aoc_lib::{parsing::{ParseError, Runnable, parse_lines}, math::min_max, iteration::queue::{Dedupable, FoldState}};
 use aoc_runner_api::SolverResult;
 use itertools::{Itertools, Either};
-use nom::{sequence::{preceded, delimited, tuple, terminated}, bytes::complete::tag, character::complete, Parser};
+use nom::{sequence::{preceded, delimited, tuple, terminated}, bytes::complete::tag, character::complete::u16, Parser};
 use thiserror::Error;
 use tupletools::Fst;
 
@@ -30,11 +30,11 @@ struct Comparison {
 }
 
 fn parse_instruction(input: &str) -> Result<Instruction, ParseError> {
-    let bot = || preceded(tag("bot "), complete::u16);
-    let output = || preceded(tag("output "), complete::u16).map(Destination::Output);
+    let bot = || preceded(tag("bot "), u16);
+    let output = || preceded(tag("output "), u16).map(Destination::Output);
     let destination = || bot().map(Destination::Bot).or(output());
 
-    let value = delimited(tag("value "), complete::u16, tag(" goes to "));
+    let value = delimited(tag("value "), u16, tag(" goes to "));
     let forward = value.and(destination()).map(|(value, destination)| {
         Instruction::Forward(Forward { destination, value })
     });

@@ -2,7 +2,7 @@ use std::{collections::HashMap, cell::RefCell};
 
 use aoc_lib::{functional::swap, parsing::{ParseError, parse_lines, Runnable}};
 use aoc_runner_api::SolverResult;
-use nom::{character::complete::{alpha1, self}, sequence::{terminated, preceded}, bytes::complete::tag, combinator::all_consuming, Parser, branch::alt};
+use nom::{character::complete::{alpha1, u32, u8}, sequence::{terminated, preceded}, bytes::complete::tag, Parser, branch::alt};
 
 #[derive(Clone, Hash, PartialEq, Eq)]
 struct Wire<'a>(&'a str);
@@ -75,18 +75,18 @@ impl<'a> ExpressionTree<'a> {
 
 fn parse_wire(input: &str) -> Result<(Wire, Expression), ParseError> {
     let wire = || alpha1.map(Wire);
-    let literal = || complete::u32.map(Value::Literal);
+    let literal = || u32.map(Value::Literal);
     let value = || wire().map(Value::Wire).or(literal());
 
     let constant = value().map(Expression::Constant);
     let and = terminated(value(), tag(" AND ")).and(value()).map(|(left, right)| Expression::And(left, right));
     let or = terminated(value(), tag(" OR ")).and(value()).map(|(left, right)| Expression::Or(left, right));
-    let lshift = terminated(value(), tag(" LSHIFT ")).and(complete::u8).map(|(value, amount)| Expression::LeftShift(value, amount));
-    let rshift = terminated(value(), tag(" RSHIFT ")).and(complete::u8).map(|(value, amount)| Expression::RightShift(value, amount));
+    let lshift = terminated(value(), tag(" LSHIFT ")).and(u8).map(|(value, amount)| Expression::LeftShift(value, amount));
+    let rshift = terminated(value(), tag(" RSHIFT ")).and(u8).map(|(value, amount)| Expression::RightShift(value, amount));
     let not = preceded(tag("NOT "), value()).map(Expression::Not);
 
     let expression = alt((and, or, lshift, rshift, not, constant));    
-    all_consuming(terminated(expression, tag(" -> ")).and(wire()))
+    terminated(expression, tag(" -> ")).and(wire())
         .map(swap).run(input)
 }
 

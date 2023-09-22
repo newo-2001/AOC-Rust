@@ -1,7 +1,7 @@
 use derive_more::{Add, AddAssign, Sub, SubAssign};
 use std::{ops::Mul, cmp::{max, min}, fmt::{Display, Formatter, self}};
 
-use nom::{character::complete, combinator::opt, sequence::{terminated, delimited}, Parser};
+use nom::{character::complete::{char, i64}, combinator::opt, sequence::{terminated, delimited}, Parser};
 use num::{Integer, clamp, Zero, One, NumCast, Signed, FromPrimitive};
 
 use crate::parsing::TextParserResult;
@@ -102,10 +102,10 @@ impl<T: Integer> Point2D<T> {
     pub fn parse(input: &str) -> TextParserResult<Point2D<T>>
         where T: FromPrimitive
     {
-        let sep = complete::char(',').and(opt(complete::char(' ')));
-        let point = terminated(complete::i64, sep).and(complete::i64);
+        let sep = char(',').and(opt(char(' ')));
+        let point = terminated(i64, sep).and(i64);
         
-        delimited(opt(complete::char('(')), point, opt(complete::char(')')))
+        delimited(opt(char('(')), point, opt(char(')')))
             .map(|(x, y)| Point2D(T::from_i64(x).unwrap(), T::from_i64(y).unwrap()))
             .parse(input)
     }

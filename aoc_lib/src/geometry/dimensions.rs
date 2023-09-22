@@ -1,9 +1,9 @@
 use std::fmt::{Display, Formatter, self, Debug};
 
-use nom::{sequence::preceded, character::complete, Parser};
+use nom::{sequence::preceded, character::complete::char, Parser};
 use thiserror::Error;
 
-use crate::parsing::{TextParserResult, self};
+use crate::parsing::{TextParserResult, usize};
 
 use super::Point2D;
 
@@ -23,8 +23,7 @@ impl Dimensions {
     }
     
     pub fn parse(input: &str) -> TextParserResult<Dimensions> {
-        let size = parsing::usize;
-        size.and(preceded(complete::char('x'), size))
+        usize.and(preceded(char('x'), usize))
             .map(|(width, height)| Dimensions(width, height))
             .parse(input)
     }

@@ -1,6 +1,6 @@
-use aoc_lib::{parsing::{ParseError, self, Runnable, parse_lines}, NoSolutionError};
+use aoc_lib::{parsing::{ParseError, Runnable, parse_lines, usize}, NoSolutionError};
 use aoc_runner_api::SolverResult;
-use nom::{bytes::complete::tag, sequence::{delimited, terminated, tuple}, character::complete, combinator::all_consuming, Parser};
+use nom::{bytes::complete::tag, sequence::{delimited, terminated, tuple}, character::complete::char, Parser};
 use num::Integer;
 
 struct Disc {
@@ -11,12 +11,12 @@ struct Disc {
 
 impl Disc {
     fn parse(input: &str) -> Result<Disc, ParseError> {
-        let disc_number = delimited(tag("Disc #"), parsing::usize, tag(" has "));
-        let positions = terminated(parsing::usize, tag(" positions; at time="));
-        let time = terminated(parsing::usize, tag(", it is at position "));
-        let starting_position = delimited(time, parsing::usize, complete::char('.'));
+        let disc_number = delimited(tag("Disc #"), usize, tag(" has "));
+        let positions = terminated(usize, tag(" positions; at time="));
+        let time = terminated(usize, tag(", it is at position "));
+        let starting_position = delimited(time, usize, char('.'));
 
-        all_consuming(tuple((disc_number, positions, starting_position)))
+        tuple((disc_number, positions, starting_position))
             .map(|(index, positions, starting_position)| Disc { positions, starting_position, index })
             .run(input)
     }

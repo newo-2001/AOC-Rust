@@ -2,7 +2,7 @@ use std::{collections::HashMap, cmp::Ordering};
 
 use aoc_lib::{parsing::{ParseError, TextParserResult, Runnable, parse_lines}, NoSolutionError};
 use aoc_runner_api::SolverResult;
-use nom::{combinator::{value, all_consuming}, Parser, bytes::complete::tag, character::complete::{alpha1, self}, sequence::{preceded, tuple}, branch::alt};
+use nom::{combinator::value, Parser, bytes::complete::tag, character::complete::{alpha1, i32}, sequence::{preceded, tuple}, branch::alt};
 
 #[derive(Clone, Copy)]
 enum ComparisonOperator {
@@ -50,7 +50,7 @@ impl<'a> Condition<'a> {
         tuple((
             preceded(tag(" if "), alpha1),
             ComparisonOperator::parse,
-            complete::i32
+            i32
         )).map(|(left, operator, right)| Condition {
             left, right, operator
         }).parse(input)
@@ -66,8 +66,8 @@ enum Operation {
 impl Operation {
     fn parse(input: &str) -> TextParserResult<Self> {
         Parser::or(
-            preceded(tag(" inc "), complete::i32).map(Self::Increment),
-            preceded(tag(" dec "), complete::i32).map(Self::Decrement)
+            preceded(tag(" inc "), i32).map(Self::Increment),
+            preceded(tag(" dec "), i32).map(Self::Decrement)
         ).parse(input)
     }
 }
@@ -80,13 +80,13 @@ struct Instruction<'a> {
 
 impl Instruction<'_> {
     fn parse(input: &str) -> Result<Instruction, ParseError> {
-        all_consuming(tuple((
+        tuple((
             alpha1,
             Operation::parse,
             Condition::parse
         )).map(|(target, operation, condition)| Instruction {
             target, condition, operation
-        })).run(input)
+        }).run(input)
     }
 }
 

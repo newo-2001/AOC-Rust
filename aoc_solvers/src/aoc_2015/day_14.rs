@@ -3,7 +3,7 @@ use std::{cmp::min, collections::HashMap};
 use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{sequence::{tuple, preceded}, bytes::complete::tag, character::complete::{self, alpha1}, Parser};
+use nom::{sequence::{tuple, preceded, delimited}, bytes::complete::tag, character::complete::{alpha1, u32}, Parser};
 
 struct Reindeer<'a> {
     name: &'a str,
@@ -14,9 +14,9 @@ struct Reindeer<'a> {
 
 impl Reindeer<'_> {
     fn parse(input: &str) -> Result<Reindeer, ParseError> {
-        let speed = preceded(tag(" can fly "), complete::u32);
-        let stamina = preceded(tag(" km/s for "), complete::u32);
-        let recovery = preceded(tag(" seconds, but then must rest for "), complete::u32);
+        let speed = preceded(tag(" can fly "), u32);
+        let stamina = preceded(tag(" km/s for "), u32);
+        let recovery = delimited(tag(" seconds, but then must rest for "), u32, tag(" seconds."));
 
         tuple((alpha1, speed, stamina, recovery))
             .map(|(name, speed, stamina, recovery)| Reindeer { name, speed, stamina, recovery })

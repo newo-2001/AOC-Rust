@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use aoc_lib::{geometry::{Dimensions, grid::{Grid, InvalidGridAreaError, GridLikeMut, BitGrid}}, parsing::{Runnable, self, parse_lines, ParseError}, math::Bit};
+use aoc_lib::{geometry::{Dimensions, grid::{Grid, InvalidGridAreaError, GridLikeMut, BitGrid}}, parsing::{Runnable, parse_lines, ParseError, usize}, math::Bit};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::preceded, bytes::complete::tag, Parser, branch::alt};
@@ -18,7 +18,7 @@ enum Instruction {
 
 impl Instruction {
     fn parse(input: &str) -> Result<Instruction, ParseError> {
-        let rotate_instruction = || parsing::usize.and(preceded(tag(" by "), parsing::usize))
+        let rotate_instruction = || usize.and(preceded(tag(" by "), usize))
             .map(|(index, amount)| RotateInstruction { index, amount });
 
         let rotate_row = preceded(tag("rotate row y="), rotate_instruction()).map(Instruction::RotateRow);

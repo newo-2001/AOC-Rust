@@ -1,9 +1,9 @@
 use std::{ops::RangeInclusive, collections::HashMap};
 
-use aoc_lib::parsing::{ParseError, parse_lines, Runnable, self};
+use aoc_lib::parsing::{ParseError, parse_lines, Runnable, usize};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{combinator::{all_consuming, opt}, branch::alt, sequence::{delimited, preceded}, bytes::complete::tag, Parser, character::complete::{anychar, self}};
+use nom::{combinator::opt, branch::alt, sequence::{delimited, preceded}, bytes::complete::tag, Parser, character::complete::{anychar, char}};
 use thiserror::Error;
 
 enum Instruction {
@@ -20,31 +20,31 @@ fn rotation_index(index: usize) -> usize { index + 1 + usize::from(index >= 4) }
 
 impl Instruction {
     fn parse(input: &str) -> Result<Instruction, ParseError> {
-        let swap_positions = preceded(tag("swap position "), parsing::usize)
-            .and(preceded(tag(" with position "), parsing::usize))
+        let swap_positions = preceded(tag("swap position "), usize)
+            .and(preceded(tag(" with position "), usize))
             .map(|(first, second)| Self::SwapPositions(first, second));
 
         let swap_letters = preceded(tag("swap letter "), anychar)
             .and(preceded(tag(" with letter "), anychar))
             .map(|(first, second)| Self::SwapLetters(first, second));
 
-        let reverse_slice = preceded(tag("reverse positions "), parsing::usize)
-            .and(preceded(tag(" through "), parsing::usize))
+        let reverse_slice = preceded(tag("reverse positions "), usize)
+            .and(preceded(tag(" through "), usize))
             .map(|(start, end) |Self::ReverseSlice(start..=end));
         
-        let move_position = preceded(tag("move position "), parsing::usize)
-            .and(preceded(tag(" to position "), parsing::usize))
+        let move_position = preceded(tag("move position "), usize)
+            .and(preceded(tag(" to position "), usize))
             .map(|(from, to)| Self::Move(from, to));
 
-        let steps = || preceded(tag(" step"), opt(complete::char('s')));
-        let rotate_left = delimited(tag("rotate left "), parsing::usize, steps()).map(Self::RotateLeft);
-        let rotate_right = delimited(tag("rotate right "), parsing::usize, steps()).map(Self::RotateRight);
+        let steps = || preceded(tag(" step"), opt(char('s')));
+        let rotate_left = delimited(tag("rotate left "), usize, steps()).map(Self::RotateLeft);
+        let rotate_right = delimited(tag("rotate right "), usize, steps()).map(Self::RotateRight);
         let rotate_position = preceded(tag("rotate based on position of letter "), anychar).map(Self::RotateBasedOnPositionOfLetter);
 
-        all_consuming(alt((
+        alt((
             swap_positions, swap_letters, reverse_slice, move_position,
             rotate_left, rotate_right, rotate_position
-        ))).run(input)
+        )).run(input)
     }
 
     fn apply(self, mut password: Vec<char>, mode: Mode) -> Result<Vec<char>, PasswordError> {

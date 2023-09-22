@@ -1,28 +1,25 @@
 
-use std::error::Error;
-
-use aoc_lib::parsing::parse_lines;
+use aoc_lib::parsing::{parse_lines, quoted, ParseError, Runnable, TextParserResult};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
     bytes::complete::{tag, take_while_m_n},
-    sequence::{preceded, delimited},
-    character::complete::{self},
-    IResult,
+    sequence::preceded,
+    character::complete::none_of,
     combinator::{map_res, value},
     branch::alt,
     multi::many0,
     Parser
 };
 
-fn hex_escape_code(input: &str) -> IResult<&str, char> {
+fn hex_escape_code(input: &str) -> TextParserResult<char> {
     map_res(
         preceded(tag("\\x"), take_while_m_n(2, 2, |x: char| x.is_ascii_hexdigit())),
         |x| u8::from_str_radix(x, 16).map(char::from)
     )(input)
 }
 
-fn escape_character(input: &str) -> IResult<&str, char> {
+fn escape_character(input: &str) -> TextParserResult<char> {
     alt((
         hex_escape_code,
         value('\\', tag("\\\\")),
@@ -30,16 +27,17 @@ fn escape_character(input: &str) -> IResult<&str, char> {
     ))(input)
 }
 
-fn character(input: &str) -> IResult<&str, char> {
-    alt((escape_character, complete::none_of("\"")))(input)
+fn character(input: &str) -> TextParserResult<char> {
+    alt((escape_character, none_of("\"")))(input)
 }
 
-fn deserialize<'a>(input: &'a str) -> Result<String, Box<dyn Error + 'a>> {
-    let quoted = |p| delimited(complete::char('\"'), p, complete::char('\"'));
-    Ok(quoted(many0(character).map(|x| x.iter().collect::<String>()))(input)?.1)
+fn deserialize(input: &str) -> Result<String, ParseError> {
+    quoted(many0(character))
+        .map(|x| x.iter().collect::<String>())
+        .run(input)
 }
 
-fn deserialized_size_diff<'a>(code: &'a str) -> Result<usize, Box<dyn Error + 'a>> {
+fn deserialized_size_diff(code: &str) -> Result<usize, ParseError> {
     Ok(code.len() - deserialize(code)?.chars().count())
 }
 

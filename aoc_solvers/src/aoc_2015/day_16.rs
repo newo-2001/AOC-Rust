@@ -6,7 +6,7 @@ use itertools::Itertools;
 use nom::{
     sequence::{terminated, delimited},
     bytes::complete::tag,
-    character::complete::{self, alpha1},
+    character::complete::{alpha1, char, u8, u16},
     combinator::opt, multi::many0, Parser
 };
 
@@ -27,9 +27,9 @@ struct Sue {
 
 impl Sue {
     fn parse(input: &str) -> Result<Sue, ParseError> {
-        let number = delimited(tag("Sue "), complete::u16, complete::char(':'));
-        let compound = delimited(complete::char(' '), alpha1, tag(": "))
-            .and(terminated(complete::u8, opt(complete::char(','))));
+        let number = delimited(tag("Sue "), u16, char(':'));
+        let compound = delimited(char(' '), alpha1, tag(": "))
+            .and(terminated(u8, opt(char(','))));
 
         let compounds = many0(compound)
             .map(|x| x.into_iter().collect::<HashMap<&str, u8>>())

@@ -6,7 +6,7 @@ use std::{collections::{HashMap, VecDeque}, iter::{self, once}};
 use nom::{
     sequence::{tuple, preceded, terminated},
     bytes::complete::tag,
-    character::complete::{alpha1, self},
+    character::complete::{alpha1, char, i32},
     Parser, combinator::opt
 };
 
@@ -26,9 +26,9 @@ struct Ingredient<'a> {
 impl Ingredient<'_> {
     fn parse(input: &str) -> Result<Ingredient, ParseError> {
         let property = |name| preceded(
-            tuple((complete::char(' '), tag(name), complete::char(' '))),
-            terminated(complete::i32, opt(complete::char(','))));
-        let name = terminated(alpha1, complete::char(':'));
+            tuple((char(' '), tag(name), char(' '))),
+            terminated(i32, opt(char(','))));
+        let name = terminated(alpha1, char(':'));
 
         tuple((
             name,

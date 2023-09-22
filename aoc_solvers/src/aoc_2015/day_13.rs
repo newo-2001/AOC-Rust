@@ -7,8 +7,8 @@ use nom::{
     combinator::value,
     bytes::complete::tag,
     Parser,
-    character::complete::{alpha1, self},
-    sequence::{tuple, preceded}
+    character::complete::{alpha1, char, u16},
+    sequence::{tuple, preceded, delimited}
 };
 
 #[derive(Eq, PartialEq, Hash, Clone)]
@@ -70,13 +70,13 @@ fn parse_edge(input: &str) -> Result<WeightedEdge, ParseError> {
     }
     
     let sign = value(Sign::Positive, tag(" gain ")).or(value(Sign::Negative, tag(" lose ")));
-    let weight = preceded(tag(" would"), sign).and(complete::u16)
+    let weight = preceded(tag(" would"), sign).and(u16)
         .map(|(sign, value)| match sign {
             Sign::Positive => i32::from(value),
             Sign::Negative => -(i32::from(value))
         });
     
-    let neighbour = preceded(tag(" happiness units by sitting next to "), alpha1);
+    let neighbour = delimited(tag(" happiness units by sitting next to "), alpha1, char('.'));
     tuple((alpha1, weight, neighbour))
         .map(|(person, weight, neighbour)| WeightedEdge { edge: Edge(person, neighbour), weight })
         .run(input)

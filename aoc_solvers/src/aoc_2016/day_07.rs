@@ -1,9 +1,9 @@
 use std::collections::HashSet;
 
-use aoc_lib::{parsing::{Runnable, parse_lines, ParseError}, iteration::ExtraIter};
+use aoc_lib::{parsing::{Runnable, parse_lines, ParseError, square_brackets}, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 use itertools::{traits::HomogeneousTuple, Itertools, Either};
-use nom::{Parser, sequence::delimited, character::complete::{alpha0, self, alpha1}, multi::many0};
+use nom::{Parser, character::complete::{alpha0, alpha1}, multi::many0};
 
 struct Ip<'a>(Vec<&'a str>, Vec<&'a str>);
 
@@ -49,8 +49,7 @@ fn find_subseqs<'a, T>(str: &'a str, subseq: impl Fn(T) -> bool + 'a) -> impl It
 
 fn parse_ip(input: &str) -> Result<Ip, ParseError> {
     let supernet = alpha1.map(|seq| (NetworkType::Supernet, seq));
-    let hypernet = delimited(complete::char('['), alpha0, complete::char(']'))
-        .map(|seq| (NetworkType::Hypernet, seq));
+    let hypernet = square_brackets(alpha0).map(|seq| (NetworkType::Hypernet, seq));
 
     let sequences = many0(hypernet.or(supernet)).run(input)?;
     let (supernet, hypernet) = sequences.into_iter()

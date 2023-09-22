@@ -1,12 +1,12 @@
-use aoc_lib::{parsing::{ParseError, Runnable, sep_by, parse_lines}, math::Range, NoSolutionError};
+use aoc_lib::{parsing::{ParseError, Runnable, parse_lines}, math::Range, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{character::complete, Parser};
+use nom::{character::complete::{char, u64}, Parser, sequence::separated_pair};
 
 // Use u64 because range is represented using an exclusive upper bound
 // u32::MAX appears in the input and would require u32::MAX + 1 to represent this
 fn parse_range(input: &str) -> Result<Range<u64>, ParseError> {
-    sep_by(complete::u64, complete::char('-'), complete::u64)
+    separated_pair(u64, char('-'), u64)
         .map(|(start, end)| Range::inclusive(start, end))
         .run(input)
 }

@@ -2,7 +2,7 @@ use std::{collections::{BTreeSet, VecDeque}, hash::Hash, iter::once};
 use aoc_lib::{parsing::{ParseError, parse_lines, Runnable, skip_over}, iteration::queue::{Dedupable, FindState}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{bytes::complete::{tag, take_till}, sequence::{terminated, preceded}, Parser, multi::separated_list0, combinator::{all_consuming, opt}, character::complete};
+use nom::{bytes::complete::{tag, take_till}, sequence::{terminated, preceded}, Parser, multi::separated_list0, combinator::opt, character::complete::char};
 
 #[derive(Debug, PartialEq, Eq, Clone, Ord, PartialOrd, Hash)]
 struct Material<'a>(&'a str);
@@ -107,9 +107,9 @@ fn parse_floor(input: &str) -> Result<Floor, ParseError> {
     let microchip = terminated(material(), tag("-compatible microchip")).map(Item::Chip);
     let item = preceded(tag("a "), generator.or(microchip));
     
-    let sep = preceded(opt(complete::char(',')), tag(" and ")).or(tag(", "));
+    let sep = preceded(opt(char(',')), tag(" and ")).or(tag(", "));
 
-    let floor = all_consuming(terminated(separated_list0(sep, item), complete::char('.')))
+    let floor = terminated(separated_list0(sep, item), char('.'))
         .map(|items| Floor(BTreeSet::from_iter(items)));
 
     preceded(skip_over("contains "), floor).run(input)

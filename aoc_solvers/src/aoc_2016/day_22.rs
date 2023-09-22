@@ -1,9 +1,9 @@
 use std::{cmp::Ordering, iter::once, collections::VecDeque};
 
-use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}}, parsing::{ParseError, Runnable, self}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
+use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}}, parsing::{ParseError, Runnable, usize}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{sequence::{preceded, delimited, tuple}, bytes::complete::tag, character::complete::{self, space1}, Parser, combinator::all_consuming};
+use nom::{sequence::{preceded, delimited, tuple}, bytes::complete::tag, character::complete::{space1, char, u8, u16}, Parser};
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 struct Node {
@@ -32,12 +32,12 @@ impl PartialOrd for Node {
 
 impl Node {
     fn parse(input: &str) -> Result<Node, ParseError> {
-        let position = delimited(complete::char('x'), parsing::usize, tag("-y")).and(parsing::usize);
+        let position = delimited(char('x'), usize, tag("-y")).and(usize);
         let position = preceded(tag("/dev/grid/node-"), position).map(Into::into);
-        let size = || delimited(space1, complete::u16, complete::char('T'));
-        let used_percent = delimited(space1, complete::u8, complete::char('%'));
+        let size = || delimited(space1, u16, char('T'));
+        let used_percent = delimited(space1, u8, char('%'));
 
-        all_consuming(tuple((position, size(), size(), size(), used_percent)))
+        tuple((position, size(), size(), size(), used_percent))
             .map(|(position, size, used, avail, used_percent)| Node {
                 position, size, used, avail, used_percent
             }).run(input)

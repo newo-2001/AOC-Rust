@@ -1,7 +1,7 @@
 use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{sequence::{tuple, preceded}, character::complete::{self, multispace1}, Parser};
+use nom::{sequence::{tuple, preceded}, character::complete::{multispace1, u32}, Parser};
 use tupletools::snd;
 
 #[derive(Clone, Copy)]
@@ -18,9 +18,9 @@ impl Triangle {
 
     fn parse(input: &str) -> Result<Triangle, ParseError> {
         tuple((
-            preceded(multispace1, complete::u32),
-            preceded(multispace1, complete::u32),
-            preceded(multispace1, complete::u32)
+            preceded(multispace1, u32),
+            preceded(multispace1, u32),
+            preceded(multispace1, u32)
         )).map(|(x, y, z)| Triangle(x, y, z))
             .run(input)
     }

@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use aoc_lib::parsing::{parse_lines, ParseError, Runnable, self};
+use aoc_lib::parsing::{parse_lines, ParseError, Runnable, isize};
 use derive_more::Display;
-use nom::{character::complete, Parser, bytes::complete::tag, sequence::preceded, combinator::all_consuming, branch::alt};
+use nom::{character::complete::{anychar, char}, Parser, bytes::complete::tag, sequence::preceded, branch::alt};
 use thiserror::Error;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Display, Debug)]
@@ -28,14 +28,14 @@ pub enum Instruction {
 
 impl Instruction {
     fn parse(input: &str) -> Result<Self, ParseError> {
-        let constant = || parsing::isize.map(Value::Constant);
-        let register = || complete::anychar.map(Register);
+        let constant = || isize.map(Value::Constant);
+        let register = || anychar.map(Register);
         let value = || constant().or(register().map(Value::Register));
 
-        let copy = preceded(tag("cpy "), value().and(preceded(complete::char(' '), register())))
+        let copy = preceded(tag("cpy "), value().and(preceded(char(' '), register())))
             .map(|(value, register)| Self::Copy(value, register));
 
-        let jnz = preceded(tag("jnz "), value().and(preceded(complete::char(' '), value())))
+        let jnz = preceded(tag("jnz "), value().and(preceded(char(' '), value())))
             .map(|(value, offset)| Self::JumpNotZero(value, offset));
         
         let inc = preceded(tag("inc "), register()).map(Self::Increment);
@@ -43,7 +43,7 @@ impl Instruction {
         let tgl = preceded(tag("tgl "), register()).map(Self::Toggle);
         let out = preceded(tag("out "), value()).map(Self::Output);
 
-        all_consuming(alt((copy, inc, dec, jnz, tgl, out))).run(input)
+        alt((copy, inc, dec, jnz, tgl, out)).run(input)
     }
 }
 

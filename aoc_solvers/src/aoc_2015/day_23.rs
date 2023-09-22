@@ -1,8 +1,8 @@
-use aoc_lib::parsing::{TextParserResult, parse_lines, Runnable, ParseError, self};
+use aoc_lib::parsing::{TextParserResult, parse_lines, Runnable, ParseError, isize};
 use aoc_runner_api::SolverResult;
 use nom::{
     Parser,
-    character::complete,
+    character::complete::char,
     sequence::{preceded, terminated},
     branch::alt, combinator::value,
     bytes::complete::tag
@@ -87,21 +87,20 @@ impl State {
 
 fn parse_instruction(input: &str) -> Result<Instruction, ParseError> {
     fn register(input: &str) -> TextParserResult<Register> {
-        value(Register::A, complete::char('a'))
-            .or(value(Register::B, complete::char('b')))
+        value(Register::A, char('a'))
+            .or(value(Register::B, char('b')))
             .parse(input)
     }
     
-    let offset = parsing::isize;
     alt((
         preceded(tag("hlf "), register).map(Instruction::Half),
         preceded(tag("tpl "), register).map(Instruction::Triple),
         preceded(tag("inc "), register).map(Instruction::Increment),
-        preceded(tag("jmp "), offset).map(Instruction::Jump),
-        preceded(tag("jie "), terminated(register, tag(", ")).and(offset))
-            .map(|(register, offset)| Instruction::JumpIfEven(register, offset)),
-        preceded(tag("jio "), terminated(register, tag(", ")).and(offset))
-            .map(|(register, offset)| Instruction::JumpIfOne(register, offset))
+        preceded(tag("jmp "), isize).map(Instruction::Jump),
+        preceded(tag("jie "), terminated(register, tag(", ")).and(isize))
+            .map(|(register, isize)| Instruction::JumpIfEven(register, isize)),
+        preceded(tag("jio "), terminated(register, tag(", ")).and(isize))
+            .map(|(register, isize)| Instruction::JumpIfOne(register, isize))
     )).run(input)
 }
 

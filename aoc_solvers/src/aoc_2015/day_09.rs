@@ -8,7 +8,7 @@ use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
-    character::complete::{alpha1, self},
+    character::complete::{alpha1, u32},
     sequence::preceded,
     Parser,
     bytes::complete::tag,
@@ -41,7 +41,7 @@ fn parse_edge(input: &str) -> Result<WeightedEdge, ParseError> {
     let edge = alpha1::<&str, VerboseError<&str>>.and(preceded(tag(" to "), alpha1))
         .map(|(from, to)| Edge(from, to));
 
-    let distance = preceded(tag(" = "), complete::u32);
+    let distance = preceded(tag(" = "), u32);
     edge.and(distance).run(input)
 }
 

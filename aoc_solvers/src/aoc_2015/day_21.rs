@@ -1,13 +1,13 @@
 use std::{cmp::{max, min}, collections::HashMap, iter};
 
-use aoc_lib::parsing::{optional_newline, Runnable, ParseError};
+use aoc_lib::parsing::{Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
     bytes::complete::tag,
-    character::complete,
-    sequence::{preceded, tuple, terminated},
-    Parser
+    character::complete::{line_ending, u32},
+    sequence::{tuple, delimited},
+    Parser, combinator::opt
 };
 
 #[derive(Clone)]
@@ -26,11 +26,12 @@ impl Entity {
     }
 
     fn parse(input: &str) -> Result<Entity, ParseError> {
-        let kv = |key| terminated(preceded(tag(key).and(tag(": ")), complete::u32), optional_newline);
+        let kv = |key| delimited(tag(key).and(tag(": ")), u32, opt(line_ending));
 
-        tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
-            .map(|(health, damage, armor)| Entity { health, damage, armor })
-            .run(input)
+        let entity = tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
+            .map(|(health, damage, armor)| Entity { health, damage, armor });
+        
+        entity.run(input)
     }
 
     fn with_gear(&self, gear: &[&Item]) -> Entity {

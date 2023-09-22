@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use aoc_lib::{parsing::{TextParserResult, Runnable, ParseError}, geometry::{Point2D, CardinalDirection, RotationDirection}};
 use aoc_runner_api::SolverResult;
-use nom::{Parser, character::complete, combinator::value, multi::separated_list0, bytes::complete::tag};
+use nom::{Parser, character::complete::{char, u16}, combinator::value, multi::separated_list0, bytes::complete::tag};
 
 struct Instruction {
     direction: RotationDirection,
@@ -24,11 +24,11 @@ impl State {
 
 fn parse_instructions(input: &str) -> Result<Vec<Instruction>, ParseError> {
     fn parse_instruction(input: &str) -> TextParserResult<Instruction> {
-        let left = value(RotationDirection::Left, complete::char('L'));
-        let right = value(RotationDirection::Right, complete::char('R'));
+        let left = value(RotationDirection::Left, char('L'));
+        let right = value(RotationDirection::Right, char('R'));
         let direction = left.or(right);
         
-        direction.and(complete::u16)
+        direction.and(u16)
             .map(|(direction, amount)| Instruction { direction, amount })
             .parse(input)
     }

@@ -1,9 +1,9 @@
 use std::{collections::HashMap, cmp::Ordering};
 
-use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, functional::repeat_apply};
+use aoc_lib::{parsing::{parse_lines, Runnable, ParseError, square_brackets}, functional::repeat_apply};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{character::{is_alphabetic, complete::{self, alpha1}}, bytes::complete::take_while1, sequence::{delimited, tuple}, Parser};
+use nom::{character::{is_alphabetic, complete::{alpha1, u32}}, bytes::complete::take_while1, sequence::tuple, Parser};
 use tupletools::fst;
 
 struct Room<'a> {
@@ -37,10 +37,9 @@ impl<'a> Room<'a> {
 
     fn parse(input: &str) -> Result<Room, ParseError> {
         let name = take_while1(|c| is_alphabetic(c as u8) || c == '-');
-        let sector_id = complete::u32;
-        let checksum = delimited(complete::char('['), alpha1, complete::char(']'));
+        let checksum = square_brackets(alpha1);
 
-        tuple((name, sector_id, checksum))
+        tuple((name, u32, checksum))
             .map(|(name, sector_id, checksum)| Room { name: String::from(name), sector_id, checksum})
             .run(input)
     }

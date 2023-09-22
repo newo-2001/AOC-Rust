@@ -3,7 +3,7 @@ use std::{collections::HashMap, hash::Hasher};
 use aoc_lib::parsing::{ParseError, Runnable, parse_lines};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{character::complete::{alpha1, self, space1}, sequence::{delimited, terminated, preceded, tuple}, multi::separated_list1, bytes::complete::tag, combinator::opt, Parser};
+use nom::{character::complete::{alpha1, space1, char, u32}, sequence::{delimited, terminated, preceded, tuple}, multi::separated_list1, bytes::complete::tag, combinator::opt, Parser};
 use std::hash::Hash;
 use thiserror::Error;
 
@@ -17,7 +17,7 @@ struct Program<'a> {
 impl<'a> Program<'a> {
     fn parse(input: &'a str) -> Result<Program<'a>, ParseError<'a>> {
         let name = terminated(alpha1, space1);
-        let weight = delimited(complete::char('('), complete::u32, complete::char(')'));
+        let weight = delimited(char('('), u32, char(')'));
         let children = preceded(tag(" -> "), separated_list1(tag(", "), alpha1));
 
         tuple((name, weight, opt(children))).map(|(name, weight, children)| Program {

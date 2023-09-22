@@ -1,6 +1,6 @@
 use aoc_lib::parsing::{curly_brackets, TextParserResult, Runnable, angle_brackets};
 use aoc_runner_api::SolverResult;
-use nom::{multi::{separated_list0, many0}, character::complete::{char, anychar, none_of}, Parser, combinator::{all_consuming, value}};
+use nom::{multi::{separated_list0, many0}, character::complete::{char, anychar, none_of}, Parser, combinator::value};
 
 enum Group {
     SubGroups(Vec<Group>),
@@ -45,11 +45,11 @@ impl Group {
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let group = all_consuming(Group::parse).run(input)?;
+    let group = Group::parse.run(input)?;
     Ok(Box::new(group.score(1)))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let group = all_consuming(Group::parse).run(input)?;
+    let group = Group::parse.run(input)?;
     Ok(Box::new(group.garbage_length()))
 }

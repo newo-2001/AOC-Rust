@@ -2,10 +2,10 @@ use std::ops::RangeFrom;
 
 use nom::{
     Parser,
-    combinator::value,
+    combinator::{value, all_consuming},
     error::{ParseError, VerboseError},
     Slice, InputIter, InputLength, AsChar,
-    multi::many_till, character::complete::{anychar, char}, bytes::complete::{take_until, self}, FindSubstring, InputTake, Compare, sequence::{terminated, delimited}
+    multi::many_till, character::complete::{anychar, char}, bytes::complete::{take_until, self}, FindSubstring, InputTake, Compare, sequence::delimited
 };
 use tupletools::snd;
 
@@ -30,15 +30,6 @@ pub fn skip_over<I, T, E>(tag: T) -> impl Parser<I, (), E>
           T: InputLength + Clone
 {
     value((), take_until(tag.clone()).and(complete::tag(tag)))
-}
-
-pub fn sep_by<I, E, L, LO, S, SO, R, RO>(left: L, sep: S, right: R) -> impl Parser<I, (LO, RO), E>
-    where L: Parser<I, LO, E>,
-          S: Parser<I, SO, E>,
-          R: Parser<I, RO, E>,
-          E: ParseError<I>
-{
-    terminated(left, sep).and(right)
 }
 
 pub fn curly_brackets<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
@@ -77,6 +68,15 @@ pub fn brackets<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
     delimited(char('('), parser, char(')'))
 }
 
+pub fn quoted<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
+    where F: Parser<I, O, E>,
+          E: ParseError<I>,
+          I: Slice<RangeFrom<usize>> + InputIter,
+          <I as InputIter>::Item: AsChar
+{
+    delimited(char('"'), parser, char('"'))
+}
+
 pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
     where F: Fn(&'a str) -> Result<T, E>
 {
@@ -86,13 +86,13 @@ pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
 }
 
 pub trait Runnable<'a, O> {
-    fn run(&mut self, input: &'a str) -> Result<O, super::ParseError<'a>>;
+    fn run(self, input: &'a str) -> Result<O, super::ParseError<'a>>;
 }
 
 impl<'a, O, F> Runnable<'a, O> for F where
     F: Parser<&'a str, O, VerboseError<&'a str>>
 {
-    fn run(&mut self, input: &'a str) -> Result<O, super::ParseError<'a>> {
-        Ok(self.parse(input)?.1)
+    fn run(self, input: &'a str) -> Result<O, super::ParseError<'a>> {
+        Ok(all_consuming(self).parse(input)?.1)
     }
 }

@@ -1,12 +1,12 @@
 use std::{cmp::{min, max}, collections::{HashSet, VecDeque}, iter, hash::Hash, error::Error};
 
-use aoc_lib::{parsing::{optional_newline, Runnable, ParseError}, NoSolutionError};
+use aoc_lib::{parsing::{Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use nom:: {
     sequence::delimited,
     Parser,
     bytes::complete::tag,
-    character::complete
+    character::complete::{u32, line_ending}, combinator::opt
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -166,7 +166,7 @@ struct Enemy {
 
 impl Enemy {
     fn parse(input: &str) -> Result<Enemy, ParseError> {
-        let kv = |key| delimited(tag(key).and(tag(": ")), complete::u32, optional_newline);
+        let kv = |key| delimited(tag(key).and(tag(": ")), u32, opt(line_ending));
 
         kv("Hit Points").and(kv("Damage"))
             .map(|(health, damage)| Enemy { health, damage })
