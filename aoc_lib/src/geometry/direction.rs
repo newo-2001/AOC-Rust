@@ -1,10 +1,12 @@
-use nom::{branch::alt, combinator::value, character::complete::one_of};
-use num::{Integer, Signed, Zero, One};
+use nom::{branch::alt, combinator::value, character::complete::one_of, bytes::complete::tag, Parser};
+use num::{Integer, Signed};
 
 use crate::parsing::TextParserResult;
 
-use super::Point2D;
+use super::{Point2D, Point3D};
 
+/// Directions that are relative to the observer in 2D space
+/// These can be used to turn to a different [`CardinalDirection`]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum RotationDirection {
     Left,
@@ -12,6 +14,11 @@ pub enum RotationDirection {
 }
 
 impl RotationDirection {
+    /// Inverts the direction
+    /// ```
+    /// Left => Right
+    /// Right => Left
+    /// ```
     #[must_use]
     pub fn inverse(self) -> RotationDirection {
         match self {
@@ -21,6 +28,12 @@ impl RotationDirection {
     }
 }
 
+/// Directions that move along the axis of 2D space
+/// ```
+///   N
+/// W   E
+///   S
+/// ```
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum CardinalDirection {
     North,
@@ -30,20 +43,21 @@ pub enum CardinalDirection {
 }
 
 impl CardinalDirection {
+    /// Used to calculate the offset created by one step in a direction
     #[must_use]
     pub fn direction_vector<T>(self) -> Point2D<T>
         where T: Signed + Integer
     {
-        let (zero, one): (T, T) = (Zero::zero(), One::one());
-
         match self {
-            Self::North => Point2D(zero, -one),
-            Self::East => Point2D(one, zero),
-            Self::South => Point2D(zero, one),
-            Self::West => Point2D(-one, zero)
+            Self::North => Point2D(T::zero(), -T::one()),
+            Self::East => Point2D(T::one(), T::zero()),
+            Self::South => Point2D(T::zero(), T::one()),
+            Self::West => Point2D(-T::one(), T::zero())
         }
     }
 
+    /// Rotate this direction by a [`RotationDirection`].
+    /// This has the effect of turning relative to an observer.
     #[must_use]
     pub fn rotate(self, rotation_direction: RotationDirection) -> CardinalDirection {
         match (self, rotation_direction) {
@@ -58,6 +72,12 @@ impl CardinalDirection {
         }
     }
 
+    /// Parse a [`CardinalDirection`] from a variety of representations like:
+    /// ```
+    ///   U   |   N   |   ^
+    /// L   R | W   E | <   >
+    ///   D   |   S   |   V
+    /// ```
     pub fn parse(input: &str) -> TextParserResult<CardinalDirection> {
         alt((
             value(Self::North, one_of("UuNn^")),
@@ -88,6 +108,12 @@ impl CardinalDirection {
     }
 }
 
+/// Directions that move diagonally in 2D space.
+/// ```
+/// NW NE
+///  
+/// SW WE
+/// ```
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 
 pub enum OrdinalDirection {
@@ -98,6 +124,7 @@ pub enum OrdinalDirection {
 }
 
 impl OrdinalDirection {
+    /// Used to calculate the offset created by one step in a direction
     #[must_use]
     pub fn direction_vector<T>(self) -> Point2D<T>
         where T: Integer + Signed
@@ -112,20 +139,100 @@ impl OrdinalDirection {
     }
 }
 
+/// Combines [`CardinalDirection`] and [`OrdinalDirection`].
+/// This allows for movement along 8 directions in 2D space.
+/// ```
+/// NW N NE
+/// W     E
+/// SW S WE
+/// ```
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum Direction {
+pub enum Direction2D {
     Cardinal(CardinalDirection),
     Ordinal(OrdinalDirection)
 }
 
-impl Direction {
+impl Direction2D {
+    /// Used to calculate the offset created by one step in a direction
     #[must_use]
-    pub fn direction_vector<T>(self) -> Point2D<T>
-        where T: Integer + Signed
-    {
+    pub fn direction_vector<T: Integer + Signed>(self) -> Point2D<T> {
         match self {
             Self::Cardinal(direction) => direction.direction_vector(),
             Self::Ordinal(direction) => direction.direction_vector()
         }
+    }
+}
+
+/// Directions that move along the axis of 3D space.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Direction3D {
+    North,
+    East,
+    South,
+    West,
+    Up,
+    Down
+}
+
+impl Direction3D {
+    /// Used to calculate the offset created by one step in a direction.
+    #[must_use]
+    pub fn direction_vector<T: Integer + Signed>(self) -> Point3D<T> {
+        match self {
+            Self::North => Point3D(T::zero(), -T::one(), T::zero()),
+            Self::East => Point3D(T::one(), T::zero(), T::zero()),
+            Self::South => Point3D(T::zero(), T::one(), T::zero()),
+            Self::West => Point3D(-T::one(), T::zero(), T::zero()),
+            Self::Up => Point3D(T::zero(), T::zero(), T::one()),
+            Self::Down => Point3D(T::zero(), T::zero(), -T::one())
+        }
+    }
+}
+
+/// Directions that move to neighbouring tiles on a 2D hex grid.
+/// ```
+///   \ N  /
+/// NW +--+ NE
+///   /    \
+/// -+      +-
+///   \    /
+/// SW +--+ SE
+///   / S  \
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum HexDirection {
+    North,
+    South,
+    NorthEast,
+    NorthWest,
+    SouthEast,
+    SouthWest
+}
+
+impl HexDirection {
+    /// Used to calculate the offset created by one step in a direction.
+    #[must_use]
+    pub fn direction_vector<T: Integer + Signed>(self) -> Point3D<T> {
+        match self {
+            Self::North => Point3D(T::zero(), -T::one(), T::one()),
+            Self::NorthEast => Point3D(T::one(), -T::one(), T::zero()),
+            Self::SouthEast => Point3D(T::one(), T::zero(), -T::one()),
+            Self::South => Point3D(T::zero(), T::one(), -T::one()),
+            Self::SouthWest => Point3D(-T::one(), T::one(), T::zero()),
+            Self::NorthWest => Point3D(-T::one(), T::zero(), T::one())
+        }
+    }
+
+    /// Parse a [`HexDirection`] from a string.
+    /// Valid representations are: NE, SE, S, N, NW, and SW.
+    pub fn parse(input: &str) -> TextParserResult<HexDirection> {
+        alt((
+            value(Self::NorthEast, tag("ne").or(tag("NE"))),
+            value(Self::NorthWest, tag("nw").or(tag("NW"))),
+            value(Self::SouthEast, tag("se").or(tag("SE"))),
+            value(Self::SouthWest, tag("sw").or(tag("SW"))),
+            value(Self::North, one_of("Nn")),
+            value(Self::South, one_of("Ss"))
+        )).parse(input)
     }
 }
