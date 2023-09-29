@@ -1,6 +1,6 @@
 use std::{collections::HashMap, iter::once};
 
-use aoc_lib::{geometry::{Point2D, CardinalDirection, RotationDirection}, NoSolutionError};
+use aoc_lib::{geometry::{Point2D, CardinalDirection, RotationDirection, Directional, Direction2D}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use num::{abs, Integer};
 
@@ -62,7 +62,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let mut grid: HashMap::<Point2D, u32> = once((Point2D::zero(), 1)).collect();
     
     for point in spiral {
-        let value: u32 = point.neighbours()
+        let value: u32 = point.neighbours(Direction2D::all())
             .filter_map(|neighbour| grid.get(&neighbour))
             .sum();
 

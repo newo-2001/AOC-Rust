@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, iter::once, fmt::{Display, Formatter, self}};
 
-use aoc_lib::{geometry::{Point2D, CardinalDirection, Area, Dimensions}, iteration::queue::{Queue, FindState, FoldState}, NoSolutionError};
+use aoc_lib::{geometry::{Point2D, CardinalDirection, Area, Dimensions, Directional}, iteration::queue::{Queue, FindState, FoldState}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use hex::ToHex;
 

@@ -1,6 +1,7 @@
 #![feature(
     step_trait,
-    return_position_impl_trait_in_trait
+    return_position_impl_trait_in_trait,
+    impl_trait_in_assoc_type
 )]
 
 #![allow(

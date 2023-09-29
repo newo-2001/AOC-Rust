@@ -5,6 +5,10 @@ use crate::parsing::TextParserResult;
 
 use super::{Point2D, Point3D};
 
+pub trait Directional: Sized {
+    fn direction_vector<T: Integer + Signed>(self) -> Point2D<T>;
+}
+
 /// Directions that are relative to the observer in 2D space
 /// These can be used to turn to a different [`CardinalDirection`]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -42,11 +46,10 @@ pub enum CardinalDirection {
     West
 }
 
-impl CardinalDirection {
+impl Directional for CardinalDirection {
     /// Used to calculate the offset created by one step in a direction
-    #[must_use]
-    pub fn direction_vector<T>(self) -> Point2D<T>
-        where T: Signed + Integer
+    fn direction_vector<T>(self) -> Point2D<T>
+        where T: Integer + Signed
     {
         match self {
             Self::North => Point2D(T::zero(), -T::one()),
@@ -55,7 +58,9 @@ impl CardinalDirection {
             Self::West => Point2D(-T::one(), T::zero())
         }
     }
+}
 
+impl CardinalDirection {
     /// Rotate this direction by a [`RotationDirection`].
     /// This has the effect of turning relative to an observer.
     #[must_use]
@@ -70,6 +75,10 @@ impl CardinalDirection {
             | (Self::East, RotationDirection::Right)
             | (Self::West, RotationDirection::Left) => Self::South
         }
+    }
+
+    pub fn all() -> [CardinalDirection; 4] {
+        [Self::North, Self::East, Self::South, Self::West]
     }
 
     /// Parse a [`CardinalDirection`] from a variety of representations like:
@@ -123,10 +132,9 @@ pub enum OrdinalDirection {
     NorthWest
 }
 
-impl OrdinalDirection {
+impl Directional for OrdinalDirection {
     /// Used to calculate the offset created by one step in a direction
-    #[must_use]
-    pub fn direction_vector<T>(self) -> Point2D<T>
+    fn direction_vector<T>(self) -> Point2D<T>
         where T: Integer + Signed
     {
         use CardinalDirection as Dir;
@@ -136,6 +144,12 @@ impl OrdinalDirection {
             Self::SouthEast => Dir::South.direction_vector() + Dir::East.direction_vector(),
             Self::SouthWest => Dir::South.direction_vector() + Dir::West.direction_vector()
         }
+    }
+}
+
+impl OrdinalDirection {
+    pub fn all() -> [OrdinalDirection; 4] {
+        [Self::NorthEast, Self::SouthEast, Self::SouthWest, Self::NorthWest]
     }
 }
 
@@ -152,14 +166,31 @@ pub enum Direction2D {
     Ordinal(OrdinalDirection)
 }
 
-impl Direction2D {
+impl Directional for Direction2D {
     /// Used to calculate the offset created by one step in a direction
-    #[must_use]
-    pub fn direction_vector<T: Integer + Signed>(self) -> Point2D<T> {
+    fn direction_vector<T: Integer + Signed>(self) -> Point2D<T> {
         match self {
             Self::Cardinal(direction) => direction.direction_vector(),
             Self::Ordinal(direction) => direction.direction_vector()
         }
+    }
+}
+
+impl Direction2D {
+    pub fn all() -> [Direction2D; 8] {
+        use CardinalDirection as Card;
+        use OrdinalDirection as Ord;
+
+        [
+            Self::Cardinal(Card::North),
+            Self::Ordinal(Ord::NorthEast),
+            Self::Cardinal(Card::East),
+            Self::Ordinal(Ord::SouthEast),
+            Self::Cardinal(Card::South),
+            Self::Ordinal(Ord::SouthWest),
+            Self::Cardinal(Card::West),
+            Self::Ordinal(Ord::NorthWest)
+        ]
     }
 }
 
@@ -186,6 +217,10 @@ impl Direction3D {
             Self::Up => Point3D(T::zero(), T::zero(), T::one()),
             Self::Down => Point3D(T::zero(), T::zero(), -T::one())
         }
+    }
+
+    pub fn all() -> [Direction3D; 6] {
+        [Self::North, Self::East, Self::South, Self::West, Self::Up, Self::Down]
     }
 }
 
@@ -221,6 +256,13 @@ impl HexDirection {
             Self::SouthWest => Point3D(-T::one(), T::one(), T::zero()),
             Self::NorthWest => Point3D(-T::one(), T::zero(), T::one())
         }
+    }
+
+    pub fn all() -> [HexDirection; 6] {
+        [
+            Self::North, Self::NorthEast, Self::SouthEast,
+            Self::South, Self::SouthWest, Self::NorthWest
+        ]
     }
 
     /// Parse a [`HexDirection`] from a string.

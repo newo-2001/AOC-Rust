@@ -74,7 +74,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     parse_lines(parse_step, input)?
         .iter().try_for_each(|step| step.apply(&mut grid))?;
 
-    Ok(Box::new(grid.count_lit()))
+    Ok(Box::new(grid.pop_count()))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {

@@ -6,7 +6,7 @@ use num::{Integer, clamp, Zero, One, NumCast, Signed, FromPrimitive};
 
 use crate::parsing::TextParserResult;
 
-use super::{Direction2D, CardinalDirection, OrdinalDirection, Dimensions};
+use super::{Dimensions, Directional};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Add, AddAssign, Sub, SubAssign)]
 pub struct Point2D<T = i32>(pub T, pub T) where T: Integer;
@@ -51,33 +51,15 @@ impl<T: Integer + Copy> Point2D<T> {
         Point2D(x, y)
     }
 
-    /// Computes the direct neigbours of this point when taking a step in every [`CardinalDirection`].
+    /// Computes the neigbours of this point in the given directions
     /// If this calculation would overflow `T`, the neighbours are not included in the list.
-    pub fn direct_neighbours(self) -> impl Iterator<Item=Point2D<T>>
-        where T: NumCast
+    pub fn neighbours<I, D>(self, directions: I) -> impl Iterator<Item=Point2D<T>>
+        where T: NumCast,
+              I: IntoIterator<Item=D>,
+              D: Directional,
     {
-        [
-            Direction2D::Cardinal(CardinalDirection::North),
-            Direction2D::Cardinal(CardinalDirection::East),
-            Direction2D::Cardinal(CardinalDirection::South),
-            Direction2D::Cardinal(CardinalDirection::West),
-        ].into_iter()
+        directions.into_iter()
             .filter_map(move |direction| self.checked_add(direction.direction_vector::<i64>()))
-    }
-
-    /// Computes the neigbours of this point when taking a step in every [`Direction2D`].
-    /// If this calculation would overflow `T`, the neighbours are not included in the list.
-    pub fn neighbours(self) -> impl Iterator<Item=Point2D<T>>
-        where T: NumCast
-    {
-        [
-            Direction2D::Ordinal(OrdinalDirection::NorthEast),
-            Direction2D::Ordinal(OrdinalDirection::SouthEast),
-            Direction2D::Ordinal(OrdinalDirection::SouthWest),
-            Direction2D::Ordinal(OrdinalDirection::NorthWest)
-        ].into_iter()
-            .filter_map(move |direction| self.checked_add(direction.direction_vector::<i64>()))
-            .chain(self.direct_neighbours())
     }
 }
 

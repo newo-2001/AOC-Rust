@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, iter::once, collections::VecDeque};
 
-use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}}, parsing::{ParseError, Runnable, usize}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
+use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, Direction2D, CardinalDirection}, parsing::{ParseError, Runnable, usize}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{preceded, delimited, tuple}, bytes::complete::tag, character::complete::{space1, char, u8, u16}, Parser};
@@ -79,7 +79,8 @@ fn find_path(grid: &Grid<Bit>, from: Point2D<usize>, to: Point2D<usize>) -> Resu
         .recursive_find(|depth| {
             if depth.state == to { return FindState::Result(depth.depth) }
 
-            let moves = depth.state.neighbours()
+            let moves = depth.state
+                .neighbours(Direction2D::all())
                 .filter_map(|position| {
                     (!grid.get(position)?.is_solid())
                         .then_some(depth.with(position))
@@ -108,7 +109,8 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .ok_or(NoSolutionError)?.position;
 
     let grid = grid.map(|node| {
-        let neighbours = node.position.direct_neighbours()
+        let neighbours = node.position
+            .neighbours(CardinalDirection::all())
             .filter_map(|position| grid.get(position));
 
         node.as_tile(neighbours)

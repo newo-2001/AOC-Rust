@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, iter::once, hash::Hash};
 
-use aoc_lib::{geometry::Point2D, iteration::queue::{Dedupable, FindState, IterState}, NoSolutionError, math::Bit};
+use aoc_lib::{geometry::{Point2D, CardinalDirection}, iteration::queue::{Dedupable, FindState, IterState}, NoSolutionError, math::Bit};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use num::Integer;
@@ -39,7 +39,7 @@ impl Grid {
     }
 
     fn moves_at(&self, SearchState { location, depth }: SearchState) -> Vec<SearchState> {
-        location.direct_neighbours()
+        location.neighbours(CardinalDirection::all())
             .filter(|&location| !self.get(location).is_solid())
             .map(|location| SearchState { location, depth: depth + 1 })
             .collect_vec()

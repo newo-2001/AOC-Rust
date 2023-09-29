@@ -19,7 +19,7 @@ pub trait GridLike: Sized {
     }
 
     fn enumerate(&self) -> impl Iterator<Item=(Point2D<usize>, &Self::GridItem)> {
-        self.area().iter().zip(self.iter())
+        self.area().into_iter().zip(self.iter())
     }
 
     fn iter_rows(&self) -> GridRowIterator<Self> {

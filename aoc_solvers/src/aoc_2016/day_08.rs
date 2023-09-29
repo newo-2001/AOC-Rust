@@ -74,7 +74,7 @@ fn final_grid(input: &str) -> Result<Grid<Bit>, Box<dyn Error + '_ + Send + Sync
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let grid = final_grid(input)?;
-    Ok(Box::new(grid.count_lit()))
+    Ok(Box::new(grid.pop_count()))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {

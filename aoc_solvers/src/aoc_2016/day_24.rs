@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, iter::once, fmt::Display};
 
-use aoc_lib::{math::Bit, parsing::InvalidTokenError, geometry::{Dimensions, grid::{Grid, GridLike}, Point2D, WrongDimensionsError}, iteration::{queue::{SearchDepth, Dedupable, FindState}, SingleError, ExtraIter}, NoSolutionError};
+use aoc_lib::{math::Bit, parsing::InvalidTokenError, geometry::{Dimensions, grid::{Grid, GridLike}, Point2D, WrongDimensionsError, CardinalDirection}, iteration::{queue::{SearchDepth, Dedupable, FindState}, SingleError, ExtraIter}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::{Itertools, Either};
 use thiserror::Error;
@@ -48,7 +48,7 @@ impl Vent {
                 } else if !search.state.returning { search.state.returning = true }
             }
 
-            let neighbours = search.state.position.direct_neighbours();
+            let neighbours = search.state.position.neighbours(CardinalDirection::all());
             let branches = neighbours.filter(|&position| {
                 let tile = self.grid.get(position).unwrap_or(&Bit::On);
                 !tile.is_solid()

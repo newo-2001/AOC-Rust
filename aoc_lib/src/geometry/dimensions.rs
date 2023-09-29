@@ -53,6 +53,12 @@ impl From<Point2D<usize>> for Dimensions {
     }
 }
 
+impl From<usize> for Dimensions {
+    fn from(value: usize) -> Self {
+        Self(value, value)
+    }
+}
+
 #[derive(Debug, Error)]
 #[error("Data did not have the expected dimensions, expected: {expected}")]
 pub struct WrongDimensionsError {

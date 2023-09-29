@@ -67,3 +67,16 @@ impl<T> Queue for VecDeque<T> {
         self.push_back(item);
     }
 }
+
+impl<T> Queue for Vec<T> {
+    type In = T;
+    type Out = T;
+
+    fn pop(&mut self) -> Option<Self::Out> {
+        self.pop()
+    }
+
+    fn push(&mut self, item: Self::In) {
+        self.push(item)
+    }
+}

@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::parsing::InvalidTokenError;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Hash)]
 pub enum Bit {
     #[default]
     Off,

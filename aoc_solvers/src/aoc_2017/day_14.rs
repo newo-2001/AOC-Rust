@@ -1,18 +1,50 @@
-use std::u8;
+use std::collections::HashSet;
 
+use aoc_lib::{geometry::{grid::{BitGrid, Grid, GridLike}, CardinalDirection, Point2D}, math::Bit};
 use aoc_runner_api::SolverResult;
+use bitvec::vec::BitVec;
+use bitvec::prelude::Msb0;
 use composing::compose_fn;
 
 use super::knot_hash;
 
-pub fn solve_part_1(input: &str) -> SolverResult {
-    let ones: u32 = (0..128)
-        .map(|n| format!("{input}-{n}"))
-        .map(compose_fn!(knot_hash::hash => hex::decode))
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .flat_map(|bytes| bytes.into_iter().map(u8::count_ones))
-        .sum();
+fn parse_grid(input: &str) -> Grid<Bit> {
+    let bits = (0..128u8)
+        .flat_map(compose_fn!(
+            |n| format!("{input}-{n}") =>
+            knot_hash::hash =>
+            hex::decode =>
+            Result::unwrap =>
+            BitVec::<_, Msb0>::from_vec =>
+            IntoIterator::into_iter
+        )).map(Bit::from);
 
-    Ok(Box::new(ones))
+    Grid::from_iter(128.into(), bits).unwrap()
+}
+
+pub fn solve_part_1(input: &str) -> SolverResult {
+    let grid = parse_grid(input);
+    Ok(Box::new(grid.pop_count()))
+}
+
+pub fn solve_part_2(input: &str) -> SolverResult {
+    let grid = parse_grid(input);
+
+    // TODO: Clean this up at some point
+    let mut regions = 0;
+    let mut seen = HashSet::<Point2D<usize>>::new();
+    for location in grid.area() {
+        if !seen.contains(&location) && grid[location].is_enabled() { regions += 1; }
+
+        let mut todo = vec![location];
+        while let Some(location) = todo.pop() {
+            let is_enabled = grid.get(location).map_or(false, |state| state.is_enabled());
+            if !is_enabled || seen.contains(&location) { continue; }
+
+            todo.extend(location.neighbours(CardinalDirection::all()));
+            seen.insert(location);
+        }
+    }
+    
+    Ok(Box::new(regions))
 }
