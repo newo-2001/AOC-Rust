@@ -6,7 +6,6 @@ fn iterations(jumps: &mut[isize], mutator: impl Fn(isize) -> isize) -> usize {
     let mut ip = 0;
     let mut index = 0;
 
-    #[allow(clippy::maybe_infinite_iter)]
     loop {
         if let Some(instruction) = jumps.get_mut(ip) {
             if let Some(updated_ip) = ip.checked_add_signed(*instruction) {

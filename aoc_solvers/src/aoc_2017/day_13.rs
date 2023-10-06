@@ -28,7 +28,8 @@ impl Scanner {
 fn trip_severity<'a>(scanners: impl IntoIterator<Item=&'a Scanner>, time: u32) -> Option<u32> {
     let mut severities = scanners.into_iter()
         .filter_map(|scanner| {
-            (scanner.depth + time).is_multiple_of(&scanner.cycle())
+            (scanner.depth + time)
+                .is_multiple_of(&scanner.cycle())
                 .then_some(scanner.severity())
         }).peekable();
         

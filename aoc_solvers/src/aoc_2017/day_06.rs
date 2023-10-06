@@ -36,7 +36,7 @@ fn first_cycle(mut banks: Vec<u32>) -> Cycle {
 fn parse_banks(input: &str) -> Result<Vec<u32>, ParseIntError> {
     input.split_whitespace()
         .map(str::parse)
-        .try_collect()
+        .collect()
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
