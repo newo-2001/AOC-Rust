@@ -22,11 +22,13 @@ fn parse_grid(input: &str) -> Grid<Bit> {
     Grid::from_iter(128.into(), bits).unwrap()
 }
 
+#[allow(clippy::unnecessary_wraps)]
 pub fn solve_part_1(input: &str) -> SolverResult {
     let grid = parse_grid(input);
     Ok(Box::new(grid.pop_count()))
 }
 
+#[allow(clippy::unnecessary_wraps)]
 pub fn solve_part_2(input: &str) -> SolverResult {
     let grid = parse_grid(input);
 

@@ -77,6 +77,7 @@ impl CardinalDirection {
         }
     }
 
+    #[must_use]
     pub fn all() -> [CardinalDirection; 4] {
         [Self::North, Self::East, Self::South, Self::West]
     }
@@ -148,6 +149,7 @@ impl Directional for OrdinalDirection {
 }
 
 impl OrdinalDirection {
+    #[must_use]
     pub fn all() -> [OrdinalDirection; 4] {
         [Self::NorthEast, Self::SouthEast, Self::SouthWest, Self::NorthWest]
     }
@@ -177,6 +179,7 @@ impl Directional for Direction2D {
 }
 
 impl Direction2D {
+    #[must_use]
     pub fn all() -> [Direction2D; 8] {
         use CardinalDirection as Card;
         use OrdinalDirection as Ord;
@@ -219,6 +222,7 @@ impl Direction3D {
         }
     }
 
+    #[must_use]
     pub fn all() -> [Direction3D; 6] {
         [Self::North, Self::East, Self::South, Self::West, Self::Up, Self::Down]
     }
@@ -258,6 +262,7 @@ impl HexDirection {
         }
     }
 
+    #[must_use]
     pub fn all() -> [HexDirection; 6] {
         [
             Self::North, Self::NorthEast, Self::SouthEast,

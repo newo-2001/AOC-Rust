@@ -77,6 +77,6 @@ impl<T> Queue for Vec<T> {
     }
 
     fn push(&mut self, item: Self::In) {
-        self.push(item)
+        self.push(item);
     }
 }
