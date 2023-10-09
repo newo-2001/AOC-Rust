@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use ahash::{HashMap, HashMapExt};
 use aoc_lib::parsing::{parse_lines, ParseError, Runnable, isize};
 use derive_more::Display;
 use nom::{character::complete::{anychar, char}, Parser, bytes::complete::tag, sequence::preceded, branch::alt};

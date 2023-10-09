@@ -1,5 +1,6 @@
-use std::{collections::HashMap, cmp::Ordering};
+use std::cmp::Ordering;
 
+use ahash::{HashMap, HashMapExt};
 use aoc_lib::{parsing::{ParseError, TextParserResult, Runnable, parse_lines}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use nom::{combinator::value, Parser, bytes::complete::tag, character::complete::{alpha1, i32}, sequence::{preceded, tuple}, branch::alt};

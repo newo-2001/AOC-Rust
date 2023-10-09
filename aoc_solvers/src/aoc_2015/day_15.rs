@@ -1,7 +1,8 @@
+use ahash::HashMap;
 use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 
-use std::{collections::{HashMap, VecDeque}, iter::{self, once}};
+use std::{collections::VecDeque, iter::{self, once}};
 
 use nom::{
     sequence::{tuple, preceded, terminated},

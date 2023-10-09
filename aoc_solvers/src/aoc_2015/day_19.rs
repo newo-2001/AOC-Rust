@@ -1,5 +1,6 @@
-use std::collections::{HashSet, BTreeSet};
+use std::collections::BTreeSet;
 
+use ahash::{HashSet, HashSetExt};
 use aoc_lib::parsing::parse_lines;
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;

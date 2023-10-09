@@ -1,5 +1,4 @@
-use std::collections::HashSet;
-
+use ahash::HashSet;
 use aoc_lib::{parsing::{Runnable, parse_lines, ParseError, square_brackets}, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 use itertools::{traits::HomogeneousTuple, Itertools, Either};

@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use ahash::{HashMap, HashMapExt};
 use aoc_lib::parsing::{ParseError, Runnable, usize};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;

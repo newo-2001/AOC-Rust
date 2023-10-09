@@ -1,5 +1,6 @@
-use std::{collections::HashMap, cell::RefCell};
+use std::cell::RefCell;
 
+use ahash::{HashMap, HashMapExt};
 use aoc_lib::{functional::swap, parsing::{ParseError, parse_lines, Runnable}};
 use aoc_runner_api::SolverResult;
 use nom::{character::complete::{alpha1, u32, u8}, sequence::{terminated, preceded}, bytes::complete::tag, Parser, branch::alt};

@@ -1,5 +1,6 @@
-use std::{cmp::{min, max}, collections::{HashSet, VecDeque}, iter, hash::Hash, error::Error};
+use std::{cmp::{min, max}, collections::VecDeque, iter, hash::{Hash, Hasher}, error::Error};
 
+use ahash::{HashSet, HashSetExt};
 use aoc_lib::{parsing::{Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use nom:: {
@@ -23,7 +24,7 @@ struct StatusEffect {
 }
 
 impl Hash for StatusEffect {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    fn hash<H: Hasher>(&self, state: &mut H) {
         self.effect.hash(state);
     }
 }

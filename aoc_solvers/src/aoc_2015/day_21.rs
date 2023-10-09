@@ -1,5 +1,6 @@
-use std::{cmp::{max, min}, collections::HashMap, iter};
+use std::{cmp::{max, min}, iter};
 
+use ahash::HashMap;
 use aoc_lib::parsing::{Runnable, ParseError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;

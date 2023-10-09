@@ -1,5 +1,6 @@
-use std::{collections::HashMap, iter::once};
+use std::iter::once;
 
+use ahash::HashMap;
 use aoc_lib::{geometry::{Point2D, CardinalDirection, RotationDirection, Directional, Direction2D}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use num::{abs, Integer};

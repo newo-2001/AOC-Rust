@@ -1,9 +1,9 @@
 use std::{
-    collections::{HashMap, HashSet},
     hash::{Hash, Hasher},
     cmp::{max, min}
 };
 
+use ahash::{HashSet, HashMap};
 use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;

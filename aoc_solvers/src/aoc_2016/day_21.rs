@@ -1,5 +1,6 @@
-use std::{ops::RangeInclusive, collections::HashMap};
+use std::ops::RangeInclusive;
 
+use ahash::HashMap;
 use aoc_lib::parsing::{ParseError, parse_lines, Runnable, usize};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;

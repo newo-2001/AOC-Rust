@@ -1,4 +1,6 @@
-use std::{collections::HashSet, hash::Hash, mem};
+use std::{hash::Hash, mem};
+
+use ahash::{HashSet, HashSetExt};
 
 use super::{Queue, recursive_fold::{recursive_fold, try_recursive_fold}, FoldState, FindState, recursive_find::{recursive_find, try_recursive_find}, IterState, recursive_iter::recursive_iter};
 
@@ -13,7 +15,7 @@ pub trait Dedupable
     where Self: Queue + Default
 {
     fn filter_duplicates(self) -> DuplicateFilter<Self> {
-        DuplicateFilter { queue: self, seen: HashSet::new() }
+        DuplicateFilter { queue: self, seen: HashSet::<Self::Out>::new() }
     }
 }
 

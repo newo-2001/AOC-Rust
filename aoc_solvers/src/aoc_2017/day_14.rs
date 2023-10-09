@@ -1,5 +1,4 @@
-use std::collections::HashSet;
-
+use ahash::{HashSet, HashSetExt};
 use aoc_lib::{geometry::{grid::{BitGrid, Grid, GridLike}, CardinalDirection, Point2D}, math::Bit};
 use aoc_runner_api::SolverResult;
 use bitvec::vec::BitVec;

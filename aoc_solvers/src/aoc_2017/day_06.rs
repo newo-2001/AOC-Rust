@@ -1,5 +1,6 @@
-use std::{collections::{HashMap, hash_map::OccupiedError}, num::ParseIntError};
+use std::{collections::hash_map::OccupiedError, num::ParseIntError};
 
+use ahash::{HashMap, HashMapExt};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 
