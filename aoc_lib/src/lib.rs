@@ -15,6 +15,7 @@ pub mod math;
 pub mod geometry;
 pub mod iteration;
 pub mod functional;
+pub mod datastructures;
 
 mod errors;
 pub use errors::*;
