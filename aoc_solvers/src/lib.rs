@@ -7,7 +7,8 @@
     map_try_insert,
     trait_alias,
     iter_next_chunk,
-    iter_array_chunks
+    iter_array_chunks,
+    linked_list_cursors
 )]
 
 #![allow(

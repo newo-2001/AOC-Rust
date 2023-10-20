@@ -1,7 +1,7 @@
 use std::{collections::hash_map::OccupiedError, num::ParseIntError};
 
 use ahash::{HashMap, HashMapExt};
-use aoc_lib::datastructures::growable_ring_buffer::GrowableRingBuffer;
+use aoc_lib::datastructures::GrowableRingBuffer;
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 
