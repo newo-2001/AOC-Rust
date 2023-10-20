@@ -1,5 +1,5 @@
 
-use aoc_lib::parsing::{parse_lines, quoted, ParseError, Runnable, TextParserResult};
+use aoc_lib::parsing::{parse_lines, quoted, ParseError, TextParser, TextParserResult};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{

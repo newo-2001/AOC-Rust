@@ -1,4 +1,4 @@
-use aoc_lib::{parsing::{ParseError, Runnable, parse_lines}, math::Range, NoSolutionError};
+use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, math::Range, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{char, u64}, Parser, sequence::separated_pair};

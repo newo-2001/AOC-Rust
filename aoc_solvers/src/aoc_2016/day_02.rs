@@ -1,4 +1,4 @@
-use aoc_lib::{geometry::{CardinalDirection, Point2D, Directional}, parsing::{parse_lines, Runnable, ParseError}};
+use aoc_lib::{geometry::{CardinalDirection, Point2D, Directional}, parsing::{parse_lines, TextParser, ParseError}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::multi::many0;

@@ -1,7 +1,7 @@
 use std::{cmp::{max, min}, iter};
 
 use ahash::HashMap;
-use aoc_lib::parsing::{Runnable, ParseError};
+use aoc_lib::parsing::{TextParser, ParseError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{

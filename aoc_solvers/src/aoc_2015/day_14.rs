@@ -1,7 +1,7 @@
 use std::cmp::min;
 
 use ahash::HashMap;
-use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded, delimited}, bytes::complete::tag, character::complete::{alpha1, u32}, Parser};

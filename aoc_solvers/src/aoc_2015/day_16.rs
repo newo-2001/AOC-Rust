@@ -1,5 +1,5 @@
 use ahash::HashMap;
-use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, NoSolutionError};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{

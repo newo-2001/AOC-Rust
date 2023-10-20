@@ -1,4 +1,4 @@
-use aoc_lib::parsing::{TextParserResult, parse_lines, Runnable, ParseError, isize};
+use aoc_lib::parsing::{TextParserResult, parse_lines, TextParser, ParseError, isize};
 use aoc_runner_api::SolverResult;
 use nom::{
     Parser,

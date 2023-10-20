@@ -1,6 +1,6 @@
 use std::ops::Add;
 
-use aoc_lib::{geometry::{Point3D, HexDirection}, parsing::{Runnable, ParseError}, NoInputError};
+use aoc_lib::{geometry::{Point3D, HexDirection}, parsing::{TextParser, ParseError}, NoInputError};
 use aoc_runner_api::SolverResult;
 use nom::{multi::separated_list0, character::complete::char};
 

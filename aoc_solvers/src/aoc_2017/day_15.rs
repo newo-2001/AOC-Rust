@@ -1,4 +1,4 @@
-use aoc_lib::{iteration::ExtraIter, parsing::{TextParserResult, Runnable, ParseError}};
+use aoc_lib::{iteration::ExtraIter, parsing::{TextParserResult, TextParser, ParseError}};
 use aoc_runner_api::SolverResult;
 use nom::{bytes::complete::tag, character::complete::{anychar, line_ending, u128}, sequence::{tuple, preceded, terminated}, Parser, combinator::opt};
 use num::Integer;

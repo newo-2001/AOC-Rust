@@ -1,5 +1,5 @@
 use ahash::HashSet;
-use aoc_lib::{parsing::{Runnable, parse_lines, ParseError, square_brackets}, iteration::ExtraIter};
+use aoc_lib::{parsing::{TextParser, parse_lines, ParseError, square_brackets}, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 use itertools::{traits::HomogeneousTuple, Itertools, Either};
 use nom::{Parser, character::complete::{alpha0, alpha1}, multi::many0};

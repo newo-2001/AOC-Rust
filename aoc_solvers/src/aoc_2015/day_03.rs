@@ -1,5 +1,5 @@
 use ahash::HashSet;
-use aoc_lib::{geometry::{CardinalDirection, Point2D, Directional}, parsing::{Runnable, ParseError}};
+use aoc_lib::{geometry::{CardinalDirection, Point2D, Directional}, parsing::{TextParser, ParseError}};
 use aoc_runner_api::SolverResult;
 use nom::multi::many0;
 

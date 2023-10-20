@@ -1,6 +1,6 @@
 use std::{collections::HashMap, cmp::Ordering};
 
-use aoc_lib::{parsing::{parse_lines, Runnable, ParseError, square_brackets}, functional::repeat_apply};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError, square_brackets}, functional::repeat_apply};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{character::{is_alphabetic, complete::{alpha1, u32}}, bytes::complete::take_while1, sequence::tuple, Parser};

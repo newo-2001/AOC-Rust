@@ -1,7 +1,7 @@
 use std::ops::RangeInclusive;
 
 use ahash::HashMap;
-use aoc_lib::parsing::{ParseError, parse_lines, Runnable, usize};
+use aoc_lib::parsing::{ParseError, parse_lines, TextParser, usize};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{combinator::opt, branch::alt, sequence::{delimited, preceded}, bytes::complete::tag, Parser, character::complete::{anychar, char}};

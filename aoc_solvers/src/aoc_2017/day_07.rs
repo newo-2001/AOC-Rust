@@ -1,7 +1,7 @@
 use std::hash::{Hash, Hasher};
 
 use ahash::HashMap;
-use aoc_lib::parsing::{ParseError, Runnable, parse_lines, brackets};
+use aoc_lib::parsing::{ParseError, TextParser, parse_lines, brackets};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{alpha1, space1, u32}, sequence::{terminated, preceded, tuple}, multi::separated_list1, bytes::complete::tag, combinator::opt, Parser};

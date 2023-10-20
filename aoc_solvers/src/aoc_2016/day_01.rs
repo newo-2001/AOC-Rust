@@ -1,5 +1,5 @@
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::{TextParserResult, Runnable, ParseError}, geometry::{Point2D, CardinalDirection, RotationDirection, Directional}};
+use aoc_lib::{parsing::{TextParserResult, TextParser, ParseError}, geometry::{Point2D, CardinalDirection, RotationDirection, Directional}};
 use aoc_runner_api::SolverResult;
 use nom::{Parser, character::complete::{char, u16}, combinator::value, multi::separated_list0, bytes::complete::tag};
 

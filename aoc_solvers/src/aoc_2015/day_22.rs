@@ -1,7 +1,7 @@
 use std::{cmp::{min, max}, collections::VecDeque, iter, hash::{Hash, Hasher}, error::Error};
 
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::{Runnable, ParseError}, NoSolutionError};
+use aoc_lib::{parsing::{TextParser, ParseError}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use nom:: {
     sequence::delimited,

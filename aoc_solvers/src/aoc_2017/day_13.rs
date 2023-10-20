@@ -1,4 +1,4 @@
-use aoc_lib::{parsing::{ParseError, Runnable, parse_lines}, NoInputError, NoSolutionError};
+use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, NoInputError, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use nom::{character::complete::u32, sequence::separated_pair, bytes::complete::tag, combinator::map};
 use num::Integer;

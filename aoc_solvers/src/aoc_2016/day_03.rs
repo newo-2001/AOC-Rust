@@ -1,4 +1,4 @@
-use aoc_lib::{parsing::{parse_lines, Runnable, ParseError}, iteration::ExtraIter};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded}, character::complete::{multispace1, u32}, Parser};

@@ -1,11 +1,14 @@
-use std::ops::RangeFrom;
+use std::ops::{RangeFrom, Range, RangeTo};
 
 use nom::{
-    Parser,
     combinator::{value, all_consuming},
     error::{ParseError, VerboseError},
+    character::complete::{anychar, char, line_ending},
+    bytes::complete::{take_until, self},
     Slice, InputIter, InputLength, AsChar,
-    multi::many_till, character::complete::{anychar, char}, bytes::complete::{take_until, self}, FindSubstring, InputTake, Compare, sequence::delimited
+    FindSubstring, InputTake, Compare, Parser,
+    sequence::delimited,
+    multi::{many_till, separated_list0}
 };
 use tupletools::snd;
 
@@ -77,22 +80,65 @@ pub fn quoted<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
     delimited(char('"'), parser, char('"'))
 }
 
-pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
-    where F: Fn(&'a str) -> Result<T, E>
+pub fn map2<I, O, E, F, M, O1, O2>(parser: F, mapper: M) -> impl Parser<I, O, E>
+    where F: Parser<I, (O1, O2), E>,
+          M: Fn(O1, O2) -> O,
+          E: ParseError<I>
 {
-    input.lines()
-        .map(parser)
-        .collect()
+    parser.map(move |(a, b)| mapper(a, b))
 }
 
-pub trait Runnable<'a, O> {
-    fn run(self, input: &'a str) -> Result<O, super::ParseError<'a>>;
-}
-
-impl<'a, O, F> Runnable<'a, O> for F where
-    F: Parser<&'a str, O, VerboseError<&'a str>>
+pub trait Map2<I, O1, O2, E>: Parser<I, (O1, O2), E> + Sized
+    where E: ParseError<I>
 {
-    fn run(self, input: &'a str) -> Result<O, super::ParseError<'a>> {
-        Ok(all_consuming(self).parse(input)?.1)
+    fn map2<O, M>(self, mapper: M) -> impl Parser<I, O, E>
+        where M: Fn(O1, O2) -> O
+    {
+        map2(self, mapper)
     }
+}
+
+impl<I, O1, O2, E, F> Map2<I, O1, O2, E> for F
+    where F: Parser<I, (O1, O2), E>,
+          E: ParseError<I>
+{}
+
+pub fn map3<I, O, E, F, M, O1, O2, O3>(parser: F, mapper: M) -> impl Parser<I, O, E>
+    where F: Parser<I, (O1, O2, O3), E>,
+          M: Fn(O1, O2, O3) -> O,
+          E: ParseError<I>
+{
+    parser.map(move |(a, b, c)| mapper(a, b, c))
+}
+
+pub trait Map3<I, O1, O2, O3, E>: Parser<I, (O1, O2, O3), E> + Sized
+    where E: ParseError<I>
+{
+    fn map3<O, M>(self, mapper: M) -> impl Parser<I, O, E>
+        where M: Fn(O1, O2, O3) -> O
+    {
+        map3(self, mapper)
+    }
+}
+
+impl<I, O1, O2, O3, E, F> Map3<I, O1, O2, O3, E> for F
+    where F: Parser<I, (O1, O2, O3), E>,
+          E: ParseError<I>
+{}
+
+pub fn lines<I, O, E, F>(parser: F) -> impl Parser<I, Vec<O>, E>
+    where F: Parser<I, O, E>,
+          E: ParseError<I>,
+          I: Clone + nom::Compare<&'static str> +
+             InputLength + InputTake + InputIter +
+             Slice<RangeFrom<usize>> + Slice<Range<usize>> + Slice<RangeTo<usize>>
+{
+    separated_list0(line_ending, parser)
+}
+
+pub fn run<I, O, F: Sized>(parser: F, input: I) -> Result<O, nom::Err<VerboseError<I>>>
+    where F: Parser<I, O, VerboseError<I>>,
+          I: InputLength
+{
+    Ok(all_consuming(parser).parse(input)?.1)
 }

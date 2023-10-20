@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, iter::once, collections::VecDeque};
 
-use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, Direction2D, CardinalDirection}, parsing::{ParseError, Runnable, usize}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
+use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, Direction2D, CardinalDirection}, parsing::{ParseError, TextParser, usize}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{preceded, delimited, tuple}, bytes::complete::tag, character::complete::{space1, char, u8, u16}, Parser};

@@ -1,4 +1,4 @@
-use aoc_lib::parsing::{skip_until, Runnable, ParseError};
+use aoc_lib::parsing::{skip_until, TextParser, ParseError};
 use aoc_runner_api::SolverResult;
 use nom::{character::complete::{u32, char}, bytes::complete::tag, sequence::{preceded, delimited}, Parser};
 

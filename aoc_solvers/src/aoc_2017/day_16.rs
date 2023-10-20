@@ -1,5 +1,5 @@
 use ahash::{HashMap, HashMapExt};
-use aoc_lib::parsing::{ParseError, Runnable, usize};
+use aoc_lib::parsing::{ParseError, TextParser, usize};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{branch::alt, multi::separated_list0, character::complete::{char, anychar}, sequence::{preceded, separated_pair}, Parser};

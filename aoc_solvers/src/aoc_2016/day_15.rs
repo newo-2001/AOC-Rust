@@ -1,4 +1,4 @@
-use aoc_lib::{parsing::{ParseError, Runnable, parse_lines, usize}, NoSolutionError};
+use aoc_lib::{parsing::{ParseError, TextParser, parse_lines, usize}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use nom::{bytes::complete::tag, sequence::{delimited, terminated, tuple}, character::complete::char, Parser};
 use num::Integer;

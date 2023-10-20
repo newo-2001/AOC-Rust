@@ -1,4 +1,4 @@
-use aoc_lib::{geometry::{Point2D, grid::{Grid, BitGrid, GridLikeMut, GridLike, GridError}, Dimensions, Area}, parsing::{parse_lines, Runnable, ParseError}, math::Bit};
+use aoc_lib::{geometry::{Point2D, grid::{Grid, BitGrid, GridLikeMut, GridLike, GridError}, Dimensions, Area}, parsing::{parse_lines, TextParser, ParseError}, math::Bit};
 use aoc_runner_api::SolverResult;
 use nom::{bytes::complete::tag, branch::alt, combinator::value, sequence::{tuple, preceded}, Parser};
 
