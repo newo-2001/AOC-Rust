@@ -4,7 +4,7 @@ use std::{ops::Mul, cmp::{max, min}, fmt::{Display, Formatter, self}};
 use nom::{character::complete::{char, i64}, combinator::opt, sequence::{terminated, delimited}, Parser};
 use num::{Integer, clamp, Zero, One, NumCast, Signed, FromPrimitive};
 
-use crate::parsing::TextParserResult;
+use crate::parsing::{TextParserResult, Parsable};
 
 use super::{Dimensions, Directional};
 
@@ -79,10 +79,11 @@ impl<T: Integer> Point2D<T> {
     pub fn x(self) -> T { self.0 }
 
     pub fn y(self) -> T { self.1 }
+}
 
+impl<T: Integer + FromPrimitive> Parsable<'_> for Point2D<T> {
     /// Parses a [`Point2D`] from a string in the form ``x, y`` or ``(x, y)``, the space is optional.
-    pub fn parse(input: &str) -> TextParserResult<Point2D<T>>
-        where T: FromPrimitive
+    fn parse(input: &str) -> TextParserResult<Point2D<T>>
     {
         let sep = char(',').and(opt(char(' ')));
         let point = terminated(i64, sep).and(i64);

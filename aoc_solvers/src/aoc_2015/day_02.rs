@@ -5,7 +5,7 @@ use nom::{character::complete::{char, u32}, sequence::{tuple, preceded}, Parser}
 
 struct Present(u32, u32, u32);
 
-impl Parsable for Present {
+impl Parsable<'_> for Present {
     fn parse(input: &str) -> TextParserResult<Present> {
         tuple((
             u32,

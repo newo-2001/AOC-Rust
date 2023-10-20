@@ -1,17 +1,32 @@
 use std::cell::RefCell;
 
 use ahash::{HashMap, HashMapExt};
-use aoc_lib::{functional::swap, parsing::{ParseError, parse_lines, TextParser}};
+use aoc_lib::{functional::swap, parsing::{ParseError, TextParser, Parsable, TextParserResult, Map2, lines}, between};
 use aoc_runner_api::SolverResult;
-use nom::{character::complete::{alpha1, u32, u8}, sequence::{terminated, preceded}, bytes::complete::tag, Parser, branch::alt};
+use nom::{character::complete::{alpha1, u32, char}, sequence::{preceded, separated_pair}, bytes::complete::tag, Parser, branch::alt};
 
 #[derive(Clone, Hash, PartialEq, Eq)]
 struct Wire<'a>(&'a str);
 
+impl<'a> Parsable<'a> for Wire<'a> {
+    fn parse(input: &'a str) -> TextParserResult<'_, Self> {
+        alpha1.map(Wire).parse(input)
+    }
+}
+
 #[derive(Clone, Hash, PartialEq, Eq)]
-enum Value<'a> {
+enum Value<'a> { 
     Wire(Wire<'a>),
     Literal(u32)
+}
+
+impl<'a> Parsable<'a> for Value<'a> {
+    fn parse(input: &'a str) -> TextParserResult<'_, Self> {
+        Parser::or(
+            u32.map(Value::Literal),
+            Wire::parse.map(Value::Wire)
+        ).parse(input)
+    }
 }
 
 #[derive(Clone, Hash, PartialEq, Eq)]
@@ -24,9 +39,39 @@ enum Expression<'a> {
     RightShift(Value<'a>, u8)
 }
 
+impl<'a> Parsable<'a> for Expression<'a> {
+    fn parse(input: &'a str) -> TextParserResult<'_, Self> {
+        fn binary_operator<'a, M, X, Y>(name: &'a str, mapper: M) -> impl TextParser<'a, Expression>
+            where M: Fn(X, Y) -> Expression<'a>,
+                X: Parsable<'a>, Y: Parsable<'a>
+        {
+            separated_pair(
+                X::parse,
+                between!(char(' '), tag(name)),
+                Y::parse
+            ).map2(mapper)
+        }
+
+        alt((
+            binary_operator("AND", Expression::And),
+            binary_operator("OR", Expression::Or),
+            binary_operator("LSHIFT", Expression::LeftShift),
+            binary_operator("RSHIFT", Expression::RightShift),
+            preceded(tag("NOT "), Value::parse).map(Expression::Not),
+            Value::parse.map(Expression::Constant)
+        )).parse(input)
+    }
+}
+
 struct ExpressionTree<'a> {
     nodes: HashMap<Wire<'a>, Expression<'a>>,
     cache: RefCell<HashMap<Wire<'a>, u32>>
+}
+
+impl<'a> FromIterator<(Wire<'a>, Expression<'a>)> for ExpressionTree<'a> {
+    fn from_iter<T: IntoIterator<Item = (Wire<'a>, Expression<'a>)>>(iter: T) -> Self {
+        Self::new(iter.into_iter().collect())
+    }
 }
 
 impl<'a> ExpressionTree<'a> {
@@ -37,11 +82,17 @@ impl<'a> ExpressionTree<'a> {
     }
     
     fn parse(input: &'a str) -> Result<ExpressionTree<'a>, ParseError<'a>> {
-        let nodes = parse_lines(parse_wire, input)?
+        let expression_tree = lines(
+            separated_pair(
+                Expression::parse,
+                tag(" -> "),
+                Wire::parse
+            ).map(swap)
+        ).run(input)?
             .into_iter()
-            .collect::<HashMap<Wire, Expression>>();
+            .collect();
 
-        Ok(ExpressionTree::new(nodes))
+        Ok(expression_tree)
     }
 
     fn reset(&mut self) {
@@ -72,23 +123,6 @@ impl<'a> ExpressionTree<'a> {
         self.cache.borrow_mut().insert(wire.clone(), value);
         value
     }
-}
-
-fn parse_wire(input: &str) -> Result<(Wire, Expression), ParseError> {
-    let wire = || alpha1.map(Wire);
-    let literal = || u32.map(Value::Literal);
-    let value = || wire().map(Value::Wire).or(literal());
-
-    let constant = value().map(Expression::Constant);
-    let and = terminated(value(), tag(" AND ")).and(value()).map(|(left, right)| Expression::And(left, right));
-    let or = terminated(value(), tag(" OR ")).and(value()).map(|(left, right)| Expression::Or(left, right));
-    let lshift = terminated(value(), tag(" LSHIFT ")).and(u8).map(|(value, amount)| Expression::LeftShift(value, amount));
-    let rshift = terminated(value(), tag(" RSHIFT ")).and(u8).map(|(value, amount)| Expression::RightShift(value, amount));
-    let not = preceded(tag("NOT "), value()).map(Expression::Not);
-
-    let expression = alt((and, or, lshift, rshift, not, constant));    
-    terminated(expression, tag(" -> ")).and(wire())
-        .map(swap).run(input)
 }
 
 const WIRE_A: Wire<'static> = Wire("a");

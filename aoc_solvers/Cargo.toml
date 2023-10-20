@@ -9,6 +9,7 @@ path = "src/lib.rs"
 
 [dependencies]
 ahash = "0.8.3"
+anyhow = "1.0.75"
 aoc_lib = { path = "../aoc_lib" }
 aoc_runner_api = { path = "../aoc_runner_api" }
 bitvec = "1.0.1"

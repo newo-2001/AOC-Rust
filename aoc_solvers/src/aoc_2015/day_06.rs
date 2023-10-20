@@ -1,4 +1,10 @@
-use aoc_lib::{geometry::{Point2D, grid::{Grid, BitGrid, GridLikeMut, GridLike, GridError}, Dimensions, Area}, parsing::{parse_lines, TextParser, ParseError}, math::Bit};
+use std::error::Error;
+
+use aoc_lib::{
+    geometry::{Point2D, grid::{Grid, BitGrid, GridLikeMut, GridLike, GridError}, Dimensions, Area},
+    parsing::{TextParser, Parsable, TextParserResult, lines},
+    math::Bit
+};
 use aoc_runner_api::SolverResult;
 use nom::{bytes::complete::tag, branch::alt, combinator::value, sequence::{tuple, preceded}, Parser};
 
@@ -39,21 +45,23 @@ struct Step {
     action: Action
 }
 
-fn parse_step(str: &str) -> Result<Step, ParseError> {
-    let action = alt((
-        value(Action::Off, tag("turn off ")),
-        value(Action::On, tag("turn on ")),
-        value(Action::Toggle, tag("toggle "))
-    ));
+impl Parsable<'_> for Step {
+    fn parse(input: &str) -> TextParserResult<Step> {
+        let action = alt((
+            value(Action::Off, tag("turn off ")),
+            value(Action::On, tag("turn on ")),
+            value(Action::Toggle, tag("toggle "))
+        ));
 
-    tuple((
-        action,
-        Point2D::parse,
-        preceded(tag(" through "), Point2D::parse)
-    )).map(|(action, top_left, bottom_right)| {
-        let area = Area::from_corners(top_left, bottom_right);
-        Step { area, action }
-    }).run(str)
+        tuple((
+            action,
+            Point2D::parse,
+            preceded(tag(" through "), Point2D::parse)
+        )).map(|(action, top_left, bottom_right)| {
+            let area = Area::from_corners(top_left, bottom_right);
+            Step { area, action }
+        }).parse(input)
+    }
 }
 
 impl Step {
@@ -68,21 +76,25 @@ impl Step {
     }
 }
 
+fn parse_grid<'a, T>(input: &'a str) -> Result<Grid<T>, Box<dyn Error + 'a + Send + Sync>>
+    where T: Default + Clone + Togglable
+{
+    let mut grid: Grid<T> = Grid::empty(Dimensions(1000, 1000));
+
+    lines(Step::parse).run(input)?
+        .iter()
+        .try_for_each(|step| step.apply(&mut grid))?;
+    
+    Ok(grid)
+}
+
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let mut grid: Grid<Bit> = Grid::empty(Dimensions(1000, 1000));
-
-    parse_lines(parse_step, input)?
-        .iter().try_for_each(|step| step.apply(&mut grid))?;
-
+    let grid = parse_grid(input)?;
     Ok(Box::new(grid.pop_count()))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let mut grid: Grid<u32> = Grid::empty(Dimensions(1000, 1000));
-
-    parse_lines(parse_step, input)?
-        .iter().try_for_each(|step| step.apply(&mut grid))?;
-
+    let grid: Grid<u32> = parse_grid(input)?;
     let total_brightness: u32 = grid.into_iter().sum();
 
     Ok(Box::new(total_brightness))

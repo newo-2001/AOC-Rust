@@ -1,4 +1,5 @@
 use std::ops::{RangeFrom, Range, RangeTo};
+use crate::between;
 
 use nom::{
     combinator::{value, all_consuming},
@@ -77,7 +78,7 @@ pub fn quoted<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
           I: Slice<RangeFrom<usize>> + InputIter,
           <I as InputIter>::Item: AsChar
 {
-    delimited(char('"'), parser, char('"'))
+    between!(char('"'), parser)
 }
 
 pub fn map2<I, O, E, F, M, O1, O2>(parser: F, mapper: M) -> impl Parser<I, O, E>
@@ -141,4 +142,11 @@ pub fn run<I, O, F: Sized>(parser: F, input: I) -> Result<O, nom::Err<VerboseErr
           I: InputLength
 {
     Ok(all_consuming(parser).parse(input)?.1)
+}
+
+#[macro_export]
+macro_rules! between {
+    ($delimiter: expr, $parser: expr) => {
+        nom::sequence::delimited($delimiter, $parser, $delimiter)
+    };
 }
