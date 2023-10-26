@@ -1,59 +1,86 @@
-use std::num::ParseIntError;
-
-use aoc_runner_api::Puzzle;
-use itertools::Itertools;
+use aoc_runner_api::{Puzzle, PuzzlePart};
+use nom::{combinator::{eof, all_consuming, value}, character::complete::{u16, char, u8}, sequence::{separated_pair, tuple, preceded}, Parser, branch::alt};
+use thiserror::Error;
 
 use crate::RunnerAction;
 
-fn available_puzzles() -> impl Iterator<Item=Puzzle> {
-    (2015..=2022).flat_map(move |year| {
-        (1..=25).flat_map(move |day| {
-            (1..=(if day == 25 { 1 } else { 2 })).map(move |part| {
-                Puzzle { year, day, part }
-            })
-        })
-    })
+#[derive(Clone, Copy)]
+enum RunnerScope {
+    All,
+    Year(u16),
+    Day(u16, u8),
+    Puzzle(Puzzle)
 }
 
-fn locate_puzzles(year: Option<u16>) -> impl Iterator<Item=Puzzle> {
-    available_puzzles()
-        .filter(move |&puzzle| {
-            aoc_solvers::get_solver(puzzle).is_some() &&
-            year.map_or(true, |year| puzzle.year == year)
-        })
+impl RunnerScope {
+    fn parse(input: &str) -> Result<Self, nom::Err<nom::error::Error<&str>>> {
+        Ok(all_consuming(alt((
+            value(RunnerScope::All, eof),
+            tuple((
+                u16,
+                preceded(char('-'), u8),
+                preceded(char('-'), Parser::or(
+                    value(PuzzlePart::First, char('1')),
+                    value(PuzzlePart::Second, char('2'))
+                ))
+            )).map(|(year, day, part)| {
+                RunnerScope::Puzzle(Puzzle { year, day, part })
+            }),
+            separated_pair(u16, char('-'), u8)
+                .map(|(year, day)| RunnerScope::Day(year, day)),
+            u16.map(RunnerScope::Year)
+        ))).parse(input)?.1)
+    }
+
+    fn puzzles(self) -> impl Iterator<Item=Puzzle> {
+        match self {
+            RunnerScope::Puzzle(puzzle) => vec![puzzle],
+            RunnerScope::Day(year, 25) => vec![
+                Puzzle { year, day: 25, part: PuzzlePart::First }
+            ],
+            RunnerScope::Day(year, day) => vec![
+                Puzzle { year, day, part: PuzzlePart::First },
+                Puzzle { year, day ,part: PuzzlePart::Second }
+            ],
+            RunnerScope::Year(year) => (1..=25).flat_map(|day| {
+                RunnerScope::Day(year, day).puzzles()
+            }).collect(),
+            RunnerScope::All => (2015..=2022).flat_map(|year| {
+                RunnerScope::Year(year).puzzles()
+            }).collect()
+        }.into_iter()
+            .filter(|&puzzle| aoc_solvers::get_solver(puzzle).is_some())
+    }
 }
 
-pub fn parse_puzzles(mut arguments: impl Iterator<Item=String>) -> Result<impl Iterator<Item=Puzzle>, ParseIntError> {
-    let puzzles: Box<dyn Iterator<Item=Puzzle>> = if let Some(year) = arguments.next() {
-        let year = year.parse::<u16>()?;
-        if let Some(day) = arguments.next() {
-            let day = day.parse::<u8>()?;
-            let parts: Vec<_> = arguments.next()
-                .map_or_else(|| {
-                    if day == 25 { vec![Ok(1)] } else { vec![Ok(1), Ok(2)] }
-                }, |part| vec![part.parse::<u8>()])
-                .into_iter().try_collect()?;
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error(transparent)]
+    Parsing(#[from] nom::Err<nom::error::Error<String>>),
+    #[error("Encountered unexpected position argument: `{0}`")]
+    UnexpectedArgument(String)
+}
 
-            Box::new(parts.into_iter().map(move |part| Puzzle { year, day, part }))
-        } else {
-            Box::new(locate_puzzles(Some(year)))
+// TODO: clean this up, possibly using clap
+impl RunnerAction {
+    pub fn parse(arguments: &[&str]) -> Result<RunnerAction, Error> {
+        match arguments {
+            ["verify", scope] => {
+                let scope = RunnerScope::parse(scope)
+                    .map_err(nom::Err::<nom::error::Error<&str>>::to_owned)?;
+                Ok(RunnerAction::Verify(scope.puzzles().collect()))
+            },
+            ["verify"] | [] => {
+                Ok(RunnerAction::Verify(RunnerScope::All.puzzles().collect()))
+            },
+            [scope] => {
+                let scope = RunnerScope::parse(scope)
+                    .map_err(nom::Err::<nom::error::Error<&str>>::to_owned)?;
+                Ok(RunnerAction::Run(scope.puzzles().collect()))
+            },
+            ["verify", _, arg] | [_, arg, ..] => {
+                Err(Error::UnexpectedArgument((*arg).to_owned()))
+            }
         }
-    } else {
-        Box::new(locate_puzzles(None))
-    };
-
-    Ok(puzzles)
-}
-
-pub fn parse(arguments: Vec<String>) -> Result<RunnerAction, ParseIntError> {
-    let action = arguments.first().map(String::as_str);
-    let action = if let Some("verify") = action {
-        let puzzles = parse_puzzles(arguments.into_iter().skip(1))?;
-        RunnerAction::Verify(puzzles.collect())
-    } else {
-        let puzzles = parse_puzzles(arguments.into_iter())?;
-        RunnerAction::Run(puzzles.collect())
-    };
-
-    Ok(action)
+    }
 }

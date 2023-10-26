@@ -14,7 +14,7 @@
     clippy::similar_names
 )]
 
-use aoc_runner_api::{Solver, Puzzle};
+use aoc_runner_api::{Solver, Puzzle, PuzzlePart};
 
 mod aoc_2016;
 mod aoc_2015;
@@ -30,9 +30,8 @@ macro_rules! solver {
 
     ($year:literal, $day: literal, $part: expr) => {
         match ($part) {
-            1 => solver!($year, $day, 1),
-            2 => solver!($year, $day, 2),
-            _ => None
+            PuzzlePart::First => solver!($year, $day, 1),
+            PuzzlePart::Second => solver!($year, $day, 2),
         }
     };
 

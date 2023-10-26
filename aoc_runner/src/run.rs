@@ -9,17 +9,21 @@ pub enum RunnerAction {
 }
 
 #[derive(Debug, Error)]
-pub enum RunPuzzleError {
+pub enum ResolutionError {
     #[error("Failed to resolve solver")]
-    MissingSolver,
+    Solver,
     #[error("Failed to resolve input file: {0}")]
-    MissingInputFile(String),
+    InputFile(String),
     #[error("Failed to resolve solution file: {0}")]
-    MissingSolutionFile(String),
-    #[error("Failed to locate solution entry for part {0}")]
-    MissingSolutionEntry(u8),
-    #[error("Solver produced wrong answer, expected: `{expected}` got `{actual}`")]
-    WrongAnswer {
+    SolutionFile(String),
+    #[error("Failed to locate solution entry")]
+    SolutionEntry
+}
+
+#[derive(Debug, Error)]
+pub enum RunnerError {
+    #[error("Solver produced an incorrect answer, expected: `{expected}` got `{actual}`")]
+    IncorrectAnswer {
         expected: String,
         actual: String
     },
@@ -27,50 +31,62 @@ pub enum RunPuzzleError {
     ExecutionError(String)
 }
 
-pub struct RunStats {
-    pub result: String,
-    pub duration: Duration
-}
-
-fn get_input_for_puzzle(puzzle: Puzzle) -> Result<String, RunPuzzleError> {
+fn get_input_for_puzzle(puzzle: Puzzle) -> Result<String, ResolutionError> {
     let path = format!("inputs/{}/day_{:02}.txt", puzzle.year, puzzle.day);
     fs::read_to_string(&path)
-        .map_err(|_| RunPuzzleError::MissingInputFile(path))
+        .map_err(|_| ResolutionError::InputFile(path))
 }
 
-fn get_solution_for_puzzle(puzzle: Puzzle) -> Result<String, RunPuzzleError> {
+fn get_solution_for_puzzle(puzzle: Puzzle) -> Result<String, ResolutionError> {
     let path = format!("solutions/{}/day_{:02}.txt", puzzle.year, puzzle.day);
     let content = fs::read_to_string(&path)
-        .map_err(|_| RunPuzzleError::MissingSolutionFile(path))?;
+        .map_err(|_| ResolutionError::SolutionFile(path))?;
 
     let solution = *content.chars()
         .as_str()
         .split(';')
         .collect::<Vec<_>>()
-        .get(puzzle.part as usize - 1)
-        .ok_or(RunPuzzleError::MissingSolutionEntry(puzzle.part))?;
+        .get(puzzle.part.number() as usize - 1)
+        .ok_or(ResolutionError::SolutionEntry)?;
 
-    Ok(solution.to_owned())
+    if solution.is_empty() { Err(ResolutionError::SolutionEntry) }
+    else { Ok(solution.to_owned()) }
 }
 
-pub fn run_puzzle(puzzle: Puzzle) -> Result<RunStats, RunPuzzleError> {
-    let solver = aoc_solvers::get_solver(puzzle)
-        .ok_or(RunPuzzleError::MissingSolver)?;
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("{error}")]
+    RunnerError {
+        duration: Duration,
+        error: RunnerError
+    },
+    #[error(transparent)]
+    ResolutionError(#[from] ResolutionError)
+}
 
-    let start_time = Instant::now();
+pub struct RunStats {
+    pub result: String,
+    pub duration: Duration
+}
+
+pub fn run_puzzle(puzzle: Puzzle) -> Result<RunStats, Error> {
+    let solver = aoc_solvers::get_solver(puzzle)
+        .ok_or(ResolutionError::Solver)?;
 
     let input = get_input_for_puzzle(puzzle)?;
-    let result = solver(&input)
-        .map_err(|err| RunPuzzleError::ExecutionError(err.to_string()))?;
 
-    let end_time = Instant::now();
-    Ok(RunStats {
-        duration: end_time - start_time,
-        result: result.to_string()
-    })
+    let start_time = Instant::now();
+    let result = solver(&input)
+        .map_err(|err| Error::RunnerError {
+            error: RunnerError::ExecutionError(err.to_string()),
+            duration: start_time - Instant::now()
+        })?;
+
+    let duration = start_time - Instant::now();
+    Ok(RunStats { result: result.to_string(), duration })
 }
 
-pub fn verify_puzzle(puzzle: Puzzle) -> Result<RunStats, RunPuzzleError> {
+pub fn verify_puzzle(puzzle: Puzzle) -> Result<RunStats, Error> {
     let expected = get_solution_for_puzzle(puzzle)?
         .replace("\r\n", "")
         .replace('\n', "");
@@ -81,5 +97,10 @@ pub fn verify_puzzle(puzzle: Puzzle) -> Result<RunStats, RunPuzzleError> {
         .replace('\n', "");
 
     if expected == actual { Ok(stats) }
-    else { Err(RunPuzzleError::WrongAnswer { expected, actual }) }
+    else {
+        Err(Error::RunnerError {
+            error: RunnerError::IncorrectAnswer { expected, actual },
+            duration: stats.duration
+        })
+    }
 }
