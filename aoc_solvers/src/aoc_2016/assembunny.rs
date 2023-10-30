@@ -1,16 +1,31 @@
 use ahash::{HashMap, HashMapExt};
-use aoc_lib::parsing::{parse_lines, ParseError, TextParser, isize};
+use aoc_lib::parsing::{isize, Parsable, TextParserResult, Map2, lines};
 use derive_more::Display;
-use nom::{character::complete::{anychar, char}, Parser, bytes::complete::tag, sequence::preceded, branch::alt};
+use nom::{character::complete::{anychar, char}, Parser, bytes::complete::tag, sequence::{preceded, separated_pair}, branch::alt};
 use thiserror::Error;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Display, Debug)]
 pub struct Register(pub char);
 
+impl Parsable<'_> for Register {
+    fn parse(input: &str) -> TextParserResult<Self> {
+        anychar.map(Self).parse(input)
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub enum Value {
     Register(Register),
     Constant(isize)
+}
+
+impl Parsable<'_> for Value {
+    fn parse(input: &str) -> TextParserResult<Self> {
+        Parser::or(
+            isize.map(Value::Constant),
+            Register::parse.map(Value::Register)
+        ).parse(input)
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -25,24 +40,16 @@ pub enum Instruction {
     Output(Value)
 }
 
-impl Instruction {
-    fn parse(input: &str) -> Result<Self, ParseError> {
-        let constant = || isize.map(Value::Constant);
-        let register = || anychar.map(Register);
-        let value = || constant().or(register().map(Value::Register));
-
-        let copy = preceded(tag("cpy "), value().and(preceded(char(' '), register())))
-            .map(|(value, register)| Self::Copy(value, register));
-
-        let jnz = preceded(tag("jnz "), value().and(preceded(char(' '), value())))
-            .map(|(value, offset)| Self::JumpNotZero(value, offset));
-        
-        let inc = preceded(tag("inc "), register()).map(Self::Increment);
-        let dec = preceded(tag("dec "), register()).map(Self::Decrement);
-        let tgl = preceded(tag("tgl "), register()).map(Self::Toggle);
-        let out = preceded(tag("out "), value()).map(Self::Output);
-
-        alt((copy, inc, dec, jnz, tgl, out)).run(input)
+impl Parsable<'_> for Instruction {
+    fn parse(input: &str) -> TextParserResult<Instruction> {
+        alt((
+            preceded(tag("cpy "), separated_pair(Value::parse, char(' '), Register::parse)).map2(Self::Copy),
+            preceded(tag("jnz "), separated_pair(Value::parse, char(' '), Value::parse)).map2(Self::JumpNotZero),
+            preceded(tag("inc "), Register::parse).map(Self::Increment),
+            preceded(tag("dec "), Register::parse).map(Self::Decrement),
+            preceded(tag("tgl "), Register::parse).map(Self::Toggle),
+            preceded(tag("out "), Value::parse).map(Self::Output)
+        )).parse(input)
     }
 }
 
@@ -50,7 +57,7 @@ impl Instruction {
 pub struct Cpu {
     instructions: Vec<Instruction>,
     registers: HashMap<Register, isize>,
-    ip: usize,
+    ip: usize
 }
 
 #[derive(Debug, Error)]
@@ -177,10 +184,13 @@ impl Cpu {
         self.registers.entry(register).or_insert(0);
         self.registers.get_mut(&register).unwrap()
     }
+}
 
-    pub fn parse(input: &str) -> Result<Cpu, ParseError> {
-        let instructions = parse_lines(Instruction::parse, input)?;
-        Ok(Cpu::new(instructions))
+impl Parsable<'_> for Cpu {
+    fn parse(input: &str) -> TextParserResult<Self> {
+        lines(Instruction::parse)
+            .map(Cpu::new)
+            .parse(input)
     }
 }
 

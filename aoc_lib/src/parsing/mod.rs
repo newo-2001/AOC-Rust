@@ -2,7 +2,7 @@ mod combinators;
 mod parsers;
 mod errors;
 
-use nom::{IResult, error::VerboseError, Parser, character::complete::{u8, u16, u32, u64, i8, i16, i32, i64}};
+use nom::{IResult, error::VerboseError, Parser, character::complete::{u8, u16, u32, u64, u128, i8, i16, i32, i64, i128}};
 
 pub use parsers::*;
 pub use combinators::*;
@@ -15,7 +15,7 @@ pub trait Parsable<'a>: Sized {
 }
 
 pub trait TextParser<'a, O>: Parser<&'a str, O, VerboseError<&'a str>> {
-    fn run(self, input: &'a str) -> Result<O, ParseError<'a>>
+    fn run(self, input: &'a str) -> Result<O, ParseError>
         where Self: Sized
     {
         run(self, input)
@@ -48,9 +48,11 @@ impl_parsable!(u8, u8);
 impl_parsable!(u16, u16);
 impl_parsable!(u32, u32);
 impl_parsable!(u64, u64);
+impl_parsable!(u128, u128);
 impl_parsable!(usize, usize);
 impl_parsable!(i8, i8);
 impl_parsable!(i16, i16);
 impl_parsable!(i32, i32);
 impl_parsable!(i64, i64);
+impl_parsable!(i128, i128);
 impl_parsable!(isize, isize);

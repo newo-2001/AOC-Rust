@@ -81,7 +81,7 @@ impl<'a> ExpressionTree<'a> {
         }
     }
     
-    fn parse(input: &'a str) -> Result<ExpressionTree<'a>, ParseError<'a>> {
+    fn parse(input: &'a str) -> Result<ExpressionTree<'a>, ParseError> {
         let expression_tree = lines(
             separated_pair(
                 Expression::parse,

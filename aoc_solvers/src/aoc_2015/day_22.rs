@@ -1,13 +1,13 @@
-use std::{cmp::{min, max}, collections::VecDeque, iter, hash::{Hash, Hasher}, error::Error};
-
+use std::{cmp::{min, max}, collections::VecDeque, iter, hash::{Hash, Hasher}};
+use anyhow::Result;
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::{TextParser, ParseError}, NoSolutionError};
+use aoc_lib::{parsing::{TextParser, Parsable, TextParserResult}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use nom:: {
-    sequence::delimited,
+    sequence::{preceded, separated_pair},
     Parser,
     bytes::complete::tag,
-    character::complete::{u32, line_ending}, combinator::opt
+    character::complete::{u32, line_ending}
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -165,13 +165,14 @@ struct Enemy {
     damage: u32,
 }
 
-impl Enemy {
-    fn parse(input: &str) -> Result<Enemy, ParseError> {
-        let kv = |key| delimited(tag(key).and(tag(": ")), u32, opt(line_ending));
-
-        kv("Hit Points").and(kv("Damage"))
-            .map(|(health, damage)| Enemy { health, damage })
-            .run(input)
+impl Parsable<'_> for Enemy {
+    fn parse(input: &str) -> TextParserResult<Enemy> {
+        separated_pair(
+            preceded(tag("Hit Points: "), u32),
+            line_ending,
+            preceded(tag("Damage: "), u32)
+        ).map(|(health, damage)| Enemy { health, damage })
+            .parse(input)
     }
 }
 
@@ -287,8 +288,8 @@ fn least_amount_of_mana_for_victory(battle: Battle) -> Option<u32> {
     best_mana
 }
 
-fn least_mana_for_input<'a>(input: &'a str, difficulty: Difficulty) -> Result<u32, Box<dyn Error + 'a + Send + Sync>> {
-    let enemy = Enemy::parse(input)?;
+fn least_mana_for_input(input: &str, difficulty: Difficulty) -> Result<u32> {
+    let enemy = Enemy::parse.run(input)?;
 
     let player = Player {
         health: 50,

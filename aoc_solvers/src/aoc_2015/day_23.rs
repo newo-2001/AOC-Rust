@@ -1,18 +1,30 @@
-use aoc_lib::parsing::{TextParserResult, parse_lines, TextParser, ParseError, isize};
+use std::iter::once;
+
+use aoc_lib::{parsing::{TextParserResult, TextParser, isize, Parsable, Map2, lines}, cpu::{self, Jump, ControlFlow}};
 use aoc_runner_api::SolverResult;
 use nom::{
     Parser,
     character::complete::char,
-    sequence::{preceded, terminated},
+    sequence::{preceded, separated_pair},
     branch::alt, combinator::value,
     bytes::complete::tag
 };
 use num::Integer;
-use thiserror::Error;
 
-#[derive(Clone, Copy)]
+type Cpu<'a> = cpu::Cpu<'a, Instruction, Register, u32>;
+
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 enum Register {
     A, B
+}
+
+impl Parsable<'_> for Register {
+    fn parse(input: &str) -> TextParserResult<Self> {
+        Parser::or(
+        value(Register::A, char('a')),
+            value(Register::B, char('b'))       
+        ).parse(input)
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -25,103 +37,58 @@ enum Instruction {
     JumpIfOne(Register, isize)
 }
 
-struct State {
-    a: u32,
-    b: u32,
-    ip: usize
+impl Parsable<'_> for Instruction {
+    fn parse(input: &str) -> TextParserResult<Self> {
+        alt((
+            preceded(tag("hlf "), Register::parse).map(Instruction::Half),
+            preceded(tag("tpl "), Register::parse).map(Instruction::Triple),
+            preceded(tag("inc "), Register::parse).map(Instruction::Increment),
+            preceded(tag("jmp "), isize).map(Instruction::Jump),
+            preceded(tag("jie "), separated_pair(Register::parse, tag(", "), isize))
+                .map2(Instruction::JumpIfEven),
+            preceded(tag("jio "), separated_pair(Register::parse, tag(", "), isize))
+                .map2(Instruction::JumpIfOne)
+        )).parse(input)
+    }
 }
 
-#[derive(Debug, Error)]
-enum ExecutationError {
-    #[error("Jumped to a negative instruction")]
-    NegativeInstructionPointer
-}
-
-impl State {
-    fn execute(&mut self, instruction: Instruction) -> Result<(), ExecutationError> {
-        match instruction {
-            Instruction::Half(register) => { self.map_register(register, |x| x / 2) }
-            Instruction::Triple(register) => { self.map_register(register, |x| x * 3) }
-            Instruction::Increment(register) => { self.map_register(register, |x| x + 1) }
-            Instruction::Jump(offset) => {
-                self.ip = self.ip.checked_add_signed(offset)
-                    .ok_or(ExecutationError::NegativeInstructionPointer)?;
-                return Ok(());
-            },
+impl cpu::Instruction<Register, u32> for Instruction {
+    type Interrupt = !;
+    
+    fn execute(&self, cpu: &mut Cpu) -> ControlFlow<Self::Interrupt> {
+        match self {
+            Instruction::Half(register) => cpu.map_register(*register, |x| x / 2),
+            Instruction::Triple(register) => cpu.map_register(*register, |x| x * 3),
+            Instruction::Increment(register) => cpu.map_register(*register, |x| x + 1),
+            Instruction::Jump(offset) => return ControlFlow::Jump(Jump::Relative(*offset)),
             Instruction::JumpIfEven(register, offset) => {
-                if self.read_register(register).is_even() {
-                    return self.execute(Instruction::Jump(offset));
+                if cpu.read_register(register).is_even() {
+                    return ControlFlow::Jump(Jump::Relative(*offset));
                 }
             },
             Instruction::JumpIfOne(register, offset) => {
-                if self.read_register(register) == 1 {
-                    return self.execute(Instruction::Jump(offset));
+                if cpu.read_register(register) == 1 {
+                    return ControlFlow::Jump(Jump::Relative(*offset));
                 }
-            }
-        }
+            },
+        };
 
-        self.ip += 1;
-        Ok(())
+        ControlFlow::Continue
     }
-}
-
-impl State {
-    fn read_register(&self, register: Register) -> u32 {
-        match register {
-            Register::A => self.a,
-            Register::B => self.b
-        }
-    }
-
-    fn write_register(&mut self, register: Register, value: u32) {
-        *match register {
-            Register::A => &mut self.a,
-            Register::B => &mut self.b
-        } = value;
-    }
-    
-    fn map_register(&mut self, register: Register, mapper: impl Fn(u32) -> u32) {
-        self.write_register(register, mapper(self.read_register(register)));
-    }
-}
-
-fn parse_instruction(input: &str) -> Result<Instruction, ParseError> {
-    fn register(input: &str) -> TextParserResult<Register> {
-        value(Register::A, char('a'))
-            .or(value(Register::B, char('b')))
-            .parse(input)
-    }
-    
-    alt((
-        preceded(tag("hlf "), register).map(Instruction::Half),
-        preceded(tag("tpl "), register).map(Instruction::Triple),
-        preceded(tag("inc "), register).map(Instruction::Increment),
-        preceded(tag("jmp "), isize).map(Instruction::Jump),
-        preceded(tag("jie "), terminated(register, tag(", ")).and(isize))
-            .map(|(register, isize)| Instruction::JumpIfEven(register, isize)),
-        preceded(tag("jio "), terminated(register, tag(", ")).and(isize))
-            .map(|(register, isize)| Instruction::JumpIfOne(register, isize))
-    )).run(input)
-}
-
-fn run_program(program: &[Instruction], mut state: State) -> Result<State, ExecutationError> {
-    while let Some(&instruction) = program.get(state.ip) {
-        state.execute(instruction)?;
-    }
-
-    Ok(state)
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let program = parse_lines(parse_instruction, input)?;
-    let State { b, .. } = run_program(&program, State { a: 0, b: 0, ip: 0 })?;
+    let program = lines(Instruction::parse).run(input)?;
+    let mut cpu = Cpu::new(&program);
+    cpu.execute();
 
-    Ok(Box::new(b))
+    Ok(Box::new(cpu.read_register(&Register::B)))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let program = parse_lines(parse_instruction, input)?;
-    let State { b, .. } = run_program(&program, State { a: 1, b: 0, ip: 0 })?;
+    let program = lines(Instruction::parse).run(input)?;
+    let mut cpu = Cpu::with_registers(&program, once((Register::A, 1)));
+    cpu.execute();
 
-    Ok(Box::new(b))
+    Ok(Box::new(cpu.read_register(&Register::B)))
 }

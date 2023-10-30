@@ -1,4 +1,4 @@
-use std::{error::Error, fmt::Display};
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum PuzzlePart {
@@ -7,7 +7,7 @@ pub enum PuzzlePart {
 }
 
 impl Display for PuzzlePart {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.number())
     }
 }
@@ -30,11 +30,11 @@ pub struct Puzzle {
 }
 
 impl Display for Puzzle {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} day {:02} part {}", self.year, self.day, self.part)
     }
 }
 
-pub type SolverResult<'a> = Result<Box<dyn Display + Send + Sync + 'a>, Box<dyn Error + 'a + Send + Sync>>;
+pub type SolverResult<'a> = anyhow::Result<Box<dyn Display + Send + Sync + 'a>>;
 pub type Solver = dyn Fn(&str) -> SolverResult;
 pub type SolverProvider = dyn Fn(&Puzzle) -> Option<Box<Solver>>;

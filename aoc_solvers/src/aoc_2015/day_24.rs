@@ -1,5 +1,7 @@
-use std::{error::Error, num::ParseIntError, iter::IntoIterator};
+use std::{num::ParseIntError, iter::IntoIterator};
 
+use anyhow::Result;
+use aoc_lib::NoSolutionError;
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use tupletools::fst;
@@ -24,7 +26,7 @@ fn quantum_entanglement<'a >(group: impl IntoIterator<Item = &'a u32>) -> u64 {
         .product::<u64>()
 }
 
-fn optimal_group(items: Vec<u32>, groups: u32) -> Result<Vec<u32>, &'static str> {
+fn optimal_group(items: Vec<u32>, groups: u32) -> Result<Vec<u32>, NoSolutionError> {
     let target = target_weight(&items, groups);
 
     items.into_iter()
@@ -35,10 +37,10 @@ fn optimal_group(items: Vec<u32>, groups: u32) -> Result<Vec<u32>, &'static str>
         .filter(|(group, _)| is_valid_group(group, target))
         .map(fst)
         .min_by_key(|group| quantum_entanglement(group))
-        .ok_or("No valid configurations found")
+        .ok_or(NoSolutionError)
 }
 
-fn entanglement_optimal_group(input: &str, groups: u32) -> Result<u64, Box<dyn Error + Sync + Send>> {
+fn entanglement_optimal_group(input: &str, groups: u32) -> Result<u64> {
     let items = parse_items(input)?;
     let group = optimal_group(items, groups)?;
     Ok(quantum_entanglement(&group))

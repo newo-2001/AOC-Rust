@@ -1,5 +1,5 @@
 use std::iter::once;
-
+use anyhow::anyhow;
 use ahash::HashMap;
 use aoc_lib::{geometry::{Point2D, CardinalDirection, RotationDirection, Directional, Direction2D}, NoSolutionError};
 use aoc_runner_api::SolverResult;
@@ -71,5 +71,5 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         _ = grid.try_insert(point, value);
     }
 
-    Err(Box::new(NoSolutionError))
+    Err(anyhow!(NoSolutionError))
 }

@@ -1,5 +1,4 @@
-use std::error::Error;
-
+use anyhow::Result;
 use aoc_lib::{geometry::{Dimensions, grid::{Grid, InvalidGridAreaError, GridLikeMut, BitGrid}}, parsing::{TextParser, parse_lines, ParseError, usize}, math::Bit};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
@@ -35,13 +34,13 @@ impl Instruction {
             },
             Instruction::RotateRow(RotateInstruction { index, amount }) => {
                 let row = grid.get_row_mut(index)
-                    .unwrap_or_else(|| panic!("Grid row index out of range: {}", index));
+                    .unwrap_or_else(|| panic!("Grid row index out of range: {index}"));
 
                 rotate_slice(row, amount);
             },
             Instruction::RotateColumn(RotateInstruction { index, amount }) => {
                 let column = grid.get_column_mut(index)
-                    .unwrap_or_else(|| panic!("Grid column index out of range: {}", index));
+                    .unwrap_or_else(|| panic!("Grid column index out of range: {index}"));
 
                 let mut rotated = column.iter()
                     .map(|light| **light)
@@ -62,7 +61,7 @@ fn rotate_slice<T>(slice: &mut [T], amount: usize) {
     slice.rotate_right(amount % slice.len());
 }
 
-fn final_grid(input: &str) -> Result<Grid<Bit>, Box<dyn Error + '_ + Send + Sync>> {
+fn final_grid(input: &str) -> Result<Grid<Bit>> {
     let grid = Grid::<Bit>::empty(Dimensions(50, 6));
     let instructions = parse_lines(Instruction::parse, input)?;
 

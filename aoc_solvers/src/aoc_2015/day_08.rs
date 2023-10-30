@@ -1,12 +1,12 @@
 
-use aoc_lib::parsing::{parse_lines, quoted, ParseError, TextParser, TextParserResult};
+use aoc_lib::parsing::{quoted, TextParser, TextParserResult, lines};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
     bytes::complete::{tag, take_while_m_n},
     sequence::preceded,
     character::complete::none_of,
-    combinator::{map_res, value},
+    combinator::{map_res, value, map},
     branch::alt,
     multi::many0,
     Parser
@@ -31,14 +31,17 @@ fn character(input: &str) -> TextParserResult<char> {
     alt((escape_character, none_of("\"")))(input)
 }
 
-fn deserialize(input: &str) -> Result<String, ParseError> {
+fn deserialize(input: &str) -> TextParserResult<String> {
     quoted(many0(character))
         .map(|x| x.iter().collect::<String>())
-        .run(input)
+        .parse(input)
 }
 
-fn deserialized_size_diff(code: &str) -> Result<usize, ParseError> {
-    Ok(code.len() - deserialize(code)?.chars().count())
+fn deserialized_size_diff(code: &str) -> TextParserResult<usize> {
+    map(
+        deserialize,
+        |deserialized| code.len() - deserialized.len()
+    ).parse(code)
 }
 
 fn serialize_char(char: char) -> String {
@@ -58,8 +61,8 @@ fn serialized_size_diff(input: &str) -> usize {
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let serialized_overhead: usize = parse_lines(deserialized_size_diff, input)
-        .map_err(|err| err.to_string())?
+    let serialized_overhead: usize = lines(deserialized_size_diff)
+        .run(input)?
         .iter()
         .sum();
 

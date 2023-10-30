@@ -1,5 +1,5 @@
 use std::iter::once;
-
+use anyhow::{anyhow, Result};
 use aoc_lib::parsing::{TextParserResult, brackets, usize};
 use aoc_runner_api::SolverResult;
 use nom::{sequence::preceded, character::complete::{anychar, char}, Parser, multi::{many0, many_till}};
@@ -28,10 +28,10 @@ fn parse_marker(input: &str) -> TextParserResult<Marker> {
     Ok((remaining, Marker { times, data }))
 }
 
-fn decompress(input: &str) -> Result<Vec<Chunk>, String> {
+fn decompress(input: &str) -> Result<Vec<Chunk>> {
     let (remaining, chunks) = many0(many_till(anychar, parse_marker))
         .parse(input)
-        .map_err(|err| err.to_string())?;
+        .map_err(|err| anyhow!(err.to_string()))?;
     
     chunks.into_iter()
         .flat_map(|(uncompressed, marker)| {

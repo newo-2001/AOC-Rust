@@ -26,7 +26,7 @@ fn factors(n: usize, limit: usize) -> Vec<usize> {
 fn smallest_prime_factor(n: usize, primes: &[usize]) -> usize {
     *primes.iter()
         .find(|&x| n % x == 0)
-        .unwrap_or_else(|| panic!("Failed to compute spf({})", n))
+        .unwrap_or_else(|| panic!("Failed to compute spf({n})"))
 }
 
 fn sieve_eratosthenes(n: usize) -> Vec<usize> {

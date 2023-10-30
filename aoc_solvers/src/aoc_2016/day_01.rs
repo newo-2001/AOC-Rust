@@ -1,5 +1,5 @@
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::{TextParserResult, TextParser, ParseError}, geometry::{Point2D, CardinalDirection, RotationDirection, Directional}};
+use aoc_lib::{parsing::{TextParserResult, TextParser, ParseError}, geometry::{Point2D, CardinalDirection, RotationDirection, Directional}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use nom::{Parser, character::complete::{char, u16}, combinator::value, multi::separated_list0, bytes::complete::tag};
 
@@ -74,7 +74,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let mut seen = HashSet::<Point2D<i32>>::new();
     let first_duplicate = path.into_iter()
         .find(|&location| !seen.insert(location))
-        .ok_or("No location is visited twice")?;
+        .ok_or(NoSolutionError)?;
 
     let distance = start.manhattan_distance(&first_duplicate);
     Ok(Box::from(distance))

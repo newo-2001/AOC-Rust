@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::parsing::parse_lines;
+use aoc_lib::{parsing::{Parsable, TextParserResult, lines, TextParser}, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{character::complete::alpha1, Parser, sequence::preceded, bytes::complete::tag, error::VerboseError};
+use nom::{character::complete::{alpha1, line_ending}, Parser, sequence::separated_pair, bytes::complete::tag};
 
 struct Replacement<'a> {
     from: &'a str,
@@ -29,11 +29,12 @@ impl Ord for Mutation {
     }
 }
 
-fn parse_replacement(input: &str) -> Result<Replacement, String> {
-    let mut replacement = alpha1.and(preceded(tag(" => "), alpha1))
-        .map(|(from, to): (&str, &str)| Replacement { from, to });
-    
-    Ok(replacement.parse(input).map_err(|err: nom::Err<VerboseError<&str>>| err.to_string())?.1)
+impl<'a> Parsable<'a> for Replacement<'a> {
+    fn parse(input: &'a str) -> TextParserResult<Self> {
+        separated_pair(alpha1, tag(" => "), alpha1)
+            .map(|(from, to)| Replacement { from, to })
+            .parse(input)
+    }
 }
 
 fn mutations(chemical: &str, from: &str, to: &str) -> Vec<String> {
@@ -56,7 +57,7 @@ fn backwards_mutations(chemical: &str, replacement: &Replacement) -> Vec<String>
     mutations(chemical, replacement.to, replacement.from)
 }
 
-fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize, String> {
+fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize, NoSolutionError> {
     let mut queue: BTreeSet<Mutation> = BTreeSet::new();
     let mut cache: HashSet<String> = HashSet::new();
     
@@ -85,21 +86,22 @@ fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize
         }
     }
 
-    Err(String::from("Couldn't synthesize medicine"))
+    Err(NoSolutionError)
 }
 
-fn parse_data(input: &str) -> Result<(Vec<Replacement>, &str), String> {
-    let (replacements, target) = input.split_once("\r\n\r\n")
-        .ok_or("No empty line found in file")?;
-
-    let replacements = parse_lines(parse_replacement, replacements)?;
-    Ok((replacements, target))
+fn parse_data(input: &str) -> TextParserResult<(Vec<Replacement>, &str)> {
+    separated_pair(
+        lines(Replacement::parse),
+        line_ending.and(line_ending),
+        alpha1
+    ).parse(input)
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let (replacements, target) = parse_data(input)?;
+    let (replacements, target) = parse_data.run(input)?;
 
-    let unique_mutations = replacements.iter()
+    let unique_mutations = replacements
+        .iter()
         .flat_map(|replacement| forward_mutations(target, replacement))
         .unique()
         .count();
@@ -108,7 +110,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let (replacements, target) = parse_data(input)?;
+    let (replacements, target) = parse_data.run(input)?;
     let fastest = fastest_synthesis(target, &replacements)?;
 
     Ok(Box::new(fastest))

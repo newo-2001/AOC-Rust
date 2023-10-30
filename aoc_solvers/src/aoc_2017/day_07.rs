@@ -1,7 +1,7 @@
 use std::hash::{Hash, Hasher};
 
 use ahash::HashMap;
-use aoc_lib::parsing::{ParseError, TextParser, parse_lines, brackets};
+use aoc_lib::parsing::{TextParser, brackets, lines, TextParserResult, Parsable};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{alpha1, space1, u32}, sequence::{terminated, preceded, tuple}, multi::separated_list1, bytes::complete::tag, combinator::opt, Parser};
@@ -14,8 +14,8 @@ struct Program<'a> {
     children: Vec<&'a str>
 }
 
-impl<'a> Program<'a> {
-    fn parse(input: &'a str) -> Result<Program<'a>, ParseError<'a>> {
+impl<'a> Parsable<'a> for Program<'a> {
+    fn parse(input: &'a str) -> TextParserResult<Program<'a>> {
         let name = terminated(alpha1, space1);
         let weight = brackets(u32);
         let children = preceded(tag(" -> "), separated_list1(tag(", "), alpha1));
@@ -23,14 +23,14 @@ impl<'a> Program<'a> {
         tuple((name, weight, opt(children))).map(|(name, weight, children)| Program {
             children: children.unwrap_or_else(Vec::new),
             name, weight,
-        }).run(input)
+        }).parse(input)
     }
 }
 
 #[derive(Debug, Error)]
-enum Error<'a> {
+enum Error {
     #[error("Node with name {0} does not exist")]
-    InvalidNode(&'a str),
+    InvalidNode(String),
     #[error("Multiple unbalanced nodes exist")]
     MultipleUnbalancedNodes,
     #[error("No unbalanced node exists")]
@@ -54,7 +54,7 @@ fn find_root<'a, 'b>(tower: impl IntoIterator<Item=&'b Program<'a>>) -> Option<&
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let tower = parse_lines(Program::parse, input)?;
+    let tower = lines(Program::parse).run(input)?;
     let root = find_root(&tower).ok_or(Error::NoNodes)?;
     Ok(Box::new(root.name))
 }
@@ -86,10 +86,12 @@ enum Balanced {
 
 // This seems way too verbose..
 // Also, stack recursion is dangerous as this could overflow the stack
-fn unbalanced_difference<'a: 'b, 'b>(tower: impl IntoIterator<Item=&'b Program<'a>>) -> Result<u32, Error<'a>> {
-    fn weight_difference<'a: 'b, 'b>(tower: &HashMap<&'a str, &'b Program<'a>>, root: &'b Program<'a>) -> Result<Balanced, Error<'a>> {
+fn unbalanced_difference<'a: 'b, 'b>(tower: impl IntoIterator<Item=&'b Program<'a>>) -> Result<u32, Error> {
+    fn weight_difference<'a: 'b, 'b>(tower: &HashMap<&'a str, &'b Program<'a>>, root: &'b Program<'a>) -> Result<Balanced, Error> {
         let child_weights = root.children.iter().map(|&name| {
-            let child = tower.get(&name).ok_or(Error::InvalidNode(name))?;
+            let child = tower.get(&name)
+                .ok_or(Error::InvalidNode(name.to_string()))?;
+            
             weight_difference(tower, child)
         }).collect::<Result<Vec<_>, _>>()?
             .into_iter()
@@ -125,7 +127,7 @@ fn unbalanced_difference<'a: 'b, 'b>(tower: impl IntoIterator<Item=&'b Program<'
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let tower: Vec<Program> = parse_lines(Program::parse, input)?;
+    let tower: Vec<Program> = lines(Program::parse).run(input)?;
     let difference = unbalanced_difference(&tower)?;
 
     Ok(Box::new(difference))

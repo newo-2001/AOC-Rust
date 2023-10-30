@@ -52,6 +52,9 @@ dependencies = [
 [[package]]
 name = "aoc_runner_api"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+]
 
 [[package]]
 name = "aoc_solvers"

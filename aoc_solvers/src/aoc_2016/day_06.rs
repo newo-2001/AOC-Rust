@@ -1,5 +1,6 @@
 use std::vec;
 
+use anyhow::anyhow;
 use aoc_lib::iteration::ExtraIter;
 use aoc_runner_api::SolverResult;
 use composing::compose_fn;
@@ -19,7 +20,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let message = places(input)
         .map(ExtraIter::mode)
         .collect::<Option<String>>()
-        .ok_or("Column was empty")?;
+        .ok_or(anyhow!("Column was empty"))?;
 
     Ok(Box::new(message))
 }
@@ -32,10 +33,10 @@ fn least_common(it: impl Iterator<Item=char>) -> Option<char> {
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let message= places(input)
+    let message = places(input)
         .map(least_common)
         .collect::<Option<String>>()
-        .ok_or("Column was empty")?;
+        .ok_or(anyhow!("Column was empty"))?;
 
     Ok(Box::new(message))
 }

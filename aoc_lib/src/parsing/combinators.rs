@@ -1,9 +1,9 @@
-use std::ops::{RangeFrom, Range, RangeTo};
+use std::{fmt::Display, ops::{RangeFrom, Range, RangeTo}};
 use crate::between;
 
 use nom::{
     combinator::{value, all_consuming},
-    error::{ParseError, VerboseError},
+    error::ParseError,
     character::complete::{anychar, char, line_ending},
     bytes::complete::{take_until, self},
     Slice, InputIter, InputLength, AsChar,
@@ -11,7 +11,7 @@ use nom::{
     sequence::delimited,
     multi::{many_till, separated_list0}
 };
-use tupletools::snd;
+use tupletools::{Snd, snd};
 
 pub fn ignore<I, O, E, F>(parser: F) -> impl Parser<I, (), E>
     where E : ParseError<I>,
@@ -137,11 +137,18 @@ pub fn lines<I, O, E, F>(parser: F) -> impl Parser<I, Vec<O>, E>
     separated_list0(line_ending, parser)
 }
 
-pub fn run<I, O, F: Sized>(parser: F, input: I) -> Result<O, nom::Err<VerboseError<I>>>
-    where F: Parser<I, O, VerboseError<I>>,
-          I: InputLength
+pub fn run<I, O, E, F: Sized>(parser: F, input: I) -> Result<O, super::ParseError>
+    where F: Parser<I, O, E>,
+          I: InputLength,
+          E: ParseError<I>,
+          nom::Err<E>: Display
 {
-    Ok(all_consuming(parser).parse(input)?.1)
+    Ok(
+        all_consuming(parser)
+            .parse(input)
+            .map_err(|e| super::ParseError::new(e.to_string()))?
+            .snd()
+    )
 }
 
 #[macro_export]

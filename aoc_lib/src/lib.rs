@@ -1,7 +1,7 @@
 #![feature(
     step_trait,
-    return_position_impl_trait_in_trait,
-    impl_trait_in_assoc_type
+    impl_trait_in_assoc_type,
+    never_type
 )]
 
 #![allow(
@@ -18,4 +18,5 @@ pub mod functional;
 pub mod datastructures;
 
 mod errors;
+pub mod cpu;
 pub use errors::*;

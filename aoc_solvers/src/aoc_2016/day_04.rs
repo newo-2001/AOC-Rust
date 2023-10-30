@@ -1,6 +1,6 @@
 use std::{collections::HashMap, cmp::Ordering};
 
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError, square_brackets}, functional::repeat_apply};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError, square_brackets}, functional::repeat_apply, NoSolutionError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{character::{is_alphabetic, complete::{alpha1, u32}}, bytes::complete::take_while1, sequence::tuple, Parser};
@@ -74,7 +74,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .update(|room| {
             room.name = repeat_apply(room.sector_id, room.name.clone(), rotate_str);
         }).find(|room| room.name.contains("northpole"))
-        .ok_or("Could not find north pole")?;
+        .ok_or(NoSolutionError)?;
     
     Ok(Box::new(north_pole.sector_id))
 }

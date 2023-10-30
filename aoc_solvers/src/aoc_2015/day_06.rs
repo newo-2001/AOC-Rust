@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use aoc_lib::{
     geometry::{Point2D, grid::{Grid, BitGrid, GridLikeMut, GridLike, GridError}, Dimensions, Area},
     parsing::{TextParser, Parsable, TextParserResult, lines},
@@ -7,6 +5,7 @@ use aoc_lib::{
 };
 use aoc_runner_api::SolverResult;
 use nom::{bytes::complete::tag, branch::alt, combinator::value, sequence::{tuple, preceded}, Parser};
+use anyhow::Result;
 
 #[derive(Clone, Copy)]
 enum Action {
@@ -76,7 +75,7 @@ impl Step {
     }
 }
 
-fn parse_grid<'a, T>(input: &'a str) -> Result<Grid<T>, Box<dyn Error + 'a + Send + Sync>>
+fn parse_grid<T>(input: &str) -> Result<Grid<T>>
     where T: Default + Clone + Togglable
 {
     let mut grid: Grid<T> = Grid::empty(Dimensions(1000, 1000));

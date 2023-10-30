@@ -1,8 +1,7 @@
-use std::error::Error;
-
 use aoc_lib::{functional::repeat_apply, parsing::InvalidTokenError};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
+use anyhow::Result;
 
 fn look_and_say(look: &[u8]) -> Vec<u8> {
     let mut say = look.iter()
@@ -26,7 +25,7 @@ fn serialize(number: &[u8]) -> String {
     number.iter().map(|c| (c + b'0') as char).collect()
 }
 
-fn parse_seed(input: &str) -> Result<Vec<u8>, Box<dyn Error + Send + Sync>> {
+fn parse_seed(input: &str) -> Result<Vec<u8>> {
     Ok(input.chars()
         .map(|c| c.to_digit(10).ok_or(InvalidTokenError(c)))
         .collect::<Result<Vec<_>, _>>()?

@@ -8,11 +8,12 @@
     trait_alias,
     iter_next_chunk,
     iter_array_chunks,
-    linked_list_cursors
+    never_type
 )]
 
 #![allow(
-    clippy::similar_names
+    clippy::similar_names,
+    clippy::into_iter_without_iter
 )]
 
 use aoc_runner_api::{Solver, Puzzle, PuzzlePart};
@@ -90,6 +91,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             15 => solver!(2017, "15", puzzle.part),
             16 => solver!(2017, "16", puzzle.part),
             17 => solver!(2017, "17", puzzle.part),
+            18 => solver!(2017, "18", puzzle.part),
             _ => None
         },
         _ => None

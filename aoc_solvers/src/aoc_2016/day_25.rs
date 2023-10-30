@@ -1,11 +1,11 @@
-use aoc_lib::NoSolutionError;
+use aoc_lib::{NoSolutionError, parsing::{Parsable, TextParser}};
 use aoc_runner_api::SolverResult;
 use num::Integer;
 
 use super::assembunny::{Cpu, REG_A, ExecutationError};
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let cpu = Cpu::parse(input)?;
+    let cpu = Cpu::parse.run(input)?;
 
     let first_clock = (0..).try_find(|&n| {
         let mut cpu = cpu.clone();
