@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter, self, Debug};
 
+use itertools::Itertools;
 use nom::{sequence::preceded, character::complete::char, Parser};
 use thiserror::Error;
 
@@ -56,6 +57,23 @@ impl From<Point2D<usize>> for Dimensions {
 impl From<usize> for Dimensions {
     fn from(value: usize) -> Self {
         Self(value, value)
+    }
+}
+
+#[derive(Debug, Error)]
+#[error("Can't compute dimensions for non-rectangular data")]
+pub struct NotRectangularError;
+
+impl<T> TryInto<Dimensions> for &Vec<Vec<T>> {
+    type Error = NotRectangularError;
+
+    fn try_into(self) -> Result<Dimensions, Self::Error> {
+        if !self.iter().map(Vec::len).all_equal() {
+            return Err(NotRectangularError)
+        }
+        
+        let columns = self.first().map(Vec::len).unwrap_or_default();
+        Ok(Dimensions(columns, self.len()))
     }
 }
 

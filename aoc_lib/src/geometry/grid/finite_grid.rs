@@ -1,9 +1,9 @@
-use std::{fmt::Debug, vec};
+use std::{fmt::Debug, vec, error::Error};
 
 use itertools::Itertools;
 use thiserror::Error;
 
-use crate::{parsing::InvalidTokenError, geometry::{Point2D, Area, WrongDimensionsError, Dimensions}};
+use crate::geometry::{Point2D, Area, Dimensions, NotRectangularError};
 
 use super::{GridLike, GridView, GridViewMut, grid_like::{impl_grid_traits, impl_grid_traits_mut, GridLikeMut}};
 
@@ -72,11 +72,11 @@ impl_grid_traits!(Grid<T>);
 impl_grid_traits_mut!(Grid<T>);
 
 #[derive(Debug, Error)]
-pub enum GridParseError {
+pub enum GridParseError<E: Error> {
     #[error(transparent)]
-    InvalidToken(#[from] InvalidTokenError<char>),
+    InvalidToken(E),
     #[error(transparent)]
-    WrongDimensions(#[from] WrongDimensionsError)
+    NotRectangular(#[from] NotRectangularError)
 }
 
 impl<T> Grid<T>
@@ -93,18 +93,15 @@ impl<T> Grid<T>
         }
     }
 
-    pub fn from_iter<I>(dimensions: Dimensions, tiles: I) -> Result<Grid<T>, WrongDimensionsError>
-        where I: IntoIterator<Item=T>,
+    pub fn new(tiles: Vec<Vec<T>>) -> Result<Grid<T>, NotRectangularError>
     {
+        let dimensions: Dimensions = (&tiles).try_into()?;
         let tiles = tiles.into_iter()
-            .collect::<Vec<T>>()
+            .flat_map(Vec::into_iter)
+            .collect_vec()
             .into_boxed_slice();
 
-        if tiles.len() == dimensions.surface_area() {
-            Ok(Grid { dimensions, tiles })
-        } else {
-            Err(WrongDimensionsError { expected: dimensions })
-        }
+        Ok(Grid { dimensions, tiles })
     }
 
     fn valid_sub_grid(&self, area: Area<usize>) -> Result<(), InvalidGridAreaError> {
@@ -131,16 +128,19 @@ impl<T> Grid<T>
         y * self.dimensions.width() + x
     }
 
-    pub fn parse(dimensions: Dimensions, input: &str) -> Result<Grid<T>, GridParseError>
-        where T: TryFrom<char, Error = InvalidTokenError<char>>
+    pub fn parse<E: Error>(input: &str) -> Result<Grid<T>, GridParseError<E>>
+        where T: TryFrom<char, Error = E>
     {
-        let cells: Vec<T> = input.lines()
-            .flat_map(|line| line.chars().map(TryInto::<T>::try_into))
-            .try_collect()
+        let cells: Vec<Vec<T>> = input.lines()
+            .map(|line| {
+                line.chars()
+                    .map(TryInto::<T>::try_into)
+                    .try_collect()
+            }).try_collect()
             .map_err(GridParseError::InvalidToken)?;
 
-        Grid::from_iter(dimensions, cells)
-            .map_err(GridParseError::WrongDimensions)
+        Grid::new(cells)
+            .map_err(GridParseError::NotRectangular)
     }
 
     #[must_use]
@@ -149,6 +149,27 @@ impl<T> Grid<T>
             tiles: self.tiles.into_vec(),
             width: self.dimensions.width()
         }
+    }
+
+    pub fn map<U>(self, mapper: impl Fn(T) -> U) -> Grid<U> {
+        let dimensions = self.dimensions;
+        let tiles = self.into_iter()
+            .map(mapper)
+            .collect_vec()
+            .into_boxed_slice();
+
+        Grid { dimensions, tiles }
+    }
+
+    pub fn enumerate_map<U>(self, mapper: impl Fn(Point2D<usize>, T) -> U) -> Grid<U> {
+        let dimensions = self.dimensions;
+        let tiles = self.into_iter()
+            .enumerate()
+            .map(|(index, value)| mapper(Point2D(index % dimensions.0, index / dimensions.1), value))
+            .collect_vec()
+            .into_boxed_slice();
+
+        Grid { dimensions, tiles }
     }
 }
 

@@ -1,24 +1,23 @@
 use ahash::{HashSet, HashSetExt};
 use aoc_lib::{geometry::{grid::{BitGrid, Grid, GridLike}, CardinalDirection, Point2D}, math::Bit};
 use aoc_runner_api::SolverResult;
-use bitvec::vec::BitVec;
-use bitvec::prelude::Msb0;
-use composing::compose_fn;
+use hex::decode;
+use itertools::Itertools;
+use bitvec::{prelude::Msb0, vec::BitVec};
 
-use super::knot_hash;
+use super::knot_hash::hash;
 
 fn parse_grid(input: &str) -> Grid<Bit> {
-    let bits = (0..128u8)
-        .flat_map(compose_fn!(
-            |n| format!("{input}-{n}") =>
-            knot_hash::hash =>
-            hex::decode =>
-            Result::unwrap =>
-            BitVec::<_, Msb0>::from_vec =>
-            IntoIterator::into_iter
-        )).map(Bit::from);
+    let bits = (0..128u8).map(|n| {
+        let hash = decode(hash(format!("{input}-{n}"))).unwrap();
+        
+        BitVec::<u8, Msb0>::from_vec(hash)
+            .into_iter()
+            .map(Bit::from)
+            .collect_vec()
+    }).collect_vec();
 
-    Grid::from_iter(128.into(), bits).unwrap()
+    Grid::new(bits).unwrap()
 }
 
 #[allow(clippy::unnecessary_wraps)]

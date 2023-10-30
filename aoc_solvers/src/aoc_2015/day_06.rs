@@ -1,5 +1,5 @@
 use aoc_lib::{
-    geometry::{Point2D, grid::{Grid, BitGrid, GridLikeMut, GridLike, GridError}, Dimensions, Area},
+    geometry::{Point2D, grid::{Grid, BitGrid, GridLikeMut, GridError}, Dimensions, Area},
     parsing::{TextParser, Parsable, TextParserResult, lines},
     math::Bit
 };
@@ -66,7 +66,7 @@ impl Parsable<'_> for Step {
 impl Step {
     fn apply(self, grid: &mut Grid<impl Togglable + Clone>) -> Result<(), GridError> {
         let mut sub_grid = grid.sub_grid_mut(self.area)?;
-        let new_state = sub_grid.into_grid()
+        let new_state = sub_grid.owned()
             .map(|state| state.toggle(self.action));
 
         sub_grid.replace(new_state)?;

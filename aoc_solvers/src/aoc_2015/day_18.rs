@@ -7,7 +7,7 @@ fn neighbours_on(grid: &Grid<Bit>, cell: Point2D<usize>) -> usize {
 }
 
 fn next_state(grid: &Grid<Bit>) -> Grid<Bit> {
-    grid.enumerate_map(|(location, &light)| {
+    grid.clone().enumerate_map(|location, light| {
         match (light, neighbours_on(grid, location)) {
             | (Bit::On, 2 | 3)
             | (Bit::Off, 3) => Bit::On,
@@ -25,14 +25,14 @@ fn fix_corners(grid: &mut Grid<Bit>) {
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let grid = Grid::parse(100.into(), input)?;
+    let grid = Grid::parse(input)?;
     let grid = repeat_apply(100, grid, consume(next_state));
 
     Ok(Box::new(grid.pop_count()))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let grid = Grid::<Bit>::parse(100.into(), input)?;
+    let grid = Grid::<Bit>::parse(input)?;
 
     let mut grid = repeat_apply(100, grid, |mut grid| {
         fix_corners(&mut grid);

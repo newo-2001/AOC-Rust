@@ -2,7 +2,6 @@ use crate::geometry::{Point2D, Area};
 
 use super::{Grid, GridLike, grid_like::{impl_grid_traits_mut, impl_grid_traits, GridLikeMut}};
 
-#[derive(Clone)]
 pub struct GridView<'a, T> {
     pub(crate) grid: &'a Grid<T>,
     pub(crate) area: Area<usize>
@@ -99,11 +98,18 @@ macro_rules! impl_grid_like_for_view {
             fn area(&self) -> Area<usize> { self.area }
         }
 
-        impl<T> $type {
+        impl<T: Clone> $type {
             #[must_use]
-            pub fn into_grid(&self) -> Grid<T> where T: Clone {
-                let items = self.iter().cloned();
-                Grid::from_iter(self.area.dimensions(), items).unwrap()
+            pub fn owned(&self) -> Grid<T> {
+                let tiles = self.iter()
+                    .cloned()
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice();
+
+                Grid {
+                    tiles,
+                    dimensions: self.area.dimensions()
+                }
             }
         }
 

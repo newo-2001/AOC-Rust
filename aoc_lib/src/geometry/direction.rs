@@ -118,6 +118,18 @@ impl CardinalDirection {
     }
 }
 
+impl<T: Integer + Copy> Point2D<T> {
+    /// Calculate the relative [`CardinalDirection`] from one point to another.
+    /// Returns `None` if the points are the same or do not lie on the same line
+    pub fn direction_to(self, other: Point2D<T>) -> Option<CardinalDirection> {
+        if self.x() == other.x() && self.y() < other.y() { Some(CardinalDirection::South) }
+        else if self.x() == other.x() && self.y() > other.y() { Some(CardinalDirection::North) }
+        else if self.x() < other.x() && self.y() == other.y() { Some(CardinalDirection::East) }
+        else if self.x() > other.x() && self.y() == other.y() { Some(CardinalDirection::West) }
+        else { None }
+    }
+}
+
 /// Directions that move diagonally in 2D space.
 /// ```
 /// NW NE

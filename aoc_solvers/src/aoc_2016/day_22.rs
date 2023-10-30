@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, iter::once, collections::VecDeque};
 
-use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, Direction2D, CardinalDirection}, parsing::{ParseError, TextParser, usize}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
+use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, Direction2D, CardinalDirection, Dimensions}, parsing::{ParseError, TextParser, usize}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{preceded, delimited, tuple}, bytes::complete::tag, character::complete::{space1, char, u8, u16}, Parser};
@@ -95,11 +95,17 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let mut nodes = parse_nodes(input)?;
     nodes.sort();
 
-    let dimensions = nodes.last()
+    let Dimensions(width, _) = nodes.last()
         .ok_or(NoSolutionError)?
         .position.into();
 
-    let grid = Grid::from_iter(dimensions, nodes)?;
+    let nodes = nodes.into_iter()
+        .chunks(width)
+        .into_iter()
+        .map(Iterator::collect)
+        .collect();
+
+    let grid = Grid::new(nodes)?;
     
     let goal_position = grid.get(grid.area().top_right())
         .ok_or(NoSolutionError)?.position;
@@ -108,7 +114,8 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .find(|node| node.used == 0)
         .ok_or(NoSolutionError)?.position;
 
-    let grid = grid.map(|node| {
+    // Inefficient, but whatever
+    let grid = grid.clone().map(|node| {
         let neighbours = node.position
             .neighbours(CardinalDirection::all())
             .filter_map(|position| grid.get(position));

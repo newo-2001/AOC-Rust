@@ -29,16 +29,6 @@ pub trait GridLike: Sized {
     fn iter_columns(&self) -> GridColumnIterator<Self> {
         GridColumnIterator { grid: self, column: 0 }
     }
-
-    fn map<U>(&self, mapper: impl Fn(&Self::GridItem) -> U) -> Grid<U> {
-        let items = self.iter().map(mapper);
-        Grid::from_iter(self.area().dimensions(), items).unwrap()
-    }
-
-    fn enumerate_map<U: Debug>(&self, mapper: impl Fn((Point2D<usize>, &Self::GridItem)) -> U) -> Grid<U> {
-        let items = self.enumerate().map(mapper);
-        Grid::from_iter(self.area().dimensions(), items).unwrap()
-    }
 }
 
 pub trait GridLikeMut: GridLike {
