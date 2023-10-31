@@ -73,6 +73,13 @@ impl<T: Integer> Point3D<T> {
         let z = add(z, z2)?;
         Some(Point3D(x, y, z))
     }
+
+    pub fn dot(self: Point3D<T>, other: Point3D<T>) -> T {
+        let Point3D(x1, y1, z1) = self;
+        let Point3D(x2, y2, z2) = other;
+
+        x1 * x2 + y1 * y2 + z1 * z2
+    }
 }
 
 impl<T: Integer + Copy> Copy for Point3D<T> {}
