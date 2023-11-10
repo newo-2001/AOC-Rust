@@ -1,5 +1,5 @@
 use ahash::{HashMap, HashSet};
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, NoSolutionError};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -54,10 +54,10 @@ impl Graph<'_> {
         self.nodes.clone().into_iter().permutations(self.nodes.len())
     }
 
-    fn most_happiness(&self) -> Result<i32, NoSolutionError> {
+    fn most_happiness(&self) -> Result<i32, NoSolution> {
         self.all_arrangments()
             .map(|arrangement| self.arrangement_happiness(arrangement))
-            .max().ok_or(NoSolutionError)
+            .max().ok_or(NoSolution)
     }
 }
 

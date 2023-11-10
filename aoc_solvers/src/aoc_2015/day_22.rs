@@ -1,7 +1,7 @@
 use std::{cmp::{min, max}, collections::VecDeque, iter, hash::{Hash, Hasher}};
 use anyhow::Result;
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::{TextParser, Parsable, TextParserResult}, NoSolutionError};
+use aoc_lib::{parsing::{TextParser, Parsable, TextParserResult}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use nom:: {
     sequence::{preceded, separated_pair},
@@ -300,7 +300,7 @@ fn least_mana_for_input(input: &str, difficulty: Difficulty) -> Result<u32> {
     let battle = Battle::new(player, enemy, difficulty);
 
     let mana = least_amount_of_mana_for_victory(battle.clone())
-        .ok_or(NoSolutionError)?;
+        .ok_or(NoSolution)?;
 
     Ok(mana)
 }

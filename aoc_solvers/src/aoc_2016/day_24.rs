@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, iter::once};
 
-use aoc_lib::{math::Bit, parsing::InvalidTokenError, geometry::{Dimensions, grid::{Grid, GridLike}, Point2D, CardinalDirection}, iteration::{queue::{SearchDepth, Dedupable, FindState}, ExtraIter}, NoSolutionError};
+use aoc_lib::{math::Bit, parsing::InvalidTokenError, geometry::{Dimensions, grid::{Grid, GridLike}, Point2D, CardinalDirection}, iteration::{queue::{SearchDepth, Dedupable, FindState}, ExtraIter}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::{Itertools, Either};
 use anyhow::Result;
@@ -39,7 +39,7 @@ struct Vent {
 }
 
 impl Vent {
-    fn shortest_path(&self, should_return: bool) -> Result<usize, NoSolutionError> {
+    fn shortest_path(&self, should_return: bool) -> Result<usize, NoSolution> {
         let queue: VecDeque<_> = once(SearchDepth::new(State::new(self.start))).collect();
         queue.filter_duplicates().recursive_find(|mut search| {
             if search.state.visited_targets.len() == self.targets.len() {
@@ -62,7 +62,7 @@ impl Vent {
             }).collect_vec();
             
             FindState::Branch(branches)
-        }).ok_or(NoSolutionError)
+        }).ok_or(NoSolution)
     }
 }
 

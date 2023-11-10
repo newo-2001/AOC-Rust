@@ -1,4 +1,4 @@
-use aoc_lib::{parsing::{ParseError, TextParser, parse_lines, usize}, NoSolutionError};
+use aoc_lib::{parsing::{ParseError, TextParser, parse_lines, usize}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use nom::{bytes::complete::tag, sequence::{delimited, terminated, tuple}, character::complete::char, Parser};
 use num::Integer;
@@ -44,7 +44,7 @@ impl Machine {
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let machine = Machine::parse(input)?;
-    let time = machine.first_aligned_time().ok_or(NoSolutionError)?;
+    let time = machine.first_aligned_time().ok_or(NoSolution)?;
     Ok(Box::new(time))
 }
 
@@ -52,6 +52,6 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let mut machine = Machine::parse(input)?;
     machine.add_disc(Disc { index: machine.total_discs() + 1, positions: 11, starting_position: 0 });
     
-    let time = machine.first_aligned_time().ok_or(NoSolutionError)?;
+    let time = machine.first_aligned_time().ok_or(NoSolution)?;
     Ok(Box::new(time))
 }

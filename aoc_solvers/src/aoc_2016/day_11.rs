@@ -1,5 +1,5 @@
 use std::{collections::{BTreeSet, VecDeque}, hash::Hash, iter::once};
-use aoc_lib::{parsing::{ParseError, parse_lines, TextParser, skip_over}, iteration::queue::{Dedupable, FindState}, NoSolutionError};
+use aoc_lib::{parsing::{ParseError, parse_lines, TextParser, skip_over}, iteration::queue::{Dedupable, FindState}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{bytes::complete::{tag, take_till}, sequence::{terminated, preceded}, Parser, multi::separated_list0, combinator::opt, character::complete::char};
@@ -196,7 +196,7 @@ fn initial_configuration(input: &str) -> Result<Configuration, ParseError> {
     })
 }
 
-fn min_moves_to_top(initial: Configuration) -> Result<usize, NoSolutionError> {
+fn min_moves_to_top(initial: Configuration) -> Result<usize, NoSolution> {
     once(initial).collect::<VecDeque<_>>()
         .filter_duplicates()
         .recursive_find(|state| {
@@ -214,7 +214,7 @@ fn min_moves_to_top(initial: Configuration) -> Result<usize, NoSolutionError> {
             ]).flatten().collect_vec();
 
             FindState::Branch(branches)
-        }).ok_or(NoSolutionError)
+        }).ok_or(NoSolution)
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {

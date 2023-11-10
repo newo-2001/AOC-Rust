@@ -18,6 +18,5 @@ pub mod iteration;
 pub mod functional;
 pub mod datastructures;
 
-mod errors;
+pub mod errors;
 pub mod cpu;
-pub use errors::*;

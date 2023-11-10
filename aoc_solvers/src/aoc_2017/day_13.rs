@@ -1,4 +1,4 @@
-use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, NoInputError, NoSolutionError};
+use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, errors::{NoSolution, NoInput}};
 use aoc_runner_api::SolverResult;
 use nom::{character::complete::u32, sequence::separated_pair, bytes::complete::tag, combinator::map};
 use num::Integer;
@@ -50,11 +50,11 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let upper_bound = scanners.iter()
         .map(Scanner::cycle)
         .reduce(|a, b| a.lcm(&b))
-        .ok_or(NoInputError)?;
+        .ok_or(NoInput)?;
 
     let first_safe_trip = (0..upper_bound)
         .find(|&time| trip_severity(&scanners, time).is_none())
-        .ok_or(NoSolutionError)?;
+        .ok_or(NoSolution)?;
 
     Ok(Box::new(first_safe_trip))
 }

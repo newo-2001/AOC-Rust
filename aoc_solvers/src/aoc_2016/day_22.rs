@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, iter::once, collections::VecDeque};
 
-use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, Direction2D, CardinalDirection, Dimensions}, parsing::{ParseError, TextParser, usize}, NoSolutionError, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
+use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, Direction2D, CardinalDirection, Dimensions}, parsing::{ParseError, TextParser, usize}, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{preceded, delimited, tuple}, bytes::complete::tag, character::complete::{space1, char, u8, u16}, Parser};
@@ -73,7 +73,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 
 // This code looks *very* generic
 // I think this could be fully abstracted to a generic grid search algorithm
-fn find_path(grid: &Grid<Bit>, from: Point2D<usize>, to: Point2D<usize>) -> Result<usize, NoSolutionError>{
+fn find_path(grid: &Grid<Bit>, from: Point2D<usize>, to: Point2D<usize>) -> Result<usize, NoSolution>{
     once(SearchDepth::new(from)).collect::<VecDeque<_>>()
         .filter_duplicates()
         .recursive_find(|depth| {
@@ -87,7 +87,7 @@ fn find_path(grid: &Grid<Bit>, from: Point2D<usize>, to: Point2D<usize>) -> Resu
                 }).collect_vec();
 
             FindState::Branch(moves)
-        }).ok_or(NoSolutionError)
+        }).ok_or(NoSolution)
 }
 
 // This solution makes more assumptions about the input than I'd like
@@ -96,7 +96,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     nodes.sort();
 
     let Dimensions(width, _) = nodes.last()
-        .ok_or(NoSolutionError)?
+        .ok_or(NoSolution)?
         .position.into();
 
     let nodes = nodes.into_iter()
@@ -108,11 +108,11 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let grid = Grid::new(nodes)?;
     
     let goal_position = grid.get(grid.area().top_right())
-        .ok_or(NoSolutionError)?.position;
+        .ok_or(NoSolution)?.position;
 
     let empty_position = grid.iter()
         .find(|node| node.used == 0)
-        .ok_or(NoSolutionError)?.position;
+        .ok_or(NoSolution)?.position;
 
     // Inefficient, but whatever
     let grid = grid.clone().map(|node| {

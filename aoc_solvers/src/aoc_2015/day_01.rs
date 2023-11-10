@@ -1,4 +1,4 @@
-use aoc_lib::{parsing::{TextParserResult, TextParser}, NoSolutionError};
+use aoc_lib::{parsing::{TextParserResult, TextParser}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use nom::{character::complete::char, combinator::value, Parser, multi::many1};
 
@@ -32,7 +32,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 pub fn solve_part_2(input: &str) -> SolverResult {
     let directions = parse_directions.run(input)?;
     let index = find_basement(&directions)
-        .ok_or(NoSolutionError)?;
+        .ok_or(NoSolution)?;
 
     Ok(Box::new(index + 1))
 }

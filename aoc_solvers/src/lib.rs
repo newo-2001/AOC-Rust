@@ -8,7 +8,8 @@
     trait_alias,
     iter_next_chunk,
     iter_array_chunks,
-    never_type
+    never_type,
+    cmp_minmax
 )]
 
 #![allow(
@@ -93,7 +94,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             17 => solver!(2017, "17", puzzle.part),
             18 => solver!(2017, "18", puzzle.part),
             19 => solver!(2017, "19", puzzle.part),
-            20 => solver!(2017, "20", 1),
+            20 => solver!(2017, "20", puzzle.part),
             _ => None
         },
         _ => None

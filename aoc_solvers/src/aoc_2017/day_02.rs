@@ -1,6 +1,6 @@
 use std::num::ParseIntError;
 
-use aoc_lib::{parsing::parse_lines, NoSolutionError};
+use aoc_lib::{parsing::parse_lines, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::{Itertools, MinMaxResult};
 use num::Integer;
@@ -44,7 +44,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .into_iter()
         .map(divisors)
         .collect::<Option<Vec<_>>>()
-        .ok_or(NoSolutionError)?
+        .ok_or(NoSolution)?
         .into_iter()
         .sum();
 

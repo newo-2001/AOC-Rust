@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, iter::once, fmt::{Display, Formatter, self}};
 
-use aoc_lib::{geometry::{Point2D, CardinalDirection, Area, Dimensions, Directional}, iteration::queue::{Queue, FindState, FoldState}, NoSolutionError};
+use aoc_lib::{geometry::{Point2D, CardinalDirection, Area, Dimensions, Directional}, iteration::queue::{Queue, FindState, FoldState}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use hex::ToHex;
 
@@ -83,22 +83,22 @@ impl Grid<'_> {
         Grid { passcode, area: Dimensions(4, 4).into() }
     }
 
-    fn shortest_path_to_vault(&self) -> Result<Path, NoSolutionError> {
+    fn shortest_path_to_vault(&self) -> Result<Path, NoSolution> {
         let queue: VecDeque<State> = once(State::default()).collect();
         queue.recursive_find(|state| {
             if state.position == self.area.bottom_right() { FindState::Result(state.path) }
             else { FindState::Branch(state.valid_moves(self)) }
-        }).ok_or(NoSolutionError)
+        }).ok_or(NoSolution)
     }
 
-    fn longest_path_to_vault(&self) -> Result<Path, NoSolutionError> {
+    fn longest_path_to_vault(&self) -> Result<Path, NoSolution> {
         let queue: VecDeque<State> = once(State::default()).collect();
         queue.recursive_fold(None, |longest: Option<Path>, state| {
             let mut moves = state.valid_moves(self);
             let vault = moves.extract_if(|state| state.position == self.area.bottom_right()).next();
             let longest = vault.map(|vault| vault.path).max(longest);
             FoldState::Branch(longest, moves)
-        }).ok_or(NoSolutionError)
+        }).ok_or(NoSolution)
     }
 }
 

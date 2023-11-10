@@ -4,7 +4,7 @@ use std::{
 };
 
 use ahash::{HashSet, HashMap};
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, NoSolutionError};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -89,7 +89,7 @@ pub fn compute_distances(input: &str) -> Result<Vec<u32>, ParseError> {
 pub fn solve_part_1(input: &str) -> SolverResult {
     let shortest_distance = *compute_distances(input)?
         .iter().min()
-        .ok_or(NoSolutionError)?;
+        .ok_or(NoSolution)?;
 
     Ok(Box::from(shortest_distance))
 }
@@ -97,7 +97,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 pub fn solve_part_2(input: &str) -> SolverResult {
     let longest_distance = *compute_distances(input)?
         .iter().max()
-        .ok_or(NoSolutionError)?;
+        .ok_or(NoSolution)?;
 
     Ok(Box::from(longest_distance))
 }

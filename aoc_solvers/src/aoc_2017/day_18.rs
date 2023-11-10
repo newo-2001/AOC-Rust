@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, fmt::Debug};
 use anyhow::anyhow;
-use aoc_lib::{NoSolutionError, cpu::{self, Jump, ControlFlow}, parsing::{Parsable, TextParserResult, TextParser, Map2, lines}};
+use aoc_lib::{cpu::{self, Jump, ControlFlow}, parsing::{Parsable, TextParserResult, TextParser, Map2, lines}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{branch::alt, bytes::complete::tag, character::complete::{satisfy, char}, Parser, sequence::{separated_pair, preceded}};
@@ -114,7 +114,7 @@ impl cpu::Instruction<Register, i64> for Instruction {
 #[derive(Debug, Error)]
 enum Error {
     #[error(transparent)]
-    NoSolution(#[from] NoSolutionError),
+    NoSolution(#[from] NoSolution),
     #[error("Unexpected interrupt: {0:?}")]
     UnexpectedInterrupt(Interrupt),
 }
@@ -125,7 +125,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let sound = match cpu.execute() {
         Some(Interrupt::Send(result)) => Ok(result),
         Some(interrupt @ Interrupt::Receive(_)) => Err(Error::UnexpectedInterrupt(interrupt)),
-        None => Err(Error::NoSolution(NoSolutionError))
+        None => Err(Error::NoSolution(NoSolution))
     }?;
 
     Ok(Box::new(sound))

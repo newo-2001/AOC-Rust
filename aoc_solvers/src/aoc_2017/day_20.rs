@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 
-use aoc_lib::{geometry::Point3D, parsing::{Parsable, angle_brackets, Map3, TextParserResult, lines, TextParser}, NoInputError};
+use anyhow::bail;
+use aoc_lib::{geometry::Point3D, parsing::{Parsable, angle_brackets, Map3, TextParserResult, lines, TextParser}, errors::{MultipleSolutions, NoInput}, iteration::{ExtraIter, SingleError}};
 use aoc_runner_api::SolverResult;
 use nom::{sequence::{tuple, terminated, delimited, preceded}, character::complete::{i32, char}, Parser, bytes::complete::tag};
 use itertools::Itertools;
@@ -41,8 +42,8 @@ impl Ord for Particle {
     fn cmp(&self, other: &Self) -> Ordering {
         // The only statistic that matters is the highest acceleration
         // regardless of direction
-        let ordering = self.acceleration.manhattan_distance(Point3D::zero())
-            .cmp(&other.acceleration.manhattan_distance(Point3D::zero()));
+        let ordering = self.acceleration.magnitude()
+            .cmp(&other.acceleration.magnitude());
         
         // In case of two particles accelerating at the same speed,
         // the one with an initial velocity vector most similar
@@ -51,27 +52,28 @@ impl Ord for Particle {
         // onto the acceleration vector using the dot product
         match ordering {
             Ordering::Equal => self.acceleration.normalized().dot(self.velocity)
-                .cmp(&other.acceleration.dot(other.velocity)),
+                .cmp(&other.acceleration.normalized().dot(other.velocity)),
             _ => ordering
         }
-
-        // TODO: Technically a tie in velocities should also be considered
     }
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let particles: Vec<Particle> = lines(Particle::parse).run(input)?;
 
-    // TODO: Technically it is possible for two particles to tie
-    // In that case the input should be rejected
-    let fastest = *particles.iter()
-        .sorted()
-        .next()
-        .ok_or(NoInputError)?;
+    let slowest = particles.into_iter()
+        .enumerate()
+        .min_set_by_key(|(_, particle)| *particle)
+        .into_iter()
+        .single();
 
-    let index = particles.into_iter()
-        .position(|particle| particle == fastest)
-        .unwrap();
+    match slowest {
+        Ok((index, _)) => Ok(Box::new(index)),
+        Err(SingleError::More) => bail!(MultipleSolutions),
+        Err(SingleError::None) => bail!(NoInput)
+    }
+}
 
-    Ok(Box::new(index))
+pub fn solve_part_2(input: &str) -> SolverResult {
+    Ok(Box::new(1))
 }

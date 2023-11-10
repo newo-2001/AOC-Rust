@@ -1,4 +1,5 @@
-use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, math::Range, NoSolutionError};
+use anyhow::bail;
+use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, math::Range, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{char, u64}, Parser, sequence::separated_pair};
@@ -22,7 +23,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let first_valid_ip = match merge_ranges(ranges).next() {
         Some(Range { start, .. }) if start > 0 => 0,
         Some(Range { end, .. }) => end,
-        None => Err(NoSolutionError)?
+        None => bail!(NoSolution)
     };
 
     Ok(Box::new(first_valid_ip))

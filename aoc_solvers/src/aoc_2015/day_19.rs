@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::{Parsable, TextParserResult, lines, TextParser}, NoSolutionError};
+use aoc_lib::{parsing::{Parsable, TextParserResult, lines, TextParser}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{alpha1, line_ending}, Parser, sequence::separated_pair, bytes::complete::tag};
@@ -57,7 +57,7 @@ fn backwards_mutations(chemical: &str, replacement: &Replacement) -> Vec<String>
     mutations(chemical, replacement.to, replacement.from)
 }
 
-fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize, NoSolutionError> {
+fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize, NoSolution> {
     let mut queue: BTreeSet<Mutation> = BTreeSet::new();
     let mut cache: HashSet<String> = HashSet::new();
     
@@ -86,7 +86,7 @@ fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize
         }
     }
 
-    Err(NoSolutionError)
+    Err(NoSolution)
 }
 
 fn parse_data(input: &str) -> TextParserResult<(Vec<Replacement>, &str)> {

@@ -1,4 +1,4 @@
-use aoc_lib::{NoSolutionError, parsing::{Parsable, TextParser}};
+use aoc_lib::{parsing::{Parsable, TextParser}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use num::Integer;
 
@@ -19,7 +19,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
             .all(|(i, v)| if i.is_even() { v == 0 } else { v == 1 });
 
         Result::<bool, ExecutationError>::Ok(is_clock_signal)
-    })?.ok_or(NoSolutionError)?;
+    })?.ok_or(NoSolution)?;
 
     Ok(Box::new(first_clock))
 }

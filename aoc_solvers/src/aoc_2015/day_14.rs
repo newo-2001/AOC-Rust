@@ -1,7 +1,7 @@
 use std::cmp::min;
 
 use ahash::HashMap;
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, NoSolutionError};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded, delimited}, bytes::complete::tag, character::complete::{alpha1, u32}, Parser};
@@ -36,7 +36,7 @@ impl Reindeer<'_> {
     }
 }
 
-fn most_points_after_seconds(reindeers: &[Reindeer], duration: u32) -> Result<u32, NoSolutionError> {
+fn most_points_after_seconds(reindeers: &[Reindeer], duration: u32) -> Result<u32, NoSolution> {
     let mut points: HashMap<&str, u32> = reindeers.iter()
         .map(|reindeer| (reindeer.name, 0))
         .collect();
@@ -50,7 +50,7 @@ fn most_points_after_seconds(reindeers: &[Reindeer], duration: u32) -> Result<u3
         }
     }
 
-    Ok(*points.values().max().ok_or(NoSolutionError)?)
+    Ok(*points.values().max().ok_or(NoSolution)?)
 }
 
 const DURATION: u32 = 2503;
@@ -59,7 +59,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let reindeers = parse_lines(Reindeer::parse, input)?;
     let winning_distance = reindeers.iter()
         .map(|reindeer| reindeer.distance_after_seconds(DURATION))
-        .max().ok_or(NoSolutionError)?;
+        .max().ok_or(NoSolution)?;
 
     Ok(Box::new(winning_distance))
 }

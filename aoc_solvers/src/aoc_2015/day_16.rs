@@ -1,5 +1,5 @@
 use ahash::HashMap;
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, NoSolutionError};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, errors::NoSolution};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -56,14 +56,14 @@ fn is_valid_solution_range(fact: Fact, solution: &Sue) -> bool {
         })
 }
 
-fn solve(fact: Fact, system: Vec<Sue>, predicate: impl Fn(Fact, &Sue) -> bool) -> Result<Sue, NoSolutionError> {
+fn solve(fact: Fact, system: Vec<Sue>, predicate: impl Fn(Fact, &Sue) -> bool) -> Result<Sue, NoSolution> {
     let system = system.into_iter()
         .filter(|solution| predicate(fact, solution))
         .collect_vec();
 
     if let [solution] = system.as_slice() {
         Ok(*solution)
-    } else { Err(NoSolutionError) }
+    } else { Err(NoSolution) }
 }
 
 const FACT: Fact = [3, 7, 2, 3, 0, 0, 5, 3, 2, 1];
