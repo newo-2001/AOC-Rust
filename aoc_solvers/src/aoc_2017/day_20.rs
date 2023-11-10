@@ -58,8 +58,15 @@ impl Ord for Particle {
     }
 }
 
+impl Particle {
+    fn simulate(&mut self) {
+        self.velocity += self.acceleration;
+        self.position += self.velocity;
+    }
+}
+
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let particles: Vec<Particle> = lines(Particle::parse).run(input)?;
+    let particles = lines(Particle::parse).run(input)?;
 
     let slowest = particles.into_iter()
         .enumerate()
@@ -75,5 +82,19 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    Ok(Box::new(1))
+    // I hate this, but I can't figure out a reasonable way to find a stopping condition
+    // Attempted to do it analytically, but that involved solving 3d quadratics
+    const ITERATIONS: u32 = 1_000;
+
+    let mut particles = lines(Particle::parse).run(input)?;
+
+    for _ in 0..ITERATIONS {
+        let positions = particles.iter()
+            .counts_by(|particle| particle.position);
+        
+        particles.retain(|particle| positions[&particle.position] == 1);
+        particles.iter_mut().for_each(Particle::simulate);
+    }
+
+    Ok(Box::new(particles.len()))
 }
