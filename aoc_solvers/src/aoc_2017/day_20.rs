@@ -47,8 +47,10 @@ impl Ord for Particle {
         // In case of two particles accelerating at the same speed,
         // the one with an initial velocity vector most similar
         // to its acceleration vector will have a head start
+        // In order to respect magnitude, we project the velocity vector
+        // onto the acceleration vector using the dot product
         match ordering {
-            Ordering::Equal => self.acceleration.dot(self.velocity)
+            Ordering::Equal => self.acceleration.normalized().dot(self.velocity)
                 .cmp(&other.acceleration.dot(other.velocity)),
             _ => ordering
         }

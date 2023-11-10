@@ -17,7 +17,9 @@ struct State {
 impl State {
     fn apply_instruction(&mut self, instruction: &Instruction) {
         self.facing = self.facing.rotate(instruction.direction);
-        self.position += self.facing.direction_vector() * i32::from(instruction.amount);
+        
+        let direction: Point2D<i32> = self.facing.direction_vector();
+        self.position += direction * i32::from(instruction.amount);
     }
 }
 
@@ -62,7 +64,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let path = path_to_end(start, &instructions);
 
     let destination = path.last().unwrap_or(&start);
-    let distance = start.manhattan_distance(destination);
+    let distance = start.manhattan_distance(*destination);
     Ok(Box::from(distance))
 }
 
@@ -76,6 +78,6 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .find(|&location| !seen.insert(location))
         .ok_or(NoSolutionError)?;
 
-    let distance = start.manhattan_distance(&first_duplicate);
+    let distance = start.manhattan_distance(first_duplicate);
     Ok(Box::from(distance))
 }

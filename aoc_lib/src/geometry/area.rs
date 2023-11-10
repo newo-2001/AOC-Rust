@@ -1,81 +1,110 @@
-use std::{cmp::{min, max}, iter::Step, fmt::{Display, Formatter, self}};
+use std::{cmp::minmax, iter::Step, fmt::{Display, Formatter, self}, ops::{Sub, Add}};
 
-use num::{Integer, Zero, ToPrimitive};
+use num::{Zero, One};
 
 use super::{Point2D, Dimensions};
 
-#[derive(Debug, Eq, PartialEq, Clone)]
-pub struct Area<T> where T: Integer {
+#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+pub struct Area<T> {
     top_left: Point2D<T>,
     bottom_right: Point2D<T>
 }
 
-impl<T: Integer + Copy> Copy for Area<T> {}
+impl<T: Copy> Copy for Area<T> {}
 
-impl<T> Area<T> where T: Integer + Copy {
-    pub fn from_corners(first: Point2D<T>, second: Point2D<T>) -> Area<T> {
-        let top_left = Point2D(min(first.x(), second.x()), min(first.y(), second.y()));
-        let bottom_right = Point2D(max(first.x(), second.x()), max(second.y(), second.y()));
+impl<T> Area<T> {
+    pub fn from_corners(Point2D(x, y): Point2D<T>, Point2D(x2, y2): Point2D<T>) -> Area<T>
+        where T: Ord
+    {
+        let [min_x, max_x] = minmax(x, x2);
+        let [min_y, max_y] = minmax(y, y2);
+        let top_left = Point2D(min_x, min_y);
+        let bottom_right = Point2D(max_x, max_y);
         Area { top_left, bottom_right }
     }
     
-    pub fn from_dimensions_at(top_left: Point2D<T>, dimensions: Dimensions) -> Area<T> where T: From<usize> {
+    pub fn from_dimensions_at(top_left: Point2D<T>, dimensions: Dimensions) -> Area<T>
+        where T: From<usize> + Add<Output=T> + Clone
+    {
         Area {
-            top_left,
+            top_left: top_left.clone(),
             bottom_right: top_left + dimensions.into()
         }
     }
 
-    pub fn dimensions(&self) -> Dimensions where T: ToPrimitive {
-        let Point2D(width, height) = self.bottom_right() - self.top_left() + Point2D::one();
-        Dimensions(T::to_usize(&width).unwrap(), T::to_usize(&height).unwrap())
+    pub fn dimensions(self) -> Dimensions
+        where T: Into<usize> + Sub<Output=T> + Add<Output = T> + One
+    {
+        let Point2D(width, height) = self.bottom_right - self.top_left + Point2D::one();
+        Dimensions(width.into(), height.into())
     }
 
-    pub fn top(&self) -> T { self.top_left.y() }
-    pub fn left(&self) -> T { self.top_left.x() }
-    pub fn bottom(&self) -> T { self.bottom_right.y() }
-    pub fn right(&self) -> T { self.bottom_right.x() }
+    pub fn top(self) -> T { self.top_left.y() }
+    pub fn left(self) -> T { self.top_left.x() }
+    pub fn bottom(self) -> T { self.bottom_right.y() }
+    pub fn right(self) -> T { self.bottom_right.x() }
 
-    pub fn top_left(&self) -> Point2D<T> { self.top_left }
-    pub fn bottom_right(&self) -> Point2D<T> { self.bottom_right }
+    pub fn top_left(self) -> Point2D<T> { self.top_left }
+    pub fn bottom_right(self) -> Point2D<T> { self.bottom_right }
 
-    pub fn top_right(&self) -> Point2D<T> {
+    pub fn top_right(self) -> Point2D<T>
+        where T: Zero
+    {
         self.top_left + Point2D(self.bottom_right.x(), Zero::zero())
     }
 
-    pub fn bottom_left(&self) -> Point2D<T> {
+    pub fn bottom_left(self) -> Point2D<T>
+        where T: Add<Output=T> + Zero
+    {
         self.top_left + Point2D(Zero::zero(), self.bottom_right.y())
     }
 
-    pub fn corners(&self) -> [Point2D<T>; 4] {
-        [self.top_left(), self.top_right(), self.bottom_left(), self.bottom_right()]
+    pub fn corners(self) -> [Point2D<T>; 4]
+        where T: Zero + Add<Output = T> + Clone
+    {
+        let top_left = self.top_left.clone();
+        let bottom_right = self.bottom_right.clone();
+        let bottom_left = self.clone().bottom_left();
+        let top_right = self.top_right();
+
+        [top_left, top_right, bottom_left, bottom_right]
     }
 
-    pub fn contains(&self, Point2D(x, y): Point2D<T>) -> bool {
-        x >= self.left() && x <= self.right() &&
-        y >= self.top() && y <= self.bottom()
+    pub fn contains(&self, Point2D(x, y): &Point2D<T>) -> bool
+        where T: Ord
+    {
+        let Point2D(left, top) = &self.top_left;
+        let Point2D(right, bottom) = &self.bottom_right;
+        x >= left && x <= right &&
+        y >= top && y <= bottom
     }
 }
 
-impl<T: Integer + Step + Copy> IntoIterator for Area<T> {
+impl<T: Step + Clone> IntoIterator for Area<T> {
     type IntoIter = impl Iterator<Item=Point2D<T>>;
     type Item = Point2D<T>;
 
-    fn into_iter(self) -> <Self as IntoIterator>::IntoIter {
-        (self.top()..=self.bottom()).flat_map(move |y| {
-            (self.left()..=self.right()).map(move |x| Point2D(x, y))
+    fn into_iter(self) -> Self::IntoIter {
+        let Point2D(left, top) = self.top_left;
+        let Point2D(right, bottom) = self.bottom_right;
+
+        (top..=bottom).flat_map(move |y| {
+            (left.clone()..=right.clone())
+                .map(move |x| Point2D(x, y.clone()))
         })
     }
 }
 
-impl<T> From<Dimensions> for Area<T> where T: Integer + Copy + From<usize> {
+impl<T> From<Dimensions> for Area<T>
+    where T: From<usize> + Zero + One + Sub<Output=T>
+{
     fn from(Dimensions(width, height): Dimensions) -> Self {
         let bottom_right: Point2D<T> = Point2D(width.into(), height.into()) - Point2D::one();
         Area { top_left: Point2D::zero(), bottom_right }
     }
 }
 
-impl<T> Display for Area<T> where T: Integer + Display + Copy {
+impl<T: Display> Display for Area<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{} to {}", self.top_left, self.bottom_right)
     }

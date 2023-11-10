@@ -41,7 +41,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
             let is_enabled = grid.get(location).map_or(false, |state| state.is_enabled());
             if !is_enabled || seen.contains(&location) { continue; }
 
-            todo.extend(location.neighbours(CardinalDirection::all()));
+            todo.extend(location.neighbours::<isize, _>(CardinalDirection::all()));
             seen.insert(location);
         }
     }

@@ -1,11 +1,9 @@
 // We have `std::iter::range`, What is the purpose of this?
 // https://kaylynn.gay/blog/post/rust_ranges_and_suffering
 
-use std::{iter::Step, fmt::Display, cmp::max};
+use std::{iter::Step, fmt::Display, cmp::{max, minmax}};
 
 use num::{FromPrimitive, Integer, One};
-
-use super::min_max;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Range<T> {
@@ -51,7 +49,7 @@ impl<T: Step> Range<T> {
     }
 
     pub fn interval(self) -> T where T: Integer {
-        let (small, large) = min_max(self.start, self.end);
+        let [small, large] = minmax(self.start, self.end);
         large - small
     }
 

@@ -14,7 +14,7 @@ pub struct GridViewMut<'a, T> {
 
 impl<'a, T> GridLikeMut for GridViewMut<'a, T> {
     fn get_mut(&mut self, location: Point2D<usize>) -> Option<&mut T> {
-        if !self.area.contains(location) { return None; }
+        if !self.area.contains(&location) { return None; }
 
         let location = location + self.area.top_left();
         let index = self.grid.backing_index(location);
@@ -64,7 +64,7 @@ macro_rules! impl_grid_like_for_view {
             type GridItem = T;
 
             fn get(&self, location: Point2D<usize>) -> Option<&T> {
-                if !self.area.contains(location) { return None; }
+                if !self.area.contains(&location) { return None; }
 
                 let location = location + self.area.top_left();
                 let index = self.grid.backing_index(location);

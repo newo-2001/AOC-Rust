@@ -64,8 +64,8 @@ impl State {
             .zip([Dir::North, Dir::South, Dir::West, Dir::East])
             .filter_map(|(c, dir)| {
                 let direction = "bcdef".contains(c).then_some(dir)?;
-                let position = self.position.checked_add(direction.direction_vector::<i8>())?;
-                grid.area.contains(position).then(|| State {
+                let position = self.position.checked_add::<isize>(direction.direction_vector())?;
+                grid.area.contains(&position).then(|| State {
                     path: self.path.with_movement(direction),
                     position
                 })

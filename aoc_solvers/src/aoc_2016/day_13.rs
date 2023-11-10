@@ -39,7 +39,7 @@ impl Grid {
     }
 
     fn moves_at(&self, SearchState { location, depth }: SearchState) -> Vec<SearchState> {
-        location.neighbours(CardinalDirection::all())
+        location.neighbours::<isize, _>(CardinalDirection::all())
             .filter(|&location| !self.get(location).is_solid())
             .map(|location| SearchState { location, depth: depth + 1 })
             .collect_vec()

@@ -80,7 +80,7 @@ fn find_path(grid: &Grid<Bit>, from: Point2D<usize>, to: Point2D<usize>) -> Resu
             if depth.state == to { return FindState::Result(depth.depth) }
 
             let moves = depth.state
-                .neighbours(Direction2D::all())
+                .neighbours::<isize, _>(Direction2D::all())
                 .filter_map(|position| {
                     (!grid.get(position)?.is_solid())
                         .then_some(depth.with(position))
@@ -117,7 +117,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     // Inefficient, but whatever
     let grid = grid.clone().map(|node| {
         let neighbours = node.position
-            .neighbours(CardinalDirection::all())
+            .neighbours::<isize, _>(CardinalDirection::all())
             .filter_map(|position| grid.get(position));
 
         node.as_tile(neighbours)

@@ -1,7 +1,7 @@
 use std::hash::{Hash, Hasher};
 
 use ahash::HashMap;
-use aoc_lib::parsing::{TextParser, brackets, lines, TextParserResult, Parsable};
+use aoc_lib::parsing::{TextParser, parens, lines, TextParserResult, Parsable};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{alpha1, space1, u32}, sequence::{terminated, preceded, tuple}, multi::separated_list1, bytes::complete::tag, combinator::opt, Parser};
@@ -17,7 +17,7 @@ struct Program<'a> {
 impl<'a> Parsable<'a> for Program<'a> {
     fn parse(input: &'a str) -> TextParserResult<Program<'a>> {
         let name = terminated(alpha1, space1);
-        let weight = brackets(u32);
+        let weight = parens(u32);
         let children = preceded(tag(" -> "), separated_list1(tag(", "), alpha1));
 
         tuple((name, weight, opt(children))).map(|(name, weight, children)| Program {

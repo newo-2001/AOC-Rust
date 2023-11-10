@@ -53,7 +53,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let mut spiral = SpiralIterator::new(Point2D::zero(), RotationDirection::Left, CardinalDirection::East);
     
     let location = spiral.nth(index - 1).unwrap();
-    let distance = location.manhattan_distance(&Point2D::zero());
+    let distance = location.manhattan_distance(Point2D::zero());
     Ok(Box::new(distance))
 }
 
@@ -63,7 +63,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let mut grid: HashMap::<Point2D, u32> = once((Point2D::zero(), 1)).collect();
     
     for point in spiral {
-        let value: u32 = point.neighbours(Direction2D::all())
+        let value: u32 = point.neighbours::<i32, _>(Direction2D::all())
             .filter_map(|neighbour| grid.get(&neighbour))
             .sum();
 

@@ -63,7 +63,7 @@ pub fn angle_brackets<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
     delimited(char('<'), parser, char('>'))
 }
 
-pub fn brackets<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
+pub fn parens<I, O, E, F>(parser: F) -> impl Parser<I, O, E>
     where F: Parser<I, O, E>,
           E: ParseError<I>,
           I: Slice<RangeFrom<usize>> + InputIter,

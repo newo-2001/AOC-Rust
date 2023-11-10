@@ -1,6 +1,6 @@
 use std::iter::once;
 use anyhow::{anyhow, Result};
-use aoc_lib::parsing::{TextParserResult, brackets, usize};
+use aoc_lib::parsing::{TextParserResult, parens, usize};
 use aoc_runner_api::SolverResult;
 use nom::{sequence::preceded, character::complete::{anychar, char}, Parser, multi::{many0, many_till}};
 
@@ -22,7 +22,7 @@ enum Chunk<'a> {
 fn parse_marker(input: &str) -> TextParserResult<Marker> {
     let parse_marker = usize.and(preceded(char('x'), usize));
 
-    let (input, (length, times)) = brackets(parse_marker).parse(input)?;
+    let (input, (length, times)) = parens(parse_marker).parse(input)?;
     let (data, remaining) = input.split_at(length);
 
     Ok((remaining, Marker { times, data }))

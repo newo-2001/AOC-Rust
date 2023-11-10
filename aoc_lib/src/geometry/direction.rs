@@ -1,12 +1,14 @@
-use nom::{branch::alt, combinator::value, character::complete::one_of, bytes::complete::tag, Parser};
-use num::{Integer, Signed};
+use std::ops::Neg;
 
-use crate::parsing::TextParserResult;
+use nom::{branch::alt, combinator::value, character::complete::one_of, bytes::complete::tag, Parser};
+use num::{One, Zero};
+
+use crate::parsing::{TextParserResult, Parsable};
 
 use super::{Point2D, Point3D};
 
-pub trait Directional: Sized {
-    fn direction_vector<T: Integer + Signed>(self) -> Point2D<T>;
+pub trait Directional<V>: Sized {
+    fn direction_vector(self) -> V;
 }
 
 /// Directions that are relative to the observer in 2D space
@@ -46,10 +48,11 @@ pub enum CardinalDirection {
     West
 }
 
-impl Directional for CardinalDirection {
+impl<T> Directional<Point2D<T>> for CardinalDirection
+    where T: Zero + One + Neg<Output=T>
+{
     /// Used to calculate the offset created by one step in a direction
-    fn direction_vector<T>(self) -> Point2D<T>
-        where T: Integer + Signed
+    fn direction_vector(self) -> Point2D<T>
     {
         match self {
             Self::North => Point2D(T::zero(), -T::one()),
@@ -82,21 +85,6 @@ impl CardinalDirection {
         [Self::North, Self::East, Self::South, Self::West]
     }
 
-    /// Parse a [`CardinalDirection`] from a variety of representations like:
-    /// ```
-    ///   U   |   N   |   ^
-    /// L   R | W   E | <   >
-    ///   D   |   S   |   V
-    /// ```
-    pub fn parse(input: &str) -> TextParserResult<CardinalDirection> {
-        alt((
-            value(Self::North, one_of("UuNn^")),
-            value(Self::East, one_of("RrEe>")),
-            value(Self::South, one_of("DdSsVv")),
-            value(Self::West, one_of("LlWw<"))
-        ))(input)
-    }
-
     #[must_use]
     pub fn relative_char(self) -> char {
         match self {
@@ -118,17 +106,23 @@ impl CardinalDirection {
     }
 }
 
-impl<T: Integer + Copy> Point2D<T> {
-    /// Calculate the relative [`CardinalDirection`] from one point to another.
-    /// Returns `None` if the points are the same or do not lie on the same line
-    pub fn direction_to(self, other: Point2D<T>) -> Option<CardinalDirection> {
-        if self.x() == other.x() && self.y() < other.y() { Some(CardinalDirection::South) }
-        else if self.x() == other.x() && self.y() > other.y() { Some(CardinalDirection::North) }
-        else if self.x() < other.x() && self.y() == other.y() { Some(CardinalDirection::East) }
-        else if self.x() > other.x() && self.y() == other.y() { Some(CardinalDirection::West) }
-        else { None }
+impl Parsable<'_> for CardinalDirection {
+    /// Parse a [`CardinalDirection`] from a variety of representations like:
+    /// ```
+    ///   U   |   N   |   ^
+    /// L   R | W   E | <   >
+    ///   D   |   S   |   V
+    /// ```
+    fn parse(input: &str) -> TextParserResult<CardinalDirection> {
+        alt((
+            value(Self::North, one_of("UuNn^")),
+            value(Self::East, one_of("RrEe>")),
+            value(Self::South, one_of("DdSsVv")),
+            value(Self::West, one_of("LlWw<"))
+        ))(input)
     }
 }
+
 
 /// Directions that move diagonally in 2D space.
 /// ```
@@ -145,10 +139,11 @@ pub enum OrdinalDirection {
     NorthWest
 }
 
-impl Directional for OrdinalDirection {
+impl<T> Directional<Point2D<T>> for OrdinalDirection
+    where T: Zero + One + Neg<Output=T>
+{
     /// Used to calculate the offset created by one step in a direction
-    fn direction_vector<T>(self) -> Point2D<T>
-        where T: Integer + Signed
+    fn direction_vector(self) -> Point2D<T>
     {
         use CardinalDirection as Dir;
         match self {
@@ -180,9 +175,11 @@ pub enum Direction2D {
     Ordinal(OrdinalDirection)
 }
 
-impl Directional for Direction2D {
+impl<T> Directional<Point2D<T>> for Direction2D
+    where T: Zero + One + Neg<Output=T>
+{
     /// Used to calculate the offset created by one step in a direction
-    fn direction_vector<T: Integer + Signed>(self) -> Point2D<T> {
+    fn direction_vector(self) -> Point2D<T> {
         match self {
             Self::Cardinal(direction) => direction.direction_vector(),
             Self::Ordinal(direction) => direction.direction_vector()
@@ -220,10 +217,11 @@ pub enum Direction3D {
     Down
 }
 
-impl Direction3D {
+impl<T> Directional<Point3D<T>> for Direction3D
+    where T: Zero + One + Neg<Output=T>
+{
     /// Used to calculate the offset created by one step in a direction.
-    #[must_use]
-    pub fn direction_vector<T: Integer + Signed>(self) -> Point3D<T> {
+    fn direction_vector(self) -> Point3D<T> {
         match self {
             Self::North => Point3D(T::zero(), -T::one(), T::zero()),
             Self::East => Point3D(T::one(), T::zero(), T::zero()),
@@ -233,7 +231,9 @@ impl Direction3D {
             Self::Down => Point3D(T::zero(), T::zero(), -T::one())
         }
     }
+}
 
+impl Direction3D {
     #[must_use]
     pub fn all() -> [Direction3D; 6] {
         [Self::North, Self::East, Self::South, Self::West, Self::Up, Self::Down]
@@ -260,10 +260,11 @@ pub enum HexDirection {
     SouthWest
 }
 
-impl HexDirection {
+impl<T> Directional<Point3D<T>> for HexDirection
+    where T: Zero + One + Neg<Output=T>
+{
     /// Used to calculate the offset created by one step in a direction.
-    #[must_use]
-    pub fn direction_vector<T: Integer + Signed>(self) -> Point3D<T> {
+    fn direction_vector(self) -> Point3D<T> {
         match self {
             Self::North => Point3D(T::zero(), -T::one(), T::one()),
             Self::NorthEast => Point3D(T::one(), -T::one(), T::zero()),
@@ -273,7 +274,9 @@ impl HexDirection {
             Self::NorthWest => Point3D(-T::one(), T::zero(), T::one())
         }
     }
+}
 
+impl HexDirection {
     #[must_use]
     pub fn all() -> [HexDirection; 6] {
         [

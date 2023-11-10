@@ -72,7 +72,7 @@ impl Map {
                 Tile::Straight(_) => {},
                 Tile::Empty => break,
                 Tile::Corner => {
-                    let neighbours = packet.position.neighbours(CardinalDirection::all())
+                    let neighbours = packet.position.neighbours::<isize, _>(CardinalDirection::all())
                         .filter(|&neighbour| {
                             !seen.contains(&neighbour) &&
                             self.0.get(neighbour).is_some_and(|tile| tile.is_path())
@@ -86,7 +86,7 @@ impl Map {
                 }
             }
             
-            let step = packet.facing.direction_vector::<isize>();
+            let step: Point2D<isize> = packet.facing.direction_vector();
             packet.position = packet.position.checked_add(step)
                 .ok_or(anyhow!("Packet traveled off the grid"))?;
             

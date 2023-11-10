@@ -48,7 +48,7 @@ impl Vent {
                 } else if !search.state.returning { search.state.returning = true }
             }
 
-            let neighbours = search.state.position.neighbours(CardinalDirection::all());
+            let neighbours = search.state.position.neighbours::<isize, _>(CardinalDirection::all());
             let branches = neighbours.filter(|&position| {
                 let tile = self.grid.get(position).unwrap_or(&Bit::On);
                 !tile.is_solid()

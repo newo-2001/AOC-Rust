@@ -1,5 +1,5 @@
 use anyhow::Result;
-use aoc_lib::{geometry::{Dimensions, grid::{Grid, InvalidGridAreaError, GridLikeMut, BitGrid}}, parsing::{TextParser, parse_lines, ParseError, usize}, math::Bit};
+use aoc_lib::{geometry::{Dimensions, grid::{Grid, InvalidGridAreaError, GridLikeMut, BitGrid}}, parsing::{TextParser, parse_lines, ParseError, usize, Parsable}, math::Bit};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::preceded, bytes::complete::tag, Parser, branch::alt};

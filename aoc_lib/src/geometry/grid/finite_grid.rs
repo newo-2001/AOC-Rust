@@ -18,7 +18,7 @@ impl<T> GridLike for Grid<T> {
     type GridItem = T;
 
     fn get(&self, location: Point2D<usize>) -> Option<&T> {
-        if !self.area().contains(location) { return None }
+        if !self.area().contains(&location) { return None }
         self.tiles.get(self.backing_index(location))
     }
 
@@ -46,7 +46,7 @@ impl<T> GridLike for Grid<T> {
 
 impl<T> GridLikeMut for Grid<T> {
     fn get_mut(&mut self, location: Point2D<usize>) -> Option<&mut T> {
-        if !self.area().contains(location) { return None }
+        if !self.area().contains(&location) { return None }
         self.tiles.get_mut(self.backing_index(location))
     }
 

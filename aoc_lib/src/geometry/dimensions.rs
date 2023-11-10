@@ -4,7 +4,7 @@ use itertools::Itertools;
 use nom::{sequence::preceded, character::complete::char, Parser};
 use thiserror::Error;
 
-use crate::parsing::{TextParserResult, usize};
+use crate::parsing::{TextParserResult, usize, Parsable};
 
 use super::Point2D;
 
@@ -21,9 +21,11 @@ impl Dimensions {
     #[must_use]
     pub fn surface_area(&self) -> usize {
         self.width() * self.height()
-    }
-    
-    pub fn parse(input: &str) -> TextParserResult<Dimensions> {
+    }   
+}
+
+impl Parsable<'_> for Dimensions {
+    fn parse(input: &str) -> TextParserResult<Dimensions> {
         usize.and(preceded(char('x'), usize))
             .map(|(width, height)| Dimensions(width, height))
             .parse(input)

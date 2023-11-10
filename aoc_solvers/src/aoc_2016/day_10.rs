@@ -1,7 +1,7 @@
-use std::{hash::Hash, collections::VecDeque};
+use std::{hash::Hash, collections::VecDeque, cmp::minmax};
 
 use ahash::{HashMap, HashMapExt};
-use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, math::min_max, iteration::queue::{Dedupable, FoldState}};
+use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, iteration::queue::{Dedupable, FoldState}};
 use aoc_runner_api::SolverResult;
 use itertools::{Itertools, Either};
 use nom::{sequence::{preceded, delimited, tuple, terminated}, bytes::complete::tag, character::complete::u16, Parser};
@@ -84,7 +84,7 @@ impl Robot {
     fn give(&mut self, value: u16) -> Result<(), RobotError> {
         self.values = match self.values {
             Chips::None => Chips::Single(value),
-            Chips::Single(first) => Chips::Double(min_max(first, value)),
+            Chips::Single(first) => Chips::Double(minmax(first, value).into()),
             Chips::Double(..) => return Err(RobotError::TooManyChips)
         };
 

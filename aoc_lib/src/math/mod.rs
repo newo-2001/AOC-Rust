@@ -12,10 +12,6 @@ pub fn gauss_sum<T: Integer + FromPrimitive + Copy>(n: T) -> T {
     n * (n + One::one()) / T::from_u32(2).unwrap()
 }
 
-pub fn min_max<T: Ord>(a: T, b: T) -> (T, T) {
-    if a > b { (b, a) } else { (a, b) }
-}
-
 pub fn min_max_by<T>(a: T, b: T, compare: impl FnOnce(&T, &T) -> Ordering) -> (T, T) {
     match compare(&a, &b) {
         Ordering::Equal | Ordering::Less => (a, b),

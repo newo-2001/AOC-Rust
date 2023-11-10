@@ -2,7 +2,7 @@ use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike, BitGrid, GridLikeMut}, 
 use aoc_runner_api::SolverResult;
 
 fn neighbours_on(grid: &Grid<Bit>, cell: Point2D<usize>) -> usize {
-    cell.neighbours(Direction2D::all())
+    cell.neighbours::<isize, _>(Direction2D::all())
         .count_where(|location| grid.get(location).is_some_and(|light| light.is_on()))
 }
 

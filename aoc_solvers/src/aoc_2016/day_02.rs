@@ -1,4 +1,4 @@
-use aoc_lib::{geometry::{CardinalDirection, Point2D, Directional}, parsing::{parse_lines, TextParser, ParseError}};
+use aoc_lib::{geometry::{CardinalDirection, Point2D, Directional}, parsing::{parse_lines, TextParser, ParseError, Parsable}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::multi::many0;
@@ -25,7 +25,7 @@ fn digit<'a>(keypad: KeyPad, location: &mut Point2D<i32>, movements: impl IntoIt
 
         *location = match keypad {
             KeyPad::Square => new_location.clamp(-1, 1),
-            KeyPad::Round => match new_location.manhattan_distance(&Point2D::zero()) {
+            KeyPad::Round => match new_location.manhattan_distance(Point2D::zero()) {
                 distance if distance <= 2 => new_location,
                 _ => *location
             }

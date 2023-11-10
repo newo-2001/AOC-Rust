@@ -1,7 +1,8 @@
 #![feature(
     step_trait,
     impl_trait_in_assoc_type,
-    never_type
+    never_type,
+    cmp_minmax
 )]
 
 #![allow(
