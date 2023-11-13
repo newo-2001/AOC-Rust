@@ -79,11 +79,13 @@ pub fn run_puzzle(puzzle: Puzzle) -> Result<RunStats, Error> {
     let result = solver(&input)
         .map_err(|err| Error::RunnerError {
             error: RunnerError::ExecutionError(err.to_string()),
-            duration: start_time - Instant::now()
+            duration: start_time.elapsed()
         })?;
 
-    let duration = start_time - Instant::now();
-    Ok(RunStats { result: result.to_string(), duration })
+    Ok(RunStats {
+        result: result.to_string(),
+        duration: start_time.elapsed()
+    })
 }
 
 pub fn verify_puzzle(puzzle: Puzzle) -> Result<RunStats, Error> {

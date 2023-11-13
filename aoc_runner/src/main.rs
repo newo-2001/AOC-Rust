@@ -51,8 +51,7 @@ fn execute(runner: fn(Puzzle) -> Result<RunStats, run::Error>, puzzles: &[Puzzle
         result
     }).collect();
 
-    let end_time = Instant::now();
-    let duration = end_time - start_time;
+    let duration = start_time.elapsed();
 
     let stats = results.into_iter().map(|result| match result {
         Err(run::Error::RunnerError { .. }) => Status::Failure,
