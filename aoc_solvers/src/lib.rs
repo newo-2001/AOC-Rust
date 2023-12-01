@@ -9,7 +9,8 @@
     iter_next_chunk,
     iter_array_chunks,
     never_type,
-    cmp_minmax
+    cmp_minmax,
+    pattern
 )]
 
 #![allow(
@@ -22,6 +23,7 @@ use aoc_runner_api::{Solver, Puzzle, PuzzlePart};
 mod aoc_2016;
 mod aoc_2015;
 mod aoc_2017;
+mod aoc_2023;
 
 // TODO: replace with procedural macro
 macro_rules! solver {
@@ -97,6 +99,10 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             20 => solver!(2017, "20", puzzle.part),
             _ => None
         },
+        2023 => match puzzle.day {
+            1 => solver!(2023, "01", puzzle.part),
+            _ => None
+        }
         _ => None
     }
 }
