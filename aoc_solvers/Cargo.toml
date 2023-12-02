@@ -17,6 +17,7 @@ composing = "0.2.0"
 derive_more = "0.99.17"
 hex = { version = "0.4.3", features = ["serde"] }
 itertools = "0.10.5"
+maplit = "1.0.2"
 md5 = "0.7.0"
 nom = "7.1.1"
 num = "0.4.1"

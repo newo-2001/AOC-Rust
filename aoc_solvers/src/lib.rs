@@ -9,8 +9,7 @@
     iter_next_chunk,
     iter_array_chunks,
     never_type,
-    cmp_minmax,
-    pattern
+    cmp_minmax
 )]
 
 #![allow(
@@ -101,6 +100,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
         },
         2023 => match puzzle.day {
             1 => solver!(2023, "01", puzzle.part),
+            2 => solver!(2023, "02", puzzle.part),
             _ => None
         }
         _ => None
