@@ -1,9 +1,9 @@
 use std::cmp::Ordering;
 
 use ahash::{HashMap, HashMapExt};
-use aoc_lib::{parsing::{ParseError, TextParserResult, TextParser, parse_lines}, errors::NoSolution};
+use aoc_lib::{parsing::{ParseError, TextParserResult, TextParser, parse_lines}, errors::NoSolution, string_enum};
 use aoc_runner_api::SolverResult;
-use nom::{combinator::value, Parser, bytes::complete::tag, character::complete::{alpha1, i32}, sequence::{preceded, tuple}, branch::alt};
+use nom::{Parser, bytes::complete::tag, character::complete::{alpha1, i32}, sequence::{preceded, tuple}};
 
 #[derive(Clone, Copy)]
 enum ComparisonOperator {
@@ -17,14 +17,14 @@ enum ComparisonOperator {
 
 impl ComparisonOperator {
     fn parse(input: &str) -> TextParserResult<Self> {
-        alt((
-            value(Self::Equal, tag(" == ")),
-            value(Self::NotEqual, tag(" != ")),
-            value(Self::GreaterThan, tag(" > ")),
-            value(Self::GreaterThanEqual, tag( " >= ")),
-            value(Self::LessThan, tag( " < ")),
-            value(Self::LessThanEqual, tag( " <= ")),
-        )).parse(input)
+        string_enum! {
+            " == " => Self::Equal,
+            " != " => Self::NotEqual,
+            " > " => Self::GreaterThan,
+            " >= " => Self::GreaterThanEqual,
+            " < " => Self::LessThan,
+            " <= " => Self::LessThanEqual
+        }.parse(input)
     }
 
     fn evaluate<T>(self, left: &T, right: &T) -> bool where T: Ord {

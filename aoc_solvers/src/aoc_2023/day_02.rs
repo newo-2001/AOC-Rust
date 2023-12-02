@@ -1,8 +1,8 @@
 use std::collections::HashMap;
-use aoc_lib::{parsing::{TextParserResult, TextParser, ParseError, parse_lines}, functional::swap};
+use aoc_lib::{parsing::{TextParserResult, TextParser, ParseError, parse_lines}, functional::swap, string_enum};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{bytes::complete::tag, branch::alt, combinator::value, Parser, sequence::{separated_pair, delimited}, character::complete::{u32, char}, multi::{separated_list0, separated_list1}};
+use nom::{bytes::complete::tag, Parser, sequence::{separated_pair, delimited}, character::complete::{u32, char}, multi::{separated_list0, separated_list1}};
 use anyhow::Result;
 use maplit::hashmap;
 
@@ -14,22 +14,22 @@ enum Color {
 }
 
 impl Color {
-    fn parse(input: &str) -> TextParserResult<Color> {
-        alt((
-            value(Color::Red, tag("red")),
-            value(Color::Blue, tag("blue")),
-            value(Color::Green, tag("green"))
-        )).parse(input)
+    fn parse(input: &str) -> TextParserResult<Self> {
+        string_enum! {
+            "red" => Self::Red,
+            "blue" => Self::Blue,
+            "green" => Self::Green
+        }.parse(input)
     }
 }
 
 struct Hand(HashMap<Color, u32>);
 
 impl Hand {
-    fn parse(input: &str) -> TextParserResult<Hand> {
+    fn parse(input: &str) -> TextParserResult<Self> {
         let cubes = || separated_pair(u32, char(' '), Color::parse).map(swap);
         separated_list1(tag(", "), cubes())
-            .map(|cubes| Hand(cubes.into_iter().collect()))
+            .map(|cubes| Self(cubes.into_iter().collect()))
             .parse(input)
     }
 
@@ -44,10 +44,10 @@ struct Game {
 }
 
 impl Game {
-    fn parse(input: &str) -> Result<Game, ParseError> {
+    fn parse(input: &str) -> Result<Self, ParseError> {
         delimited(tag("Game "), u32, tag(": "))
             .and(separated_list0(tag("; "), Hand::parse))
-            .map(|(number, hands)| Game { hands, number })
+            .map(|(number, hands)| Self { hands, number })
             .run(input)
     }
 
@@ -69,7 +69,7 @@ impl Game {
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let total_cubes = hashmap!{
+    let total_cubes = hashmap! {
         Color::Red => 12,
         Color::Green => 13,
         Color::Blue => 14

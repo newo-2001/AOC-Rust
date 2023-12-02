@@ -1,10 +1,10 @@
 use aoc_lib::{
     geometry::{Point2D, grid::{Grid, BitGrid, GridLikeMut, GridError}, Dimensions, Area},
     parsing::{TextParser, Parsable, TextParserResult, lines},
-    math::Bit
+    math::Bit, string_enum
 };
 use aoc_runner_api::SolverResult;
-use nom::{bytes::complete::tag, branch::alt, combinator::value, sequence::{tuple, preceded}, Parser};
+use nom::{bytes::complete::tag, sequence::{tuple, preceded}, Parser};
 use anyhow::Result;
 
 #[derive(Clone, Copy)]
@@ -46,11 +46,11 @@ struct Step {
 
 impl Parsable<'_> for Step {
     fn parse(input: &str) -> TextParserResult<Step> {
-        let action = alt((
-            value(Action::Off, tag("turn off ")),
-            value(Action::On, tag("turn on ")),
-            value(Action::Toggle, tag("toggle "))
-        ));
+        let action = string_enum! {
+            "turn off " => Action::Off,
+            "turn on " => Action::On,
+            "toggle " => Action::Toggle
+        };
 
         tuple((
             action,
