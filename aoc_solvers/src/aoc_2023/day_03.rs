@@ -30,12 +30,12 @@ struct Number {
 }
 
 // This is quite possibly the ugliest and most error prone code in this repo
-fn numbers_at(grid: &Grid<Tile>, point: Point2D<usize>) -> Vec<Number> {
+fn numbers_at(grid: &Grid<Tile>, point: Point2D<usize>) -> impl Iterator<Item=Number> + '_ {
     let mut seen = HashSet::<Point2D<usize>>::new();
-    let mut numbers: Vec<Number> = Vec::new();
+    let neighbours = point.neighbours::<isize, _>(Direction2D::all());
 
-    for mut pos in point.neighbours::<isize, _>(Direction2D::all()) {
-        if seen.contains(&pos) || !matches!(grid.get(pos), Some(Tile::Digit(_))) { continue; }
+    neighbours.filter_map(move |mut pos| {
+        if seen.contains(&pos) || !matches!(grid.get(pos), Some(Tile::Digit(_))) { return None }
 
         // Move back to start of the number
         while let Some(previous) = pos.checked_add(Point2D::<isize>(-1, 0)) {
@@ -51,10 +51,8 @@ fn numbers_at(grid: &Grid<Tile>, point: Point2D<usize>) -> Vec<Number> {
             pos += Point2D(1, 0);
         }
 
-        numbers.push(number);
-    }
-
-    numbers
+        Some(number)
+    })
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
@@ -73,12 +71,12 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 
 pub fn solve_part_2(input: &str) -> SolverResult {
     let grid: Grid<Tile> = Grid::parse(input)?;
-
     let gear_ratio_sum: u32 = grid.enumerate()
         .filter(|(_, tile)| matches!(tile, Tile::Symbol('*')))
         .filter_map(|(pos, _)| {
-            match numbers_at(&grid, pos).as_slice() {
-                [Number { value: left, .. }, Number { value: right, .. }] => Some(left * right),
+            let numbers = numbers_at(&grid, pos).collect_vec();
+            match numbers.as_slice() {
+                [left, right] => Some(left.value * right.value),
                 _ => None
             }
         }).sum();
