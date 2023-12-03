@@ -1,17 +1,14 @@
+use ahash::{HashSet, HashSetExt};
 use aoc_lib::geometry::{grid::{Grid, GridLike}, Point2D, Direction2D};
 use aoc_runner_api::SolverResult;
+use itertools::Itertools;
+use std::hash::Hash;
 
 #[derive(Clone, Copy)]
 enum Tile {
     Symbol(char),
     Digit(u32),
     Period
-}
-
-impl Tile {
-    fn is_symbol(self) -> bool {
-        matches!(self, Self::Symbol(_))
-    }
 }
 
 impl TryFrom<char> for Tile {
@@ -26,61 +23,65 @@ impl TryFrom<char> for Tile {
     }
 }
 
-#[derive(Default)]
+#[derive(PartialEq, Eq, Hash)]
 struct Number {
-    value: u32,
-    tiles: Vec<Point2D<usize>>
+    position: Point2D<usize>,
+    value: u32
 }
 
-impl Number {
-    fn is_part_number(&self, grid: &Grid<Tile>) -> bool {
-        self.tiles.iter()  
-            .flat_map(|tile| {
-                tile.neighbours::<isize, _>(Direction2D::all())
-                    .map(|neighbour| grid.get(neighbour))
-            }).flatten()
-            .any(|tile| tile.is_symbol())
-    }
-}
+// This is quite possibly the ugliest and most error prone code in this repo
+fn numbers_at(grid: &Grid<Tile>, point: Point2D<usize>) -> Vec<Number> {
+    let mut seen = HashSet::<Point2D<usize>>::new();
+    let mut numbers: Vec<Number> = Vec::new();
 
-// TODO: Clean this shit up
-fn numbers(grid: &Grid<Tile>) -> Vec<Number> {
-    let mut numbers = Vec::<Number>::new();
-    let mut number: Option<Number> = None;
+    for mut pos in point.neighbours::<isize, _>(Direction2D::all()) {
+        if seen.contains(&pos) || !matches!(grid.get(pos), Some(Tile::Digit(_))) { continue; }
 
-    for (position, tile) in grid.enumerate() {
-        number = if let &Tile::Digit(digit) = tile {
-            let mut number = number.unwrap_or_default();
-            number.tiles.push(position);
-            number.value = number.value * 10 + digit;
-
-            Some(number)
-        } else {
-            if let Some(number) = number {
-                numbers.push(number);
-            }
-
-            None
+        // Move back to start of the number
+        while let Some(previous) = pos.checked_add(Point2D::<isize>(-1, 0)) {
+            if !matches!(grid.get(previous), Some(Tile::Digit(_))) { break; }
+            pos = previous;
         }
-    }
 
-    if let Some(number) = number {
+        // Accumulate number whilst moving along
+        let mut number = Number { value: 0, position: pos };
+        while let Some(Tile::Digit(digit)) = grid.get(pos) {
+            number.value = number.value * 10 + digit;
+            seen.insert(pos);
+            pos += Point2D(1, 0);
+        }
+
         numbers.push(number);
     }
 
     numbers
 }
 
-fn part_numbers(grid: &Grid<Tile>) -> impl Iterator<Item=u32> + '_ {
-    numbers(grid)
-        .into_iter()
-        .filter(|number| number.is_part_number(grid))
-        .map(|number| number.value)
-}
-
 pub fn solve_part_1(input: &str) -> SolverResult {
     let grid: Grid<Tile> = Grid::parse(input)?;
-    let parts_sum: u32 = part_numbers(&grid).sum();
+    let parts_sum: u32 = grid.enumerate()
+        .filter(|(_, tile)| matches!(tile, Tile::Symbol(_)))
+        .flat_map(|(pos, _)| numbers_at(&grid, pos))
+        .collect::<HashSet<Number>>()
+        .into_iter()
+        .dedup()
+        .map(|number| number.value)
+        .sum();
 
     Ok(Box::new(parts_sum))
+}
+
+pub fn solve_part_2(input: &str) -> SolverResult {
+    let grid: Grid<Tile> = Grid::parse(input)?;
+
+    let gear_ratio_sum: u32 = grid.enumerate()
+        .filter(|(_, tile)| matches!(tile, Tile::Symbol('*')))
+        .filter_map(|(pos, _)| {
+            match numbers_at(&grid, pos).as_slice() {
+                [Number { value: left, .. }, Number { value: right, .. }] => Some(left * right),
+                _ => None
+            }
+        }).sum();
+
+    Ok(Box::new(gear_ratio_sum))
 }
