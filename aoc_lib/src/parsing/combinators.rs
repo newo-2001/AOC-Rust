@@ -13,12 +13,6 @@ use nom::{
 };
 use tupletools::{Snd, snd};
 
-pub fn ignore<I, O, E, F>(parser: F) -> impl Parser<I, (), E>
-    where E : ParseError<I>,
-          F : Parser<I, O, E> {
-    value((), parser)
-}
-
 pub fn skip_until<I, O, E, F, C>(parser: F) -> impl Parser<I, O, E>
     where E: ParseError<I>,
           F: Parser<I, O, E>,
@@ -155,5 +149,12 @@ pub fn run<I, O, E, F: Sized>(parser: F, input: I) -> Result<O, super::ParseErro
 macro_rules! between {
     ($delimiter: expr, $parser: expr) => {
         nom::sequence::delimited($delimiter, $parser, $delimiter)
+    };
+}
+
+#[macro_export]
+macro_rules! ignore {
+    ($($parser: expr),*) => {
+        nom::combinator::value((), nom::sequence::tuple(($($parser,)*)))
     };
 }

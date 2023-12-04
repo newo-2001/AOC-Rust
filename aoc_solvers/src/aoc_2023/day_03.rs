@@ -1,5 +1,5 @@
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::geometry::{grid::{Grid, GridLike}, Point2D, Direction2D};
+use aoc_lib::{geometry::{grid::{Grid, GridLike}, Point2D, Direction2D}, iteration::ExtraIter};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use std::hash::Hash;
@@ -62,9 +62,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
         .flat_map(|(pos, _)| numbers_at(&grid, pos))
         .collect::<HashSet<Number>>()
         .into_iter()
-        .dedup()
-        .map(|number| number.value)
-        .sum();
+        .sum_by(|number| number.value);
 
     Ok(Box::new(parts_sum))
 }

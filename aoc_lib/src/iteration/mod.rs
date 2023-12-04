@@ -1,4 +1,4 @@
-use std::hash::Hash;
+use std::{hash::Hash, iter::Sum};
 
 mod single;
 mod mode;
@@ -35,6 +35,10 @@ pub trait ExtraIter: Iterator + Sized {
         *self.counts_by(predicate)
             .get(&true)
             .unwrap_or(&0)
+    }
+
+    fn sum_by<T: Sum>(self, keying_function: impl Fn(Self::Item) -> T) -> T {
+        self.map(keying_function).sum()
     }
 }
 
