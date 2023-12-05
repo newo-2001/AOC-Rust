@@ -45,7 +45,7 @@ impl RunnerScope {
             RunnerScope::Year(year) => (1..=25).flat_map(|day| {
                 RunnerScope::Day(year, day).puzzles()
             }).collect(),
-            RunnerScope::All => (2015..=2022).flat_map(|year| {
+            RunnerScope::All => (2015..=2023).flat_map(|year| {
                 RunnerScope::Year(year).puzzles()
             }).collect()
         }.into_iter()
