@@ -1,10 +1,12 @@
 mod bit;
 mod range;
+mod quadratic;
 
 use std::cmp::Ordering;
 
 pub use bit::*;
 pub use range::*;
+pub use quadratic::*;
 
 use num::{FromPrimitive, Integer, One};
 
