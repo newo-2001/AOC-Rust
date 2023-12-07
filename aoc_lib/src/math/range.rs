@@ -1,9 +1,9 @@
 // We have `std::iter::range`, What is the purpose of this?
 // https://kaylynn.gay/blog/post/rust_ranges_and_suffering
 
-use std::{iter::Step, fmt::Display, cmp::{max, minmax}, ops::{Sub, Add, Div}};
+use std::{iter::Step, fmt::Display, cmp::{max, minmax, minmax_by, min}, ops::{Sub, Add, Div}};
 
-use num::{FromPrimitive, One, Zero};
+use num::{One, Zero};
 
 /// A contiguous range with a lower and upper bound.
 /// Prefer this over [`std::iter::range`] for computations where iteration is not required
@@ -82,10 +82,20 @@ impl<T> Range<T> {
         else { Err((self, other)) }
     }
 
+    /// Returns the range that the two have in common if any
+    pub fn intersect(self, other: Self) -> Option<Self>
+        where T: Ord
+    {
+        let [first, second] = minmax_by(self, other, |a, b| a.start.cmp(&b.start));
+        
+        (second.start < first.end)
+            .then_some(Range::exclusive(second.start, min(first.end, second.end)))
+    }
+
     /// Sums the entire range of numbers.
     /// Since the range is contiguous, an O(1) algorithm is used.
     pub fn sum(self) -> T
-        where T: Clone + Ord + Zero + One + FromPrimitive +
+        where T: Clone + Ord + Zero + One + From<u8> +
                  Sub<Output=T> + Add<Output=T> + Div<Output=T>
     {
         let amount = self.clone().interval();
@@ -94,7 +104,7 @@ impl<T> Range<T> {
             RangeDirection::Decreasing => self.end + T::one()
         };
 
-        (self.start + end) * amount / T::from_u8(2).unwrap()
+        (self.start + end) * amount / T::from(2u8)
     }
 }
 
@@ -178,5 +188,18 @@ mod tests {
         let first = Range::inclusive(5, 6);
         let second = Range::exclusive(8, 10);
         assert_eq!(Err((first, second)), first.merge(second));
+    }
+
+    #[test]
+    fn intersect() {
+        assert_eq!(None, Range::exclusive(2, 5).intersect(Range::exclusive(5, 6)));
+
+        let outer = Range::inclusive(1, 8);
+        let inner = Range::exclusive(4, 7);
+        assert_eq!(Some(inner), inner.intersect(outer));
+
+        let first = Range::inclusive(3, 6);
+        let second = Range::inclusive(5, 8);
+        assert_eq!(Some(Range::inclusive(5, 6)), first.intersect(second));
     }
 }

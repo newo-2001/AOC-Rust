@@ -31,6 +31,16 @@ impl Map {
             .unwrap_or(n)
     }
 
+    fn flatten(&self, parent: Range) -> Vec<MappingRange> {
+        let mut iter = self.0.iter()
+            .skip_while(|child| !child.from.contains(parent.start));
+
+        let ranges = iter.take_while(|child| !child.from.contains(parent.end));
+        
+        let last = iter.next().map(|mapping| mapping.from.intersect(parent))
+
+    }
+
     fn parse(input: &str) -> TextParserResult<Self> {
         preceded(
             skip_until(tag("map:")).and(line_ending),
