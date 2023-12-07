@@ -1,4 +1,4 @@
-use std::{hash::Hash, iter::Sum};
+use std::{hash::Hash, iter::Sum, ops::{DerefMut, Deref}};
 
 mod single;
 mod mode;
@@ -32,14 +32,23 @@ pub trait ExtraIter: Iterator + Sized {
     }
 
     fn count_where(self, predicate: impl Fn(Self::Item) -> bool) -> usize {
-        *self.counts_by(predicate)
-            .get(&true)
-            .unwrap_or(&0)
+        self.counts_by(predicate)
+            .remove(&true)
+            .unwrap_or_default()
     }
 
-    fn sum_by<T: Sum>(self, keying_function: impl Fn(Self::Item) -> T) -> T {
-        self.map(keying_function).sum()
+    fn sum_by<T: Sum>(self, key: impl Fn(Self::Item) -> T) -> T {
+        self.map(key).sum()
+    }
+
+    fn replace_all<T>(self, needle: T, replacement: T)
+        where Self::Item: DerefMut + Deref<Target=T>,
+              T: PartialEq + Clone
+    {
+        for mut item in self {
+            if *item == needle { *item = replacement.clone() }
+        }
     }
 }
 
-impl<T> ExtraIter for T where T: Iterator { }
+impl<T> ExtraIter for T where T: Iterator {}

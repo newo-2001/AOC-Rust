@@ -23,7 +23,7 @@ impl Race {
         };
 
         match formula.roots() {
-            Roots::Pair(left, right) => (left.ceil() - right.ceil()) as u64,
+            Roots::Pair(left, right) => (left.floor() - right.ceil()) as u64 + 1,
             Roots::Single(_) => 1,
             Roots::None => 0
         }
