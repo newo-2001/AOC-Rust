@@ -34,6 +34,15 @@ impl RotationDirection {
     }
 }
 
+impl Parsable<'_> for RotationDirection {
+    fn parse(input: &str) -> TextParserResult<Self> {
+        Parser::or(
+            value(Self::Left, one_of("Ll")),
+            value(Self::Right, one_of("Rr"))
+        ).parse(input)
+    }
+}
+
 /// Directions that move along the axis of 2D space
 /// ```
 ///   N

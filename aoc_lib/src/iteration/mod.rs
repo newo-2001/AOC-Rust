@@ -1,17 +1,16 @@
 use std::{hash::Hash, iter::Sum, ops::{DerefMut, Deref}};
+use itertools::Itertools;
 
 mod single;
 mod mode;
+mod try_fold_while;
 pub mod queue;
 
-use itertools::Itertools;
-
-pub use self::single::SingleError;
+pub use single::SingleError;
+pub use try_fold_while::TryFoldWhile;
 
 pub trait ExtraIter: Iterator + Sized {
-    fn single(self) -> Result<Self::Item, SingleError>
-        where Self: Sized
-    {
+    fn single(self) -> Result<Self::Item, SingleError> {
         single::single(self)
     }
 
@@ -29,6 +28,12 @@ pub trait ExtraIter: Iterator + Sized {
         where Self::Item: Eq + Hash
     {
         mode::multi_mode(self)
+    }
+
+    fn try_fold_while<T, E, F>(self, init: T, folder: F) -> Result<T, E>
+        where F: Fn(T, Self::Item) -> TryFoldWhile<T, E>
+    {
+        try_fold_while::try_fold_while(self, init, folder)
     }
 
     fn count_where(self, predicate: impl Fn(Self::Item) -> bool) -> usize {
@@ -51,4 +56,4 @@ pub trait ExtraIter: Iterator + Sized {
     }
 }
 
-impl<T> ExtraIter for T where T: Iterator {}
+impl<I> ExtraIter for I where I: Iterator {}
