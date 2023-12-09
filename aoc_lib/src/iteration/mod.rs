@@ -4,8 +4,10 @@ use itertools::Itertools;
 mod single;
 mod mode;
 mod try_fold_while;
+mod generator;
 pub mod queue;
 
+pub use generator::{Generator, generate};
 pub use single::SingleError;
 pub use try_fold_while::TryFoldWhile;
 

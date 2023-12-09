@@ -51,7 +51,7 @@ fn distance_until<'a, I>(
     start: &'a NodeId<'a>,
     predicate: impl Fn(&'a NodeId<'a>) -> bool
 ) -> Result<usize>
-    where I: IntoIterator<Item=RotationDirection>,
+    where I: IntoIterator<Item=&'a RotationDirection>,
           I::IntoIter: Clone
 {
     instructions
@@ -61,7 +61,7 @@ fn distance_until<'a, I>(
             match map.get(node) {
                 None => TryFoldWhile::Err(anyhow!("Attempted to visit undefined node: {}", node)),
                 Some(edges) => {
-                    let node = edges.get(direction);
+                    let node = edges.get(*direction);
                     let next = (distance + 1, node);
 
                     if (predicate)(node) { TryFoldWhile::Done(next) }
@@ -73,7 +73,7 @@ fn distance_until<'a, I>(
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let (instructions, map) = parse_map(input)?;
-    let distance = distance_until(&map, instructions, &NodeId("AAA"), |node| node == &NodeId("ZZZ"))?;
+    let distance = distance_until(&map, &instructions, &NodeId("AAA"), |node| node == &NodeId("ZZZ"))?;
 
     Ok(Box::new(distance))
 }
@@ -84,7 +84,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let distance: usize = map.keys()
         .filter(|node| node.is_start())
         .map(|start| {
-            distance_until(&map, instructions.clone(), start, NodeId::is_end)
+            distance_until(&map, &instructions, start, NodeId::is_end)
         }).collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .reduce(|x, y| x.lcm(&y))
