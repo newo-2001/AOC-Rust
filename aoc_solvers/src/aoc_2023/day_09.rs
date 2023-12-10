@@ -32,13 +32,9 @@ impl History {
             .sum()
     }
 
-    fn prev(self) -> i32 {
-        self.differences()
-            .map(|history| *history.0.first().unwrap())
-            .collect_vec()
-            .into_iter()
-            .rev()
-            .fold(0, |acc, head| head - acc)
+    fn prev(mut self) -> i32 {
+        self.0.reverse();
+        self.next()
     }
 }
 
