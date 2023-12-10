@@ -1,5 +1,6 @@
-use std::{cmp::minmax, iter::Step, fmt::{Display, Formatter, self}, ops::{Sub, Add}};
+use std::{cmp::minmax, iter::Step, fmt::{Display, Formatter, self}, ops::{Sub, Add}, hash::Hash};
 
+use ahash::HashSet;
 use num::{Zero, One};
 
 use super::{Point2D, Dimensions};
@@ -68,6 +69,20 @@ impl<T> Area<T> {
         let top_right = self.top_right();
 
         [top_left, top_right, bottom_left, bottom_right]
+    }
+
+    /// Produces an iterator containing all the [`Point2D`]s on the edges of the area
+    pub fn edges(self) -> impl Iterator<Item=Point2D<T>>
+        where T: Step + Copy,
+              Point2D<T>: Hash + Eq
+    {
+        (self.left()..=self.right()).map(move |x| {
+            [Point2D(x, self.top()), Point2D(x, self.bottom())]
+        }).chain((self.top()..=self.bottom()).map(move |y| {
+            [Point2D(self.left(), y), Point2D(self.right(), y)]
+        })).flatten()
+            .collect::<HashSet<_>>()
+            .into_iter()
     }
 
     pub fn contains(&self, Point2D(x, y): &Point2D<T>) -> bool

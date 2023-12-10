@@ -76,7 +76,7 @@ impl CardinalDirection {
     /// Rotate this direction by a [`RotationDirection`].
     /// This has the effect of turning relative to an observer.
     #[must_use]
-    pub fn rotate(self, rotation_direction: RotationDirection) -> CardinalDirection {
+    pub fn rotate(self, rotation_direction: RotationDirection) -> Self {
         match (self, rotation_direction) {
             | (Self::North, RotationDirection::Left)
             | (Self::South, RotationDirection::Right) => Self::West,
@@ -86,6 +86,17 @@ impl CardinalDirection {
             | (Self::West, RotationDirection::Right) => Self::North,
             | (Self::East, RotationDirection::Right)
             | (Self::West, RotationDirection::Left) => Self::South
+        }
+    }
+
+    /// The direction opposite of this one
+    #[must_use]
+    pub fn reverse(self) -> Self {
+        match self {
+            Self::North => Self::South,
+            Self::South => Self::North,
+            Self::East => Self::West,
+            Self::West => Self::East
         }
     }
 
