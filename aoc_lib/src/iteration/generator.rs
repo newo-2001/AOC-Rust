@@ -1,3 +1,7 @@
+/// Produces an iterator from a generator function.
+/// The generator function will be called with the previously produced value
+/// to produce the next value in the sequence.
+/// It turns a recursive function into an iterator.
 pub fn generate<T, F>(seed: T, generator: F) -> Generator<T, F>
     where F: Fn(&T) -> Option<T>
 {
