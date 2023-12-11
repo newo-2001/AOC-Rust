@@ -1,4 +1,4 @@
-use std::{slice, vec, fmt::Debug};
+use std::{slice, vec, fmt::Debug, iter::Enumerate};
 
 use thiserror::Error;
 
@@ -28,6 +28,14 @@ pub trait GridLike: Sized {
 
     fn iter_columns(&self) -> GridColumnIterator<Self> {
         GridColumnIterator { grid: self, column: 0 }
+    }
+
+    fn enumerate_rows(&self) -> Enumerate<GridRowIterator<Self>> {
+        self.iter_rows().enumerate()
+    }
+
+    fn enumerate_columns(&self) -> Enumerate<GridColumnIterator<Self>> {
+        self.iter_columns().enumerate()
     }
 }
 

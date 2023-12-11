@@ -56,6 +56,12 @@ pub trait ExtraIter: Iterator + Sized {
             if *item == needle { *item = replacement.clone() }
         }
     }
+
+    /// Returns true if none of the items in the iterator match the predicate.
+    /// Like [`Iterator::all`], but with the condition inverted.
+    fn none(&mut self, predicate: impl Fn(Self::Item) -> bool) -> bool {
+        self.all(|item| !(predicate)(item))
+    }
 }
 
 impl<I> ExtraIter for I where I: Iterator {}

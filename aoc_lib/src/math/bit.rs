@@ -42,6 +42,15 @@ impl From<bool> for Bit {
     }
 }
 
+impl From<Bit> for bool {
+    fn from(bit: Bit) -> bool {
+        match bit {
+            Bit::On => true,
+            Bit::Off => false
+        }
+    }
+}
+
 impl TryFrom<char> for Bit {
     type Error = InvalidTokenError<char>;
 
