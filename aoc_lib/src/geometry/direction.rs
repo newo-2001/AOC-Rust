@@ -11,6 +11,12 @@ pub trait Directional<V>: Sized {
     fn direction_vector(self) -> V;
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub enum Axis {
+    Horizontal,
+    Vertical
+}
+
 /// Directions that are relative to the observer in 2D space
 /// These can be used to turn to a different [`CardinalDirection`]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

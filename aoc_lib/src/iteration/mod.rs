@@ -5,11 +5,13 @@ mod single;
 mod mode;
 mod try_fold_while;
 mod generator;
+mod transpose;
 pub mod queue;
 
 pub use generator::{Generator, generate};
 pub use single::SingleError;
 pub use try_fold_while::TryFoldWhile;
+pub use transpose::Transpose;
 
 pub trait ExtraIter: Iterator + Sized {
     /// Returns `Ok` if the iterator contained exactly one element.
@@ -79,6 +81,36 @@ pub trait ExtraIter: Iterator + Sized {
     fn none(&mut self, predicate: impl Fn(Self::Item) -> bool) -> bool {
         self.all(|item| !(predicate)(item))
     }
+
+    fn transpose(self) -> Transpose<<<Self as Iterator>::Item as IntoIterator>::IntoIter> where
+        <Self as Iterator>::Item: IntoIterator
+    {
+        Transpose { rows: self.map(IntoIterator::into_iter).collect() }
+    }
 }
 
 impl<I> ExtraIter for I where I: Iterator {}
+
+#[cfg(test)]
+mod tests {
+    use super::ExtraIter;
+    use itertools::Itertools;
+
+    #[test]
+    fn transpose() {
+        let matrix = vec![
+            vec![1, 2, 3],
+            vec![4, 5, 6]
+        ].into_iter()
+            .transpose()
+            .collect_vec();
+
+        let expected = vec![
+            vec![1, 4],
+            vec![2, 5],
+            vec![3, 6]
+        ];
+
+        assert_eq!(expected, matrix);
+    }
+}
