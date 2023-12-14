@@ -11,7 +11,6 @@
     never_type,
     cmp_minmax,
     iter_intersperse,
-    slice_take
 )]
 
 #![allow(
@@ -114,6 +113,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             11 => solver!(2023, "11", puzzle.part),
             12 => solver!(2023, "12", puzzle.part),
             13 => solver!(2023, "13", puzzle.part),
+            14 => solver!(2023, "14", puzzle.part),
             _  => None
         }
         _ => None

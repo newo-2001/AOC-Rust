@@ -16,6 +16,7 @@ bitvec = "1.0.1"
 composing = "0.2.0"
 derive_more = "0.99.17"
 hex = { version = "0.4.3", features = ["serde"] }
+indexmap = "2.1.0"
 itertools = "0.10.5"
 maplit = "1.0.2"
 md5 = "0.7.0"
