@@ -1,11 +1,11 @@
 use std::fmt::Debug;
 
-use anyhow::Context;
+use anyhow::{Context, Result, anyhow};
 use aoc_lib::{math::Bit, parsing::{ParseError, TextParser}, iteration::ExtraIter, geometry::Axis};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{multi::{separated_list1, count, many1}, character::complete::{anychar, line_ending}, combinator::map_res};
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::iter::{ParallelIterator, IntoParallelRefMutIterator};
 
 fn parse(input: &str) -> Result<Vec<Vec<Vec<Bit>>>, ParseError> {
     separated_list1(
@@ -32,9 +32,9 @@ impl Mirror {
     }
 }
 
-fn reflection_location<T: PartialEq>(pattern: &[T], exclude: Option<usize>) -> Option<usize> {
-    fn reflect<T: PartialEq>(pattern: &[T], exclude: Option<usize>) -> Option<usize> {
-        if pattern.len() < 2 { return None }
+fn reflection_locations<T: PartialEq>(pattern: &[T]) -> impl Iterator<Item=usize> {
+    fn reflect<T: PartialEq>(pattern: &[T]) -> Option<usize> {
+        if pattern.len() < 2 { return None; }
 
         let pivot = pattern.len() / 2;
         let start = &pattern[..pivot];
@@ -44,42 +44,34 @@ fn reflection_location<T: PartialEq>(pattern: &[T], exclude: Option<usize>) -> O
             .zip(end.iter().rev())
             .all(|(a, b)| a == b);
 
-        if !reflection || exclude.is_some_and(|exclude| pivot == exclude) {
-            reflect(&pattern[..pattern.len() - 1], exclude)
-        } else { Some (pivot) }
+        if reflection { Some(pivot) }
+        else { reflect(&pattern[..pattern.len() - 1]) }
     }
 
-    reflect(pattern, exclude).or_else(|| {
-        let exclude = exclude.map(|x| pattern.len() - x);
-        reflect(&pattern.iter().rev().collect_vec(), exclude)
+    [
+        reflect(pattern),
+        reflect(&pattern.iter().rev().collect_vec())
             .map(|offset| pattern.len() - offset)
-    })
+    ].into_iter()
+        .flatten()
+        .dedup()
 }
 
-fn find_mirror<T: PartialEq>(pattern: &[Vec<T>], exclude: Option<Mirror>) -> Option<Mirror> {
-    let exclude_horizontal = exclude.and_then(|mirror| {
-        (mirror.axis == Axis::Horizontal).then_some(mirror.offset)
-    });
-
-    if let Some(offset) = reflection_location(pattern, exclude_horizontal) {
-        return Some(Mirror { offset, axis: Axis::Horizontal });
-    }
-
+fn find_mirrors<T: PartialEq>(pattern: &[Vec<T>]) -> impl Iterator<Item=Mirror> + '_ {
     let transposed = pattern.iter()
         .transpose()
         .collect_vec();
 
-    let exclude_vertical = exclude.and_then(|mirror| {
-        (mirror.axis == Axis::Vertical).then_some(mirror.offset)
-    });
-
-    reflection_location(&transposed, exclude_vertical)
+    reflection_locations(&transposed)
         .map(|offset| Mirror { offset, axis: Axis::Vertical })
+        .chain(reflection_locations(pattern).map(|offset| Mirror { offset, axis: Axis::Horizontal}))
 }
 
-fn find_smudgy_mirror(mut pattern: Vec<Vec<Bit>>) -> Option<Mirror> {
-    let actual_mirror = find_mirror(&pattern, None)?;
-
+fn find_smudgy_mirror(pattern: &mut [Vec<Bit>]) -> Result<Mirror> {
+    let clean_mirror: Mirror = find_mirrors(pattern)
+        .single()
+        .context("Failed to identify clean mirror")?;
+    
     // I will find a better way to do this
     // I just want to go to bed
     (0..pattern.len()).find_map(|row_index| {
@@ -88,25 +80,28 @@ fn find_smudgy_mirror(mut pattern: Vec<Vec<Bit>>) -> Option<Mirror> {
             let tile = &mut row[col_index];
             *tile = tile.invert();
 
-            if let Some(mirror) = find_mirror(&pattern, Some(actual_mirror)) {
-                return Some(mirror);
-            }
+            let result = find_mirrors(pattern)
+                .filter(|&mirror| mirror != clean_mirror)
+                .single()
+                .ok();
 
             let row = &mut pattern[row_index];
             let tile = &mut row[col_index];
             *tile = tile.invert();
 
-            None
+            result
         })
-    })
+    }).ok_or_else(|| anyhow!("{:?}", &pattern))
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let total_points = parse(input)?
         .into_iter()
-        .map(|pattern| find_mirror(&pattern, None))
-        .collect::<Option<Vec<Mirror>>>()
-        .context("Input contained a pattern without a mirror")?
+        .map(|pattern| {
+            find_mirrors(&pattern)
+                .single()
+                .context("Failed to identify mirror")
+        }).collect::<Result<Vec<Mirror>>>()?
         .iter()
         .sum_by(Mirror::summary);
 
@@ -115,10 +110,9 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 
 pub fn solve_part_2(input: &str) -> SolverResult {
     let total_points = parse(input)?
-        .into_par_iter()
-        .map(find_smudgy_mirror)
-        .collect::<Option<Vec<Mirror>>>()
-        .context("Input contained a pattern without a mirror")?
+        .par_iter_mut()
+        .map(|pattern| find_smudgy_mirror(pattern))
+        .collect::<Result<Vec<Mirror>>>()?
         .iter()
         .sum_by(Mirror::summary);
 
@@ -127,16 +121,17 @@ pub fn solve_part_2(input: &str) -> SolverResult {
 
 #[cfg(test)]
 mod tests {
-    use crate::aoc_2023::day_13::reflection_location;
+    use itertools::Itertools;
+    use crate::aoc_2023::day_13::reflection_locations;
 
     #[test]
     fn reflections() {
-        assert_eq!(None, reflection_location(&[1, 2, 3], None));
-        assert_eq!(Some(1), reflection_location(&[1, 1], None));
-        assert_eq!(Some(2), reflection_location(&[1, 2, 2], None));
-        assert_eq!(None, reflection_location(&[1, 2, 3, 2, 1, 0], None));
-        assert_eq!(Some(4), reflection_location(&[-1, 1, 2, 3, 3, 2, 1], None));
-        assert_eq!(Some(3), reflection_location(&[1, 2, 3, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6], None));
-        assert_eq!(Some(8), reflection_location(&[1, 2, 3, 4, 5, 3, 2, 1, 1], None));
+        assert_eq!(Vec::<usize>::new(), reflection_locations(&[1, 2, 3]).collect_vec());
+        assert_eq!(Vec::<usize>::new(), reflection_locations(&[1, 2, 3, 2, 1, 0]).collect_vec());
+        assert_eq!(vec![1], reflection_locations(&[1, 1]).collect_vec());
+        assert_eq!(vec![2], reflection_locations(&[1, 2, 2]).collect_vec());
+        assert_eq!(vec![4], reflection_locations(&[-1, 1, 2, 3, 3, 2, 1]).collect_vec());
+        assert_eq!(vec![3], reflection_locations(&[1, 2, 3, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6]).collect_vec());
+        assert_eq!(vec![8], reflection_locations(&[1, 2, 3, 4, 5, 3, 2, 1, 1]).collect_vec());
     }
 }
