@@ -1,4 +1,4 @@
-use std::{hash::Hash, iter::Sum, ops::{DerefMut, Deref}};
+use std::{hash::Hash, ops::{DerefMut, Deref, Add}};
 use itertools::Itertools;
 
 mod single;
@@ -61,8 +61,10 @@ pub trait ExtraIter: Iterator + Sized {
 
     /// Sum the values by a particular key.
     /// Like chaining [`Iterator::map`] and [`Iterator::sum`]
-    fn sum_by<T: Sum>(self, key: impl Fn(Self::Item) -> T) -> T {
-        self.map(key).sum()
+    fn sum_by<T>(self, mut key: impl FnMut(Self::Item) -> T) -> T where
+        T: Default + Add<Output=T>,
+    {
+        self.fold(T::default(), |acc, x| acc + (key)(x))
     }
 
     /// Replaces all occurances of `needle` with `replacement`.
@@ -77,11 +79,28 @@ pub trait ExtraIter: Iterator + Sized {
     }
 
     /// Returns true if none of the items in the iterator match the predicate.
-    /// Like [`Iterator::all`], but with the condition inverted.
-    fn none(&mut self, predicate: impl Fn(Self::Item) -> bool) -> bool {
-        self.all(|item| !(predicate)(item))
+    /// Like [`Iterator::any`], but with the condition inverted.
+    fn none(&mut self, predicate: impl FnMut(Self::Item) -> bool) -> bool {
+        !self.any(predicate)
     }
 
+    /// Transposes nested iterators.
+    /// ```
+    /// let matrix: Vec<i32> = vec![
+    ///     vec![1, 2, 3],
+    ///     vec![4, 5, 6]
+    /// ].into_iter()
+    ///     .transpose()
+    ///     .collect()
+    ///
+    /// let expected = vec![
+    ///     vec![1, 4],
+    ///     vec![2, 5],
+    ///     vec![3, 6]
+    /// ];
+    /// 
+    /// assert_eq!(expected, matrix);
+    /// ```
     fn transpose(self) -> Transpose<<<Self as Iterator>::Item as IntoIterator>::IntoIter> where
         <Self as Iterator>::Item: IntoIterator
     {
@@ -90,27 +109,3 @@ pub trait ExtraIter: Iterator + Sized {
 }
 
 impl<I> ExtraIter for I where I: Iterator {}
-
-#[cfg(test)]
-mod tests {
-    use super::ExtraIter;
-    use itertools::Itertools;
-
-    #[test]
-    fn transpose() {
-        let matrix = vec![
-            vec![1, 2, 3],
-            vec![4, 5, 6]
-        ].into_iter()
-            .transpose()
-            .collect_vec();
-
-        let expected = vec![
-            vec![1, 4],
-            vec![2, 5],
-            vec![3, 6]
-        ];
-
-        assert_eq!(expected, matrix);
-    }
-}
