@@ -12,6 +12,7 @@ ahash = "0.8.3"
 anyhow = "1.0.75"
 aoc_lib = { path = "../aoc_lib" }
 aoc_runner_api = { path = "../aoc_runner_api" }
+arr_macro = "0.2.1"
 bitvec = "1.0.1"
 composing = "0.2.0"
 derive_more = "0.99.17"
