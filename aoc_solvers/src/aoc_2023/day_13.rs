@@ -1,11 +1,11 @@
 use std::fmt::Debug;
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{Context, Result};
 use aoc_lib::{math::Bit, parsing::{ParseError, TextParser}, iteration::ExtraIter, geometry::Axis};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
 use nom::{multi::{separated_list1, count, many1}, character::complete::{anychar, line_ending}, combinator::map_res};
-use rayon::iter::{ParallelIterator, IntoParallelRefMutIterator};
+use rayon::iter::{ParallelIterator, IntoParallelIterator};
 
 fn parse(input: &str) -> Result<Vec<Vec<Vec<Bit>>>, ParseError> {
     separated_list1(
@@ -40,12 +40,11 @@ fn reflection_locations<T: PartialEq>(pattern: &[T]) -> impl Iterator<Item=usize
         let start = &pattern[..pivot];
         let end = &pattern[pivot..pivot * 2];
         
-        let reflection = start.iter()
+        start.iter()
             .zip(end.iter().rev())
-            .all(|(a, b)| a == b);
-
-        if reflection { Some(pivot) }
-        else { reflect(&pattern[..pattern.len() - 1]) }
+            .all(|(a, b)| a == b)
+            .then_some(pivot)
+            .or_else(|| reflect(&pattern[..pattern.len() - 1]))
     }
 
     [
@@ -67,8 +66,8 @@ fn find_mirrors<T: PartialEq>(pattern: &[Vec<T>]) -> impl Iterator<Item=Mirror> 
         .chain(reflection_locations(pattern).map(|offset| Mirror { offset, axis: Axis::Horizontal}))
 }
 
-fn find_smudgy_mirror(pattern: &mut [Vec<Bit>]) -> Result<Mirror> {
-    let clean_mirror: Mirror = find_mirrors(pattern)
+fn find_smudgy_mirror(mut pattern: Vec<Vec<Bit>>) -> Result<Mirror> {
+    let clean_mirror: Mirror = find_mirrors(&pattern)
         .single()
         .context("Failed to identify clean mirror")?;
     
@@ -80,7 +79,7 @@ fn find_smudgy_mirror(pattern: &mut [Vec<Bit>]) -> Result<Mirror> {
             let tile = &mut row[col_index];
             *tile = tile.invert();
 
-            let result = find_mirrors(pattern)
+            let result = find_mirrors(&pattern)
                 .filter(|&mirror| mirror != clean_mirror)
                 .single()
                 .ok();
@@ -91,11 +90,11 @@ fn find_smudgy_mirror(pattern: &mut [Vec<Bit>]) -> Result<Mirror> {
 
             result
         })
-    }).ok_or_else(|| anyhow!("{:?}", &pattern))
+    }).context("Failed to identify smudge")
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let total_points = parse(input)?
+    let total_points: usize = parse(input)?
         .into_iter()
         .map(|pattern| {
             find_mirrors(&pattern)
@@ -110,8 +109,8 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 
 pub fn solve_part_2(input: &str) -> SolverResult {
     let total_points = parse(input)?
-        .par_iter_mut()
-        .map(|pattern| find_smudgy_mirror(pattern))
+        .into_par_iter()
+        .map(find_smudgy_mirror)
         .collect::<Result<Vec<Mirror>>>()?
         .iter()
         .sum_by(Mirror::summary);

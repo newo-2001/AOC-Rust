@@ -1,7 +1,6 @@
 #![feature(
     get_many_mut,
     extract_if,
-    result_option_inspect,
     iter_collect_into,
     try_find,
     map_try_insert,

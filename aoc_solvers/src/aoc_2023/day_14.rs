@@ -1,5 +1,5 @@
 use ahash::HashMap;
-use aoc_lib::{geometry::{Point2D, CardinalDirection, Directional}, iteration::ExtraIter};
+use aoc_lib::{geometry::{Point2D, CardinalDirection, Directional}, iteration::{ExtraIter, generate}};
 use aoc_runner_api::SolverResult;
 use anyhow::{anyhow, Result};
 use indexmap::IndexSet;
@@ -47,6 +47,7 @@ impl Grid {
     }
 
     fn get(&self, location: Point2D<usize>) -> Option<&Rock> {
+        // Insert an imaginary wall of square rocks beyond the grid's boundry
         if location.x() >= self.width || location.y() >= self.height { 
             Some(&Rock::Square) 
         } else { self.tiles.get(&location) }
@@ -61,23 +62,32 @@ impl Grid {
     }
 
     fn tilt(&mut self, direction: CardinalDirection) {
-        loop {
-            let mut moved = false;
-
-            for (location, rock) in self.tiles.clone() {
-                if rock != Rock::Round { continue; }
-
-                let neighbour = location.checked_add::<isize>(direction.direction_vector());
-                if let Some(neighbour) = neighbour {
-                    if self.get(neighbour).is_some() { continue; }
-
-                    self.tiles.insert(neighbour, Rock::Round);
-                    self.tiles.remove(&location);
-                    moved = true;
+        // Iterate against the direction of gravity.
+        // This ensures that we can calculate the new state in a single sweep of the grid.
+        let rocks = self.tiles
+            .iter()
+            .filter_map(|(pos, rock)| (rock == &Rock::Round).then_some(pos))
+            .copied()
+            .sorted_unstable_by(|Point2D(x, y), Point2D(x2, y2)| {
+                match direction {
+                    CardinalDirection::North => y.cmp(y2),
+                    CardinalDirection::South => y2.cmp(y),
+                    CardinalDirection::West => x.cmp(x2),
+                    CardinalDirection::East => x2.cmp(x)
                 }
-            }
+            });
+        
+        for location in rocks {
+            self.tiles.remove(&location);
 
-            if !moved { break; }
+            // Move the rock until we underflow or hit another rock.
+            // The earlier sort guarantees that any rock encountered is at a resting position.
+            let end = generate(location, |location| {
+                location.checked_add::<isize>(direction.direction_vector())
+                    .filter(|&neighbour| self.get(neighbour).is_none())
+            }).last().unwrap();
+
+            self.tiles.insert(end, Rock::Round);
         }
     }
 
@@ -99,7 +109,9 @@ impl Grid {
             .filter_map(|(&location, &rock)| {
                 (rock == Rock::Round).then_some(location)
             }).collect_vec();
-
+        
+        // Since equality of states should be independant of the order of the rocks
+        // we first sort the rocks in a predictable manner.
         rocks.sort_unstable_by(|Point2D(x, y), Point2D(x2, y2)| {
             y.cmp(y2).then_with(|| x.cmp(x2))
         });

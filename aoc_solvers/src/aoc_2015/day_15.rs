@@ -49,7 +49,7 @@ fn cookie_property(cookie: &Cookie, ingredients: &Ingredients, property: impl Fn
         let ingredient = ingredients.get(name)
             .unwrap_or_else(|| panic!("Cookie had unrecognized ingredient: {name}"));
 
-        i64::from(property(ingredient)) * i64::try_from(amount).unwrap()
+        i64::from(property(ingredient)) * i64::from(amount)
     }).sum::<i64>()
         .try_into()
         .unwrap_or(0)

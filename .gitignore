@@ -2,3 +2,5 @@
 **/.vscode/
 **/.idea/
 rustc-ice-*.txt
+heaptrack.*.zst
+flamegraph.svg

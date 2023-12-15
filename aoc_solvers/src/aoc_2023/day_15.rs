@@ -1,10 +1,9 @@
-use aoc_lib::{iteration::ExtraIter, parsing::{ParseError, TextParser}};
+use aoc_lib::{iteration::ExtraIter, parsing::{TextParser, ParseError}};
 use aoc_runner_api::SolverResult;
 use arr_macro::arr;
 use composing::compose_fn;
 use indexmap::IndexMap;
-use itertools::Itertools;
-use nom::{character::complete::{alpha1, char, u8}, Parser, sequence::{separated_pair, terminated}};
+use nom::{sequence::{terminated, separated_pair}, character::complete::{alpha1, char, u8}, Parser};
 
 fn hash(input: &[u8]) -> u8 {
     input.iter().fold(0, |acc, &char| {
@@ -61,18 +60,16 @@ impl<'a> Map<'a> {
 pub fn solve_part_2(input: &str) -> SolverResult {
     let mut map: Map = Map::new();
 
-    let operations: Vec<Operation> = input.split(',')
-        .map(Operation::parse)
-        .try_collect()?;
-
+    let operations = input.split(',').map(Operation::parse);
     for operation in operations {
-        match operation {
+        match operation? {
             Operation::Remove(label) => map.remove(label),
             Operation::Insert { label, focal_length } => map.insert(label, focal_length)
         }
     }
 
-    let focussing_power_sum: usize = map.buckets.into_iter()
+    let focussing_power_sum: usize = map.buckets
+        .into_iter()
         .enumerate()
         .flat_map(|(box_number, lenses)| {
             lenses.into_iter().enumerate().map(move |(index, (_, focal_length))| {
