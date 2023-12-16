@@ -11,13 +11,15 @@ enum Rock {
     Square
 }
 
-fn parse_rock(char: char) -> Result<Option<Rock>> {
-    Ok(match char {
-        '.' => None,
-        'O' => Some(Rock::Round),
-        '#' => Some(Rock::Square),
-        _ => return Err(anyhow!("Invalid rock encountered: '{char}'"))
-    })
+impl Rock {
+    fn parse(char: char) -> Result<Option<Rock>> {
+        Ok(match char {
+            '.' => None,
+            'O' => Some(Rock::Round),
+            '#' => Some(Rock::Square),
+            _ => return Err(anyhow!("Invalid rock encountered: '{char}'"))
+        })
+    }
 }
 
 struct Grid {
@@ -35,9 +37,8 @@ impl Grid {
             .enumerate()
             .flat_map(|(y, row)| {
                 row.chars()
-                    .map(parse_rock)
                     .enumerate()
-                    .filter_map(move |(x, result)| match result {
+                    .filter_map(move |(x, char)| match Rock::parse(char) {
                         Ok(rock) => rock.map(|rock| Ok((Point2D(x, y), rock))),
                         Err(err) => Some(Err(err))
                     })
