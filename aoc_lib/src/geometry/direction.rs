@@ -324,3 +324,10 @@ impl HexDirection {
         )).parse(input)
     }
 }
+
+/// Describes the orientation of a plane
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub enum Orientation {
+    Clockwise,
+    CounterClockwise
+}

@@ -7,8 +7,8 @@ use super::{Point2D, Dimensions};
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub struct Area<T> {
-    top_left: Point2D<T>,
-    bottom_right: Point2D<T>
+    pub(crate) top_left: Point2D<T>,
+    pub(crate) bottom_right: Point2D<T>
 }
 
 impl<T: Copy> Copy for Area<T> {}

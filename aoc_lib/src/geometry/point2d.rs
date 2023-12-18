@@ -35,10 +35,10 @@ impl<T> Point2D<T> {
     /// Perform a termwise checked addition with another point.
     /// Returns `None` if any component overflows.
     pub fn checked_add<U>(self, rhs: Point2D<U>) -> Option<Point2D<T>>
-        where U: TryFrom<T> + Add<Output=U>,
-              T: TryFrom<U>
+        where U: TryInto<T> + Add<Output=U>,
+              T: TryInto<U>
     {
-        let add = |a: T, b: U| T::try_from(U::try_from(a).ok()? + b).ok();
+        let add = |a: T, b: U| (a.try_into().ok()? + b).try_into().ok();
 
         let x = add(self.0, rhs.0)?;
         let y = add(self.1, rhs.1)?;
