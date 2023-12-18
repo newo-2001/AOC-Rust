@@ -92,6 +92,13 @@ impl<T> Point2D<T> {
         else if x > x2 && y == y2 { Some(CardinalDirection::West) }
         else { None }
     }
+
+    /// Attempts to map a `Point2D<T>` to a `Point2D<U>`.
+    pub fn try_map<U>(self) -> Result<Point2D<U>, T::Error> where
+        T: TryInto<U>
+    {
+        Ok(Point2D(self.0.try_into()?, self.1.try_into()?))
+    }
 }
 
 impl<T: TryFrom<i64>> Parsable<'_> for Point2D<T> {

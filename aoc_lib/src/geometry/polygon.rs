@@ -1,11 +1,11 @@
 use indexmap::IndexSet;
 use itertools::Itertools;
-use num::Signed;
+use num::{Signed, Integer};
 use std::{hash::Hash, ops::{Add, Sub, Div, Mul}, fmt::Debug};
 
 use crate::iteration::ExtraIter;
 
-use super::{Point2D, Area, Orientation};
+use super::{Point2D, Area};
 
 #[derive(Debug, Clone)]
 pub struct Polygon<T> {
@@ -16,10 +16,12 @@ impl<T> Polygon<T> {
     #[must_use]
     pub fn new() -> Self { Self { points: IndexSet::default() }}
 
-    pub fn push_point(&mut self, point: Point2D<T>) where
+    /// Inserts a new point at the end of the polygon.
+    /// Returns `true` if the point was yet in the polygon's boundry, `false` otherwise.
+    pub fn push_point(&mut self, point: Point2D<T>) -> bool where
         T: Hash + Eq
     {
-        self.points.insert(point);
+        self.points.insert(point)
     }
 
     #[must_use]
@@ -54,38 +56,30 @@ impl<T> Polygon<T> {
             .sum_by(|(a, b)| a.manhattan_distance(b))
     }
 
-    #[must_use]
     /// Computes the area of the polygon including the boundry using the [shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula).
     /// This operation is O(N).
-    pub fn shoelace(&self) -> T where
+    #[must_use]
+    pub fn area(&self) -> T where
         T: Add<Output=T> + Sub<Output=T> + Div<Output=T> + Mul<Output=T> +
-           Clone + Default + From<u8>
+           Clone + Default + Signed + From<u8>
     {
-        self.points.iter()
+        let signed_area = self.points.iter()
             .cloned()
             .circular_tuple_windows()
-            .sum_by(|(Point2D(x, y), Point2D(x2, y2))| (x * y2) - (x2 * y)) / T::from(2u8)
+            .sum_by(|(Point2D(x, y), Point2D(x2, y2))| (x * y2) - (x2 * y)) / T::from(2u8);
+
+        // For some reason this only works when it is called on an intermediate
+        signed_area.abs()
     }
 
-    /// Computes the area of the polygon including the boundry using [pick's theorem](https://en.wikipedia.org/wiki/Pick%27s_theorem).
+    /// Computes the number of integer coordinates in the polygon including the boundry
+    /// using [pick's theorem](https://en.wikipedia.org/wiki/Pick%27s_theorem).
     /// This operation is O(N).
     #[must_use]
     pub fn pick(&self) -> T where
-        T: Add<Output=T> + Sub<Output=T> + Div<Output=T> + Mul<Output=T> +
-           Clone + Default + Ord + From<u8>
+        T: Clone + Default + Signed + Integer + From<u8>
     {
-        self.shoelace() + self.circumference() / T::from(2u8) + T::from(1u8)
-    }
-
-    /// Determines whether the polygon is oriented clockwise or counter clockwise.
-    /// This operation has to compute the area so the operation is O(N).
-    #[must_use]
-    pub fn orientation(&self) -> Orientation where
-        T: Add<Output=T> + Sub<Output=T> + Div<Output=T> + Mul<Output=T> +
-           Clone + Default + Ord + From<u8> + Signed
-    {
-        if self.pick().is_negative() { Orientation::CounterClockwise }
-        else { Orientation::Clockwise }
+        self.area() + self.circumference() / T::from(2u8) + T::from(1u8)
     }
 
     /// Flip the orientation of the polygon.
