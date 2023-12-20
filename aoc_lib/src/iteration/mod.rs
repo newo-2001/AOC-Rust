@@ -85,21 +85,22 @@ pub trait ExtraIter: Iterator + Sized {
     }
 
     /// Transposes nested iterators.
-    /// ```
-    /// let matrix: Vec<i32> = vec![
+    /// ```ignore
+    /// # use aoc_lib::iteration::ExtraIter;
+    /// let transposed: Vec<Vec<i32>> = vec![
     ///     vec![1, 2, 3],
     ///     vec![4, 5, 6]
     /// ].into_iter()
     ///     .transpose()
-    ///     .collect()
+    ///     .collect();
     ///
-    /// let expected = vec![
+    /// let expected: Vec<Vec<i32>> = vec![
     ///     vec![1, 4],
     ///     vec![2, 5],
     ///     vec![3, 6]
     /// ];
     /// 
-    /// assert_eq!(expected, matrix);
+    /// assert_eq!(expected, transposed);
     /// ```
     fn transpose(self) -> Transpose<<<Self as Iterator>::Item as IntoIterator>::IntoIter> where
         <Self as Iterator>::Item: IntoIterator

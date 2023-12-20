@@ -9,7 +9,7 @@
     iter_array_chunks,
     never_type,
     cmp_minmax,
-    iter_intersperse,
+    iter_intersperse
 )]
 
 #![allow(
@@ -117,6 +117,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             16 => solver!(2023, "16", puzzle.part),
             17 => solver!(2023, "17", puzzle.part),
             18 => solver!(2023, "18", puzzle.part),
+            19 => solver!(2023, "19", puzzle.part),
             20 => solver!(2023, "20", puzzle.part),
             _  => None
         }

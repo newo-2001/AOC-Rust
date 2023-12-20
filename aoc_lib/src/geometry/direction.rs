@@ -28,8 +28,9 @@ pub enum RotationDirection {
 impl RotationDirection {
     /// Inverts the direction
     /// ```
-    /// Left => Right
-    /// Right => Left
+    /// # use aoc_lib::geometry::RotationDirection;
+    /// assert_eq!(RotationDirection::Left, RotationDirection::Right.inverse());
+    /// assert_eq!(RotationDirection::Right, RotationDirection::Left.inverse());
     /// ```
     #[must_use]
     pub fn inverse(self) -> RotationDirection {
@@ -50,7 +51,7 @@ impl Parsable<'_> for RotationDirection {
 }
 
 /// Directions that move along the axis of 2D space
-/// ```
+/// ```text
 ///   N
 /// W   E
 ///   S
@@ -134,7 +135,7 @@ impl CardinalDirection {
 
 impl Parsable<'_> for CardinalDirection {
     /// Parse a [`CardinalDirection`] from a variety of representations like:
-    /// ```
+    /// ```text
     ///   U   |   N   |   ^
     /// L   R | W   E | <   >
     ///   D   |   S   |   V
@@ -151,7 +152,7 @@ impl Parsable<'_> for CardinalDirection {
 
 
 /// Directions that move diagonally in 2D space.
-/// ```
+/// ```text
 /// NW NE
 ///  
 /// SW WE
@@ -190,7 +191,7 @@ impl OrdinalDirection {
 
 /// Combines [`CardinalDirection`] and [`OrdinalDirection`].
 /// This allows for movement along 8 directions in 2D space.
-/// ```
+/// ```text
 /// NW N NE
 /// W     E
 /// SW S WE
@@ -267,7 +268,7 @@ impl Direction3D {
 }
 
 /// Directions that move to neighbouring tiles on a 2D hex grid.
-/// ```
+/// ```text
 ///   \ N  /
 /// NW +--+ NE
 ///   /    \

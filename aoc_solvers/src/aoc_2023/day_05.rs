@@ -1,7 +1,7 @@
-use aoc_lib::{math::Range, between, parsing::{TextParserResult, ParseError, TextParser, skip_until}};
+use aoc_lib::{math::{Range, InvalidRangeError}, between, parsing::{TextParserResult, ParseError, TextParser, skip_until}};
 use aoc_runner_api::SolverResult;
 use itertools::Itertools;
-use nom::{character::complete::{char, u64, line_ending}, sequence::{tuple, preceded, delimited}, Parser, multi::separated_list1, bytes::complete::tag};
+use nom::{character::complete::{char, u64, line_ending}, sequence::{tuple, preceded, delimited}, Parser, multi::separated_list1, bytes::complete::tag, combinator::map_res};
 use anyhow::{anyhow, Result};
 use rayon::iter::{ParallelBridge, ParallelIterator, IntoParallelIterator};
 
@@ -53,11 +53,15 @@ impl MappingRange {
     }
 
     fn parse(input: &str) -> TextParserResult<Self> {
-        tuple((u64, between!(char(' '), u64), u64))
-            .map(|(dest_start, source_start, length)| Self {
-                from: Range::exclusive(source_start, source_start + length),
-                to: Range::exclusive(dest_start, dest_start + length)
-            }).parse(input)
+        map_res(
+            tuple((u64, between!(char(' '), u64), u64)),
+            |(dest_start, source_start, length)| {
+                Result::<_, InvalidRangeError<_>>::Ok(Self {
+                    from: Range::exclusive(source_start, source_start + length)?,
+                    to: Range::exclusive(dest_start, dest_start + length)?
+                })
+            }
+        ).parse(input)
     }
 }
 
