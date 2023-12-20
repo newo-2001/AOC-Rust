@@ -16,7 +16,7 @@ pub fn isize(input: &str) -> TextParserResult<isize> {
 
 #[macro_export]
 macro_rules! string_enum {
-    {$($name:literal => $value:path),*} => {
+    {$($name:literal => $value:expr),*} => {
         nom::branch::alt(($(
             nom::combinator::value($value, nom::bytes::complete::tag($name)),
         )*))
