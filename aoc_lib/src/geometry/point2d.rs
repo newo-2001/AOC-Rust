@@ -1,5 +1,5 @@
 use derive_more;
-use std::{ops::{Add, Sub}, fmt::{Display, Formatter, self}, cmp::{minmax, Ordering}};
+use std::{ops::{Add, Sub}, fmt::{Display, Formatter, self}, cmp::minmax};
 
 use nom::{character::complete::{char, i64}, combinator::{opt, map_res}, sequence::separated_pair, Parser};
 use num::{clamp, Zero, One};
@@ -9,7 +9,7 @@ use crate::parsing::{TextParserResult, Parsable, parens};
 use super::{Dimensions, Directional, CardinalDirection};
 
 #[derive(
-    Clone, Debug, Default, PartialEq, Eq, Hash,
+    Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord,
     derive_more::Neg,
     derive_more::Add, derive_more::AddAssign,
     derive_more::Sub, derive_more::SubAssign,
@@ -130,19 +130,6 @@ impl<T> From<(T, T)> for Point2D<T> {
 impl<T: From<usize>> From<Dimensions> for Point2D<T> {
     fn from(Dimensions(width, height): Dimensions) -> Self {
         Point2D(width.into(), height.into())
-    }
-}
-
-impl<T: PartialOrd> PartialOrd for Point2D<T> {
-    fn partial_cmp(&self, Self(x2, y2): &Self) -> Option<Ordering> {
-        let Self(x, y) = self;
-        let x = x.partial_cmp(x2);
-        let y = y.partial_cmp(y2);
-
-        match (x, y) {
-            (Some(x), Some(y)) if x == y => Some(x),
-            _ => None
-        }
     }
 }
 

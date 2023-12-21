@@ -1,4 +1,4 @@
-use std::{fmt::Debug, vec, error::Error};
+use std::{fmt::{Debug, Display}, vec};
 
 use itertools::Itertools;
 use thiserror::Error;
@@ -72,7 +72,7 @@ impl_grid_traits!(Grid<T>);
 impl_grid_traits_mut!(Grid<T>);
 
 #[derive(Debug, Error)]
-pub enum GridParseError<E: Error> {
+pub enum GridParseError<E: Display> {
     #[error(transparent)]
     InvalidToken(E),
     #[error(transparent)]
@@ -105,7 +105,7 @@ impl<T> Grid<T>
     }
 
     fn valid_sub_grid(&self, area: Area<usize>) -> Result<(), InvalidGridAreaError> {
-        if area.top_left() < Point2D::zero() || area.bottom_right() >= self.dimensions.into() {
+        if area.bottom() >= self.dimensions.1 || area.right() >= self.dimensions.0 {
             Err(InvalidGridAreaError { dimensions: self.dimensions, area })
         } else { Ok(()) }
     }
@@ -128,7 +128,7 @@ impl<T> Grid<T>
         y * self.dimensions.width() + x
     }
 
-    pub fn parse<E: Error>(input: &str) -> Result<Grid<T>, GridParseError<E>>
+    pub fn parse<E: Display>(input: &str) -> Result<Grid<T>, GridParseError<E>>
         where T: TryFrom<char, Error = E>
     {
         let cells: Vec<Vec<T>> = input.lines()
