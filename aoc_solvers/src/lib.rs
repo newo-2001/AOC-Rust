@@ -9,7 +9,8 @@
     iter_array_chunks,
     never_type,
     cmp_minmax,
-    iter_intersperse
+    iter_intersperse,
+    anonymous_lifetime_in_impl_trait
 )]
 
 #![allow(
@@ -119,8 +120,8 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             18 => solver!(2023, "18", puzzle.part),
             19 => solver!(2023, "19", puzzle.part),
             20 => solver!(2023, "20", puzzle.part),
-            21 => solver!(2023, "21", 1),
-            22 => solver!(2023, "22", 1),
+            21 if puzzle.part == PuzzlePart::First => solver!(2023, "21", 1),
+            22 => solver!(2023, "22", puzzle.part),
             _  => None
         }
         _ => None
