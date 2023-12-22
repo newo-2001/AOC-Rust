@@ -1,12 +1,15 @@
 use std::{fmt::{Display, Formatter, self}, ops::{Add, Sub, Mul, Div}, cmp::minmax};
 use derive_more;
 
+use nom::{sequence::{terminated, tuple}, character::complete::char, combinator::opt, Parser};
 use num::{Zero, One};
+
+use crate::parsing::{Parsable, Map3, parens};
 
 use super::Directional;
 
 #[derive(
-    Debug, Clone, Default, Eq, PartialEq, Hash,
+    Debug, Clone, Default, Eq, PartialEq, Hash, PartialOrd, Ord,
     derive_more::Neg,
     derive_more::Add, derive_more::AddAssign,
     derive_more::Sub, derive_more::SubAssign,
@@ -115,5 +118,18 @@ impl<T: Display> Display for Point3D<T> {
 impl<T> From<(T, T, T)> for Point3D<T> {
     fn from((x, y, z): (T, T, T)) -> Self {
         Point3D(x, y, z)
+    }
+}
+
+impl<'a, T: Parsable<'a>> Parsable<'a> for Point3D<T> {
+    fn parse(input: &'a str) -> crate::parsing::TextParserResult<'a, Self> {
+        let seperator = || terminated(char(','), opt(char(' ')));
+        let point = || tuple((
+            terminated(T::parse, seperator()),
+            terminated(T::parse ,seperator()),
+            T::parse
+        )).map3(Point3D);
+
+        parens(point()).or(point()).parse(input)
     }
 }

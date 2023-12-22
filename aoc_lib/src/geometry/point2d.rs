@@ -1,10 +1,10 @@
 use derive_more;
 use std::{ops::{Add, Sub}, fmt::{Display, Formatter, self}, cmp::minmax};
 
-use nom::{character::complete::{char, i64}, combinator::{opt, map_res}, sequence::separated_pair, Parser};
+use nom::{character::complete::char, combinator::opt, sequence::separated_pair, Parser};
 use num::{clamp, Zero, One};
 
-use crate::parsing::{TextParserResult, Parsable, parens};
+use crate::parsing::{TextParserResult, Parsable, parens, Map2};
 
 use super::{Dimensions, Directional, CardinalDirection};
 
@@ -101,23 +101,22 @@ impl<T> Point2D<T> {
     }
 }
 
-impl<T: TryFrom<i64>> Parsable<'_> for Point2D<T> {
+impl<'a, T: Parsable<'a>> Parsable<'a> for Point2D<T> {
     /// Parses a [`Point2D`] from a string in the form ``x, y`` or ``(x, y)``, the space is optional.
-    fn parse(input: &str) -> TextParserResult<Point2D<T>>
+    fn parse(input: &'a str) -> TextParserResult<Point2D<T>>
     {
         let point = || separated_pair(
-            i64,
+            T::parse,
             Parser::and(
                 char(','),
                 opt(char(' '))
             ),
-            i64
+            T::parse
         );
         
-        map_res(
-            parens(point()).or(point()),
-            |(x, y)| Ok::<_, T::Error>(Point2D(T::try_from(x)?, T::try_from(y)?))
-        ).parse(input)
+        parens(point()).or(point())
+            .map2(Point2D)
+            .parse(input)
     }
 }
 

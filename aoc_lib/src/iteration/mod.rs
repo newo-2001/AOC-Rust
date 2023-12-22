@@ -53,7 +53,7 @@ pub trait ExtraIter: Iterator + Sized {
 
     /// Counts the amount of items that meet a predicate.
     /// Like chaining [`Iterator::filter`] and [`Iterator::count`]
-    fn count_where(self, predicate: impl Fn(Self::Item) -> bool) -> usize {
+    fn count_where(self, predicate: impl FnMut(Self::Item) -> bool) -> usize {
         self.counts_by(predicate)
             .remove(&true)
             .unwrap_or_default()
