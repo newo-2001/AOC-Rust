@@ -122,6 +122,7 @@ pub fn get_solver(puzzle: Puzzle) -> Option<Box<Solver>> {
             20 => solver!(2023, "20", puzzle.part),
             21 if puzzle.part == PuzzlePart::First => solver!(2023, "21", 1),
             22 => solver!(2023, "22", puzzle.part),
+            23 => solver!(2023, "23", puzzle.part),
             _  => None
         }
         _ => None
