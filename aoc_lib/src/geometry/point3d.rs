@@ -1,7 +1,7 @@
 use std::{fmt::{Display, Formatter, self}, ops::{Add, Sub, Mul, Div}, cmp::minmax};
 use derive_more;
 
-use nom::{sequence::{terminated, tuple}, character::complete::char, combinator::opt, Parser};
+use nom::{sequence::{terminated, tuple}, character::complete::{char, space0}, Parser};
 use num::{Zero, One};
 
 use crate::parsing::{Parsable, Map3, parens};
@@ -123,7 +123,7 @@ impl<T> From<(T, T, T)> for Point3D<T> {
 
 impl<'a, T: Parsable<'a>> Parsable<'a> for Point3D<T> {
     fn parse(input: &'a str) -> crate::parsing::TextParserResult<'a, Self> {
-        let seperator = || terminated(char(','), opt(char(' ')));
+        let seperator = || terminated(char(','), space0);
         let point = || tuple((
             terminated(T::parse, seperator()),
             terminated(T::parse ,seperator()),

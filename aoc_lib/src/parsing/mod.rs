@@ -56,3 +56,5 @@ impl_parsable!(i32, i32);
 impl_parsable!(i64, i64);
 impl_parsable!(i128, i128);
 impl_parsable!(isize, isize);
+impl_parsable!(f32, f32);
+impl_parsable!(f64, f64);

@@ -1,7 +1,7 @@
 use derive_more;
 use std::{ops::{Add, Sub}, fmt::{Display, Formatter, self}, cmp::minmax};
 
-use nom::{character::complete::char, combinator::opt, sequence::separated_pair, Parser};
+use nom::{character::complete::{char, space0}, sequence::separated_pair, Parser};
 use num::{clamp, Zero, One};
 
 use crate::parsing::{TextParserResult, Parsable, parens, Map2};
@@ -109,7 +109,7 @@ impl<'a, T: Parsable<'a>> Parsable<'a> for Point2D<T> {
             T::parse,
             Parser::and(
                 char(','),
-                opt(char(' '))
+                space0
             ),
             T::parse
         );
