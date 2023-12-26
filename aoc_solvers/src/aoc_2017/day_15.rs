@@ -34,7 +34,7 @@ fn parse_generators(input: &str) -> Result<(Generator, Generator), ParseError> {
     Ok((a, b))
 }
 
-fn judge((a, b): (u128, u128)) -> bool {
+fn judge(a: u128, b: u128) -> bool {
     let mask = u128::from(u16::MAX);
     a & mask == b & mask
 }
@@ -44,7 +44,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     
     let matches = a.zip(b)
         .take(40_000_000)
-        .count_where(judge);
+        .count_where(|&(a, b)| judge(a, b));
 
     Ok(Box::new(matches))
 }
@@ -55,7 +55,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let matches = a.filter(|n| n.is_multiple_of(&4))
         .zip(b.filter(|n| n.is_multiple_of(&8)))
         .take(5_000_000)
-        .count_where(judge);
+        .count_where(|&(a, b)| judge(a, b));
 
     Ok(Box::new(matches))
 }

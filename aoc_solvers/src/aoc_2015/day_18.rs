@@ -3,7 +3,7 @@ use aoc_runner_api::SolverResult;
 
 fn neighbours_on(grid: &Grid<Bit>, cell: Point2D<usize>) -> usize {
     cell.neighbours::<isize, _>(Direction2D::all())
-        .count_where(|location| grid.get(location).is_some_and(|light| light.is_on()))
+        .count_where(|&location| grid.get(location).is_some_and(|light| light.is_on()))
 }
 
 fn next_state(grid: &Grid<Bit>) -> Grid<Bit> {

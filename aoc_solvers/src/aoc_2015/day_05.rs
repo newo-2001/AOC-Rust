@@ -8,7 +8,7 @@ fn is_vowel(char: char) -> bool {
 }
 
 fn count_vowels(str: &str) -> usize {
-    str.chars().count_where(is_vowel)
+    str.chars().count_where(|&c| is_vowel(c))
 }
 
 fn has_consecutive_duplicates(str: &str) -> bool {
@@ -69,12 +69,12 @@ fn real_is_nice(str: &str) -> bool {
 
 #[allow(clippy::unnecessary_wraps)]
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let nice_words = input.lines().count_where(is_nice);
+    let nice_words = input.lines().count_where(|&word| is_nice(word));
     Ok(Box::new(nice_words))
 }
 
 #[allow(clippy::unnecessary_wraps)]
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let nice_words = input.lines().count_where(real_is_nice);
+    let nice_words = input.lines().count_where(|&word| real_is_nice(word));
     Ok(Box::new(nice_words))
 }

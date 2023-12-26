@@ -8,8 +8,8 @@ use tupletools::snd;
 struct Triangle(u32, u32, u32);
 
 impl Triangle {
-    fn is_valid(self) -> bool {
-        let Self(x, y, z) = self;
+    fn is_valid(&self) -> bool {
+        let &Self(x, y, z) = self;
 
         x + y > z &&
         y + z > x &&

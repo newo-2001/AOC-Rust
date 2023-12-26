@@ -66,7 +66,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
         .permutations(2)
         .flatten()
         .tuples()
-        .count_where(|(a, b)| !a.is_empty() && a != b && a.fits_on_node(&b));
+        .count_where(|(a, b)| !a.is_empty() && a != b && a.fits_on_node(b));
 
     Ok(Box::new(viable_pairs))
 }

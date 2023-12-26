@@ -1,5 +1,4 @@
 use std::{hash::Hash, ops::{DerefMut, Deref, Add}};
-use itertools::Itertools;
 
 mod single;
 mod mode;
@@ -53,11 +52,10 @@ pub trait ExtraIter: Iterator + Sized {
 
     /// Counts the amount of items that meet a predicate.
     /// Like chaining [`Iterator::filter`] and [`Iterator::count`]
-    fn count_where(self, predicate: impl FnMut(Self::Item) -> bool) -> usize {
-        self.counts_by(predicate)
-            .remove(&true)
-            .unwrap_or_default()
+    fn count_where(self, predicate: impl FnMut(&Self::Item) -> bool) -> usize {
+        self.filter(predicate).count()
     }
+    
 
     /// Sum the values by a particular key.
     /// Like chaining [`Iterator::map`] and [`Iterator::sum`]

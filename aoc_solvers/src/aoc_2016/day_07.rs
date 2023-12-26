@@ -63,7 +63,7 @@ fn parse_ip(input: &str) -> Result<Ip, ParseError> {
 pub fn solve_part_1(input: &str) -> SolverResult {
     let valid_ips: usize = parse_lines(parse_ip, input)?
         .into_iter()
-        .count_where(|ip| ip.supports_tls());
+        .count_where(Ip::supports_tls);
 
     Ok(Box::new(valid_ips))
 }
@@ -71,7 +71,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 pub fn solve_part_2(input: &str) -> SolverResult {
     let valid_ips: usize = parse_lines(parse_ip, input)?
         .into_iter()
-        .count_where(|ip| ip.supports_ssl());
+        .count_where(Ip::supports_ssl);
 
     Ok(Box::new(valid_ips))
 }

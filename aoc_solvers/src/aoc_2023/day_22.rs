@@ -108,7 +108,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         brick.disintegrate(&mut updated_grid);
         stabilize(&mut dropped_bricks, &mut updated_grid);
 
-        bricks.iter().count_where(|original| original != brick && !dropped_bricks.contains(original))
+        bricks.iter().count_where(|&original| original != brick && !dropped_bricks.contains(original))
     }).sum();
 
     Ok(Box::new(falling_bricks))

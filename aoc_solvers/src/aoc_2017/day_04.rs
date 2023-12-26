@@ -23,9 +23,10 @@ fn contains_anagram<'a>(words: impl IntoIterator<Item=&'a str>) -> bool {
 
 #[allow(clippy::unnecessary_wraps)]
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let valid_passphrases = input.lines()
+    let valid_passphrases = *input.lines()
         .map(str::split_whitespace)
-        .count_where(|passphrase| passphrase.clone().all_unique() && !contains_anagram(passphrase));
+        .counts_by(|passphrase| passphrase.clone().all_unique() && !contains_anagram(passphrase))
+        .get(&true).unwrap_or(&0);
 
     Ok(Box::new(valid_passphrases))
 }
