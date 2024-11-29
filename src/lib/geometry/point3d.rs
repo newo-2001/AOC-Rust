@@ -25,16 +25,16 @@ impl<T> Point3D<T> {
 
     /// The point located at ``(0, 0, 0)`` (The origin)
     #[must_use]
-    pub fn zero() -> Self where T: Zero { Point3D(Zero::zero(), Zero::zero(), Zero::zero()) }
+    pub fn zero() -> Self where T: Zero { Self(Zero::zero(), Zero::zero(), Zero::zero()) }
 
     /// The point located at ``(1, 1, 1)``
     #[must_use]
-    pub fn one() -> Self where T: One { Point3D(One::one(), One::one(), One::one()) }
+    pub fn one() -> Self where T: One { Self(One::one(), One::one(), One::one()) }
 
     /// The distance between two points when using the
     /// [manhattan (or taxicab) distance function](https://en.wikipedia.org/wiki/Taxicab_geometry).
-    pub fn manhattan_distance(self, Self(x2, y2, z2): Self) -> T
-        where T: Ord + Sub<Output=T> + Add<Output=T>
+    pub fn manhattan_distance(self, Self(x2, y2, z2): Self) -> T where
+        T: Ord + Sub<Output=T> + Add<Output=T>
     {
         let Self(x, y, z) = self;
         let [min_x, max_x] = minmax(x, x2);
@@ -48,8 +48,8 @@ impl<T> Point3D<T> {
     /// if these points were to represent coordinates on a 2D hex grid.
     /// For more information on these coordinates,
     /// check out [this](https://www.redblobgames.com/grids/hexagons/#coordinates-cube) article on hexagonal cube grids.
-    pub fn hex_distance(self, other: Self) -> T
-        where T: One + Ord + Sub<Output=T> + Add<Output=T> + Div<Output=T>
+    pub fn hex_distance(self, other: Self) -> T where
+        T: One + Ord + Sub<Output=T> + Add<Output=T> + Div<Output=T>
     {
         let two = T::one() + T::one();
         self.manhattan_distance(other) / two
@@ -57,10 +57,10 @@ impl<T> Point3D<T> {
 
     /// Computes the direct neigbours of this point when taking a step in every [`Direction3D`].
     /// If this calculation would overflow `T`, the neighbours are not included in the list.
-    pub fn neighbours<U, D>(self, directions: impl IntoIterator<Item=D>) -> impl Iterator<Item=Point3D<T>>
-        where T: Clone + TryFrom<U>,
-              U: Add<Output = U> + TryFrom<T>,
-              D: Directional<Point3D<U>>
+    pub fn neighbours<U, D>(self, directions: impl IntoIterator<Item=D>) -> impl Iterator<Item=Self> where
+        T: Clone + TryFrom<U>,
+        U: Add<Output = U> + TryFrom<T>,
+        D: Directional<Point3D<U>>
     {
         directions.into_iter()
             .map(Directional::direction_vector)
@@ -69,38 +69,38 @@ impl<T> Point3D<T> {
 
     /// Perform a termwise checked addition with another point.
     /// Returns `None` if any component overflows.
-    pub fn checked_add<U>(self, Point3D(x2, y2, z2): Point3D<U>) -> Option<Point3D<T>>
-        where U: TryFrom<T> + Add<Output=U>,
-              T: TryFrom<U>
+    pub fn checked_add<U>(self, Point3D(x2, y2, z2): Point3D<U>) -> Option<Self> where
+        U: TryFrom<T> + Add<Output=U>,
+        T: TryFrom<U>
     {
         let add = |a: T, b: U| T::try_from(U::try_from(a).ok()? + b).ok();
-        let Point3D(x, y, z) = self;
+        let Self(x, y, z) = self;
 
         let x = add(x, x2)?;
         let y = add(y, y2)?;
         let z = add(z, z2)?;
-        Some(Point3D(x, y, z))
+        Some(Self(x, y, z))
     }
 
-    pub fn dot(self: Point3D<T>, other: Point3D<T>) -> T
-        where T: Mul<Output=T> + Add<Output=T>
+    pub fn dot(self, other: Self) -> T where
+        T: Mul<Output=T> + Add<Output=T>
     {
-        let Point3D(x1, y1, z1) = self;
-        let Point3D(x2, y2, z2) = other;
+        let Self(x1, y1, z1) = self;
+        let Self(x2, y2, z2) = other;
 
         x1 * x2 + y1 * y2 + z1 * z2
     }
 
-    pub fn magnitude(self) -> T
-        where T: Zero + Ord + Sub<Output=T>
+    pub fn magnitude(self) -> T where
+        T: Zero + Ord + Sub<Output=T>
     {
-        self.manhattan_distance(Point3D::zero())
+        self.manhattan_distance(Self::zero())
     }
 
     #[must_use]
-    pub fn normalized(self) -> Point3D<T>
-        where T: Zero + Ord + Copy + Sub<Output=T>,
-              Self: Div<T, Output=Self>
+    pub fn normalized(self) -> Self where
+        T: Zero + Ord + Copy + Sub<Output=T>,
+        Self: Div<T, Output=Self>
     {
         self / self.magnitude()
     }
@@ -117,7 +117,7 @@ impl<T: Display> Display for Point3D<T> {
 
 impl<T> From<(T, T, T)> for Point3D<T> {
     fn from((x, y, z): (T, T, T)) -> Self {
-        Point3D(x, y, z)
+        Self(x, y, z)
     }
 }
 

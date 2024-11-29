@@ -131,8 +131,8 @@ pub fn lines<I, O, E, F>(parser: F) -> impl Parser<I, Vec<O>, E>
     separated_list0(line_ending, parser)
 }
 
-pub fn run<I, O, E, F: Sized>(parser: F, input: I) -> Result<O, super::ParseError>
-    where F: Parser<I, O, E>,
+pub fn run<I, O, E, F>(parser: F, input: I) -> Result<O, super::ParseError>
+    where F: Parser<I, O, E> + Sized,
           I: InputLength,
           E: ParseError<I>,
           nom::Err<E>: Display

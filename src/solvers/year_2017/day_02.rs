@@ -3,10 +3,10 @@ use std::num::ParseIntError;
 use aoc_lib::{parsing::parse_lines, errors::NoSolution};
 use crate::SolverResult;
 use itertools::{Itertools, MinMaxResult};
-use num::Integer;
 
 fn parse_row(input: &str) -> Result<Vec<u32>, ParseIntError> {
-    input.split_whitespace()
+    input
+        .split_whitespace()
         .map(str::parse)
         .try_collect()
 }
@@ -24,10 +24,11 @@ fn divisors<I>(row: I) -> Option<u32>
 {
     row.into_iter()
         .tuple_combinations()
-        .find_map(|(a, b)| {
-            a.divides(&b).then_some(a / b)
-                .or(b.divides(&a).then_some(b / a))
-        })
+        .find_map(|(a, b)| a
+            .is_multiple_of(b)
+            .then_some(a / b)
+            .or_else(|| b.is_multiple_of(a).then_some(b / a))
+        )
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {

@@ -1,7 +1,7 @@
 use ahash::{HashSet, HashSetExt};
 use aoc_lib::{parsing::InvalidTokenError, geometry::{grid::{Grid, GridLike}, Point2D, CardinalDirection, Directional}, iteration::{ExtraIter, SingleError}};
 use crate::SolverResult;
-use anyhow::{anyhow, Result, bail};
+use anyhow::{anyhow, bail, Context, Result};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {
@@ -37,8 +37,9 @@ struct Map(Grid<Tile>);
 
 impl Map {
     fn start(&self) -> Result<Point2D<usize>> {
-        let first_row = self.0.get_row(0)
-            .ok_or(anyhow!("Grid is empty"))?;
+        let first_row = self.0
+            .get_row(0)
+            .context("Grid is empty")?;
 
         let column = first_row.iter()
             .enumerate()
@@ -63,8 +64,9 @@ impl Map {
         let mut seen = HashSet::new();
 
         loop {
-            let tile = self.0.get(packet.position)
-                .ok_or(anyhow!("Packet traveled off the grid"))?;
+            let tile = self.0
+                .get(packet.position)
+                .context("Packet traveled off the grid")?;
 
             seen.insert(packet.position);
 
@@ -87,8 +89,9 @@ impl Map {
             }
             
             let step: Point2D<isize> = packet.facing.direction_vector();
-            packet.position = packet.position.checked_add(step)
-                .ok_or(anyhow!("Packet traveled off the grid"))?;
+            packet.position = packet.position
+                .checked_add(step)
+                .context("Packet traveled off the grid")?;
             
             path.push(*tile);
         }

@@ -7,11 +7,10 @@ pub enum SingleError {
 }
 
 pub fn single<T>(mut it: impl Iterator<Item=T>) -> Result<T, SingleError> {
-    match it.next() {
-        None => Err(SingleError::None),
-        Some(v) => match it.next() {
+    it
+        .next()
+        .map_or_else(|| Err(SingleError::None), |v| match it.next() {
             None => Ok(v),
             Some(_) => Err(SingleError::More)
-        }
-    }
+        })
 }

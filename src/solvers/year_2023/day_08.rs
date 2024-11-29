@@ -2,7 +2,7 @@ use ahash::HashMap;
 use aoc_lib::{geometry::RotationDirection, parsing::{ParseError, Parsable, TextParser, TextParserResult, parens, Map2}, iteration::{TryFoldWhile, ExtraIter}};
 use crate::SolverResult;
 use nom::{multi::{many1, count, separated_list1}, character::complete::{line_ending, alphanumeric1}, sequence::{terminated, separated_pair}, Parser, bytes::complete::tag};
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use derive_more::Display;
 use num::Integer;
 use tupletools::fst;
@@ -28,7 +28,7 @@ impl<'a> Edges<'a> {
             .parse(input)
     }
 
-    fn get(&self, direction: RotationDirection) -> &NodeId<'_> {
+    const fn get(&self, direction: RotationDirection) -> &NodeId<'_> {
         match direction {
             RotationDirection::Left => &self.0,
             RotationDirection::Right => &self.1
@@ -58,6 +58,7 @@ fn distance_until<'a, I>(
         .into_iter()
         .cycle()
         .try_fold_while((0usize, start), |(distance, node), direction| {
+            #[allow(clippy::option_if_let_else)]
             match map.get(node) {
                 None => TryFoldWhile::Err(anyhow!("Attempted to visit undefined node: {}", node)),
                 Some(edges) => {
@@ -88,7 +89,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         }).collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .reduce(|x, y| x.lcm(&y))
-        .ok_or(anyhow!("Input contained no starting nodes"))?;
+        .context("Input contained no starting nodes")?;
 
     Ok(Box::new(distance))
 }

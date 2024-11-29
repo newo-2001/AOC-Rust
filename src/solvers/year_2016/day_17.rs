@@ -31,14 +31,14 @@ impl Ord for Path {
 }
 
 impl Path {
-    fn with_movement(&self, direction: CardinalDirection) -> Path {
+    fn with_movement(&self, direction: CardinalDirection) -> Self {
         let mut path = self.clone();
         path.0.push(direction);
         path
     }
 
     fn len(&self) -> usize { self.0.len() }
-    fn new() -> Self { Path(Vec::new()) }
+    const fn new() -> Self { Self(Vec::new()) }
 }
 
 struct State {
@@ -65,7 +65,7 @@ impl State {
             .filter_map(|(c, dir)| {
                 let direction = "bcdef".contains(c).then_some(dir)?;
                 let position = self.position.checked_add::<isize>(direction.direction_vector())?;
-                grid.area.contains(&position).then(|| State {
+                grid.area.contains(&position).then(|| Self {
                     path: self.path.with_movement(direction),
                     position
                 })

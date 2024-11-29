@@ -10,7 +10,7 @@ struct Data(Vec<Bit>);
 
 impl Data {
     fn parse(input: &str) -> Result<Self, InvalidTokenError<char>> {
-        Ok(Data(input.chars().map(TryInto::try_into).try_collect()?))
+        Ok(Self(input.chars().map(TryInto::try_into).try_collect()?))
     }
 
     fn len(&self) -> usize { self.0.len() }
@@ -30,7 +30,8 @@ impl Data {
 
     fn checksum(&self) -> Self {
         fn checksum(data: Data) -> Data {
-            data.0.into_iter()
+            data.0
+                .into_iter()
                 .tuples()
                 .map(|(a, b)| (a == b).into())
                 .collect()
@@ -42,7 +43,7 @@ impl Data {
 
 impl FromIterator<Bit> for Data {
     fn from_iter<T: IntoIterator<Item = Bit>>(iter: T) -> Self {
-        Data(iter.into_iter().collect())
+        Self(iter.into_iter().collect())
     }
 }
 

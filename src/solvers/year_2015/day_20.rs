@@ -2,7 +2,6 @@ use std::{f32::consts::E, iter::repeat};
 
 use crate::SolverResult;
 use itertools::Itertools;
-use num::Integer;
 
 const GAMMA: f32 = 0.577_215_7;
 
@@ -20,7 +19,7 @@ fn prime_factors(mut n: usize, primes: &[usize]) -> Vec<usize> {
 }
 
 fn factors(n: usize, limit: usize) -> Vec<usize> {
-    (1..limit).filter(|x| n.is_multiple_of(x)).collect()
+    (1..limit).filter(|&x| n.is_multiple_of(x)).collect()
 }
 
 fn smallest_prime_factor(n: usize, primes: &[usize]) -> usize {
@@ -55,10 +54,10 @@ fn lower_bound_sum_of_divisors(sum: usize) -> usize {
     fn sum_upper_bound(sum: usize) -> usize {
         #[allow(clippy::cast_precision_loss)]
         let bound = sum as f32;
-        let loglogn = bound.log(E).log(E);
+        let lnln = bound.ln().ln();
 
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        let result = (f32::powf(E, GAMMA) * bound * loglogn + 0.6483 * bound / loglogn) as usize;
+        let result = (f32::powf(E, GAMMA) * bound).mul_add(lnln, 0.6483 * bound / lnln) as usize;
         
         result
     }

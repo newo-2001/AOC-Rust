@@ -1,6 +1,6 @@
 use aoc_lib::parsing::{curly_brackets, TextParserResult, TextParser, angle_brackets};
 use crate::SolverResult;
-use nom::{multi::{separated_list0, many0}, character::complete::{char, anychar, none_of}, Parser, combinator::value};
+use nom::{character::complete::{anychar, char, none_of}, combinator::{map, value}, multi::{many0, separated_list0}, Parser};
 
 enum Group {
     SubGroups(Vec<Group>),
@@ -9,19 +9,28 @@ enum Group {
 
 impl Group {
     // I think this solution is beautiful
-    fn parse(input: &str) -> TextParserResult<Group> {
+    fn parse(input: &str) -> TextParserResult<Self> {
         Parser::or(
-            curly_brackets(
-                separated_list0(char(','), Group::parse)
-            ).map(Group::SubGroups),
-            angle_brackets(
-                many0(
-                    Parser::or(
-                        value(None, char('!').and(anychar)),
-                        none_of(">").map(Some)
+            map(
+                curly_brackets(
+                    separated_list0(char(','), Self::parse)
+                ),
+                Group::SubGroups
+            ),
+            map(
+                angle_brackets(
+                    map(
+                        many0(
+                            Parser::or(
+                                value(None, char('!').and(anychar)),
+                                none_of(">").map(Some)
+                            )
+                        ),
+                        |garbage| garbage.into_iter().flatten().collect()
                     )
-                ).map(|garbage| garbage.into_iter().flatten().collect())
-            ).map(|garbage: Vec<char>| Group::Garbage(garbage.into_iter().collect()))
+                ),
+                |garbage: Vec<char>| Self::Garbage(garbage.into_iter().collect())
+            )
         ).parse(input)
     }
 
@@ -38,7 +47,10 @@ impl Group {
 
     fn garbage_length(&self) -> usize {
         match self {
-            Self::SubGroups(subgroups) => subgroups.iter().map(Group::garbage_length).sum(),
+            Self::SubGroups(subgroups) => subgroups
+                .iter()
+                .map(Self::garbage_length)
+                .sum(),
             Self::Garbage(garbage) => garbage.len()
         }
     }

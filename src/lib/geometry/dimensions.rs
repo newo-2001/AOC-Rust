@@ -13,21 +13,21 @@ pub struct Dimensions(pub usize, pub usize);
 
 impl Dimensions {
     #[must_use]
-    pub fn width(&self) -> usize { self.0 }
+    pub const fn width(&self) -> usize { self.0 }
 
     #[must_use]
-    pub fn height(&self) -> usize { self.1 }
+    pub const fn height(&self) -> usize { self.1 }
     
     #[must_use]
-    pub fn surface_area(&self) -> usize {
+    pub const fn surface_area(&self) -> usize {
         self.width() * self.height()
     }   
 }
 
 impl Parsable<'_> for Dimensions {
-    fn parse(input: &str) -> TextParserResult<Dimensions> {
+    fn parse(input: &str) -> TextParserResult<Self> {
         usize.and(preceded(char('x'), usize))
-            .map(|(width, height)| Dimensions(width, height))
+            .map(|(width, height)| Self(width, height))
             .parse(input)
     }
 }

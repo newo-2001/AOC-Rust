@@ -9,7 +9,7 @@ use nom::{character::complete::{alpha1, u32, char}, sequence::{preceded, separat
 struct Wire<'a>(&'a str);
 
 impl<'a> Parsable<'a> for Wire<'a> {
-    fn parse(input: &'a str) -> TextParserResult<'_, Self> {
+    fn parse(input: &'a str) -> TextParserResult<'a, Self> {
         alpha1.map(Wire).parse(input)
     }
 }
@@ -21,7 +21,7 @@ enum Value<'a> {
 }
 
 impl<'a> Parsable<'a> for Value<'a> {
-    fn parse(input: &'a str) -> TextParserResult<'_, Self> {
+    fn parse(input: &'a str) -> TextParserResult<'a, Self> {
         Parser::or(
             u32.map(Value::Literal),
             Wire::parse.map(Value::Wire)
@@ -40,10 +40,10 @@ enum Expression<'a> {
 }
 
 impl<'a> Parsable<'a> for Expression<'a> {
-    fn parse(input: &'a str) -> TextParserResult<'_, Self> {
-        fn binary_operator<'a, M, X, Y>(name: &'a str, mapper: M) -> impl TextParser<'a, Expression>
-            where M: Fn(X, Y) -> Expression<'a>,
-                X: Parsable<'a>, Y: Parsable<'a>
+    fn parse(input: &'a str) -> TextParserResult<'a, Self> {
+        fn binary_operator<'a, M, X, Y>(name: &'a str, mapper: M) -> impl TextParser<'a, Expression<'a>> where
+            M: Fn(X, Y) -> Expression<'a>,
+            X: Parsable<'a>, Y: Parsable<'a>
         {
             separated_pair(
                 X::parse,
@@ -65,6 +65,7 @@ impl<'a> Parsable<'a> for Expression<'a> {
 
 struct ExpressionTree<'a> {
     nodes: HashMap<Wire<'a>, Expression<'a>>,
+    // TODO: I Hate Cell with a passion, this has to go at some point
     cache: RefCell<HashMap<Wire<'a>, u32>>
 }
 
@@ -75,13 +76,13 @@ impl<'a> FromIterator<(Wire<'a>, Expression<'a>)> for ExpressionTree<'a> {
 }
 
 impl<'a> ExpressionTree<'a> {
-    fn new(nodes: HashMap<Wire<'a>, Expression<'a>>) -> ExpressionTree<'a> {
+    fn new(nodes: HashMap<Wire<'a>, Expression<'a>>) -> Self {
         ExpressionTree {
             cache: RefCell::new(HashMap::<Wire, u32>::new()), nodes
         }
     }
     
-    fn parse(input: &'a str) -> Result<ExpressionTree<'a>, ParseError> {
+    fn parse(input: &'a str) -> Result<Self, ParseError> {
         let expression_tree = lines(
             separated_pair(
                 Expression::parse,
@@ -95,7 +96,7 @@ impl<'a> ExpressionTree<'a> {
         Ok(expression_tree)
     }
 
-    fn reset(&mut self) {
+    fn reset(&self) {
         self.cache.replace(HashMap::new());
     }
 

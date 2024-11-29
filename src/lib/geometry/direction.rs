@@ -33,7 +33,7 @@ impl RotationDirection {
     /// assert_eq!(RotationDirection::Right, RotationDirection::Left.inverse());
     /// ```
     #[must_use]
-    pub fn inverse(self) -> RotationDirection {
+    pub const fn inverse(self) -> Self {
         match self {
             Self::Left => Self::Right,
             Self::Right => Self::Left
@@ -83,7 +83,7 @@ impl CardinalDirection {
     /// Rotate this direction by a [`RotationDirection`].
     /// This has the effect of turning relative to an observer.
     #[must_use]
-    pub fn rotate(self, rotation_direction: RotationDirection) -> Self {
+    pub const fn rotate(self, rotation_direction: RotationDirection) -> Self {
         match (self, rotation_direction) {
             | (Self::North, RotationDirection::Left)
             | (Self::South, RotationDirection::Right) => Self::West,
@@ -98,7 +98,7 @@ impl CardinalDirection {
 
     /// The direction opposite of this one
     #[must_use]
-    pub fn reverse(self) -> Self {
+    pub const fn reverse(self) -> Self {
         match self {
             Self::North => Self::South,
             Self::South => Self::North,
@@ -108,12 +108,12 @@ impl CardinalDirection {
     }
 
     #[must_use]
-    pub fn all() -> [CardinalDirection; 4] {
+    pub const fn all() -> [Self; 4] {
         [Self::North, Self::East, Self::South, Self::West]
     }
 
     #[must_use]
-    pub fn relative_char(self) -> char {
+    pub const fn relative_char(self) -> char {
         match self {
             Self::North => 'U',
             Self::East => 'R',
@@ -123,7 +123,7 @@ impl CardinalDirection {
     }
 
     #[must_use]
-    pub fn absolute_char(self) -> char {
+    pub const fn absolute_char(self) -> char {
         match self {
             Self::North => 'N',
             Self::East => 'E',
@@ -140,7 +140,7 @@ impl Parsable<'_> for CardinalDirection {
     /// L   R | W   E | <   >
     ///   D   |   S   |   V
     /// ```
-    fn parse(input: &str) -> TextParserResult<CardinalDirection> {
+    fn parse(input: &str) -> TextParserResult<Self> {
         alt((
             value(Self::North, one_of("UuNn^")),
             value(Self::East, one_of("RrEe>")),
@@ -184,7 +184,7 @@ impl<T> Directional<Point2D<T>> for OrdinalDirection
 
 impl OrdinalDirection {
     #[must_use]
-    pub fn all() -> [OrdinalDirection; 4] {
+    pub const fn all() -> [Self; 4] {
         [Self::NorthEast, Self::SouthEast, Self::SouthWest, Self::NorthWest]
     }
 }
@@ -216,7 +216,7 @@ impl<T> Directional<Point2D<T>> for Direction2D
 
 impl Direction2D {
     #[must_use]
-    pub fn all() -> [Direction2D; 8] {
+    pub const fn all() -> [Self; 8] {
         use CardinalDirection as Card;
         use OrdinalDirection as Ord;
 
@@ -262,7 +262,7 @@ impl<T> Directional<Point3D<T>> for Direction3D
 
 impl Direction3D {
     #[must_use]
-    pub fn all() -> [Direction3D; 6] {
+    pub const fn all() -> [Self; 6] {
         [Self::North, Self::East, Self::South, Self::West, Self::Up, Self::Down]
     }
 }
@@ -305,7 +305,7 @@ impl<T> Directional<Point3D<T>> for HexDirection
 
 impl HexDirection {
     #[must_use]
-    pub fn all() -> [HexDirection; 6] {
+    pub const fn all() -> [Self; 6] {
         [
             Self::North, Self::NorthEast, Self::SouthEast,
             Self::South, Self::SouthWest, Self::NorthWest
@@ -314,7 +314,7 @@ impl HexDirection {
 
     /// Parse a [`HexDirection`] from a string.
     /// Valid representations are: NE, SE, S, N, NW, and SW.
-    pub fn parse(input: &str) -> TextParserResult<HexDirection> {
+    pub fn parse(input: &str) -> TextParserResult<Self> {
         alt((
             value(Self::NorthEast, tag("ne").or(tag("NE"))),
             value(Self::NorthWest, tag("nw").or(tag("NW"))),

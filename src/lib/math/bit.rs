@@ -11,16 +11,16 @@ pub enum Bit {
 
 impl Bit {
     #[must_use]
-    pub fn is_enabled(self) -> bool { self == Bit::On }
+    pub fn is_enabled(self) -> bool { self == Self::On }
 
     #[must_use]
-    pub fn is_on(self) -> bool { self == Bit::On }
+    pub fn is_on(self) -> bool { self == Self::On }
 
     #[must_use]
-    pub fn is_solid(self) -> bool { self == Bit::On }
+    pub fn is_solid(self) -> bool { self == Self::On }
 
     #[must_use]
-    pub fn digit(self) -> char {
+    pub const fn digit(self) -> char {
         match self {
             Self::Off => '0',
             Self::On => '1'
@@ -28,7 +28,7 @@ impl Bit {
     }
 
     #[must_use]
-    pub fn invert(self) -> Self {
+    pub const fn invert(self) -> Self {
         match self {
             Self::Off => Self::On,
             Self::On => Self::Off
@@ -38,12 +38,12 @@ impl Bit {
 
 impl From<bool> for Bit {
     fn from(value: bool) -> Self {
-        if value { Bit::On } else { Bit::Off }
+        if value { Self::On } else { Self::Off }
     }
 }
 
 impl From<Bit> for bool {
-    fn from(bit: Bit) -> bool {
+    fn from(bit: Bit) -> Self {
         match bit {
             Bit::On => true,
             Bit::Off => false

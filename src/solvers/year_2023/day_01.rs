@@ -1,17 +1,18 @@
 use crate::SolverResult;
 use itertools::Itertools;
 use tupletools::snd;
-use anyhow::{anyhow, Result};
+use anyhow::{Context, Result};
 
 fn calibration(digits: impl IntoIterator<Item=u32>) -> Result<u32> {
     let mut digits = digits.into_iter();
-    let first = digits.next().ok_or(anyhow!("A line in the input does not contain a digit"))?;
+    let first = digits.next().context("A line in the input does not contain a digit")?;
     let last = digits.last().unwrap_or(first);
     Ok(first * 10 + last)
 }
 
 fn total_calibration<I: IntoIterator<Item=u32>>(digits: impl IntoIterator<Item=I>) -> Result<u32> {
-    let total = digits.into_iter()
+    let total = digits
+        .into_iter()
         .map(calibration)
         .collect::<Result<Vec<u32>>>()?
         .into_iter()

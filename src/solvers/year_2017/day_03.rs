@@ -14,8 +14,8 @@ struct SpiralIterator {
 }
 
 impl SpiralIterator {
-    fn new(start: Point2D, direction: RotationDirection, facing: CardinalDirection) -> Self {
-        SpiralIterator {
+    const fn new(start: Point2D, direction: RotationDirection, facing: CardinalDirection) -> Self {
+        Self {
             next: start,
             start_facing: facing,
             index: 1,

@@ -47,7 +47,7 @@ struct Condition<'a> {
 }
 
 impl<'a> Condition<'a> {
-    fn parse(input: &'a str) -> TextParserResult<Self>{
+    fn parse(input: &'a str) -> TextParserResult<'a, Self>{
         tuple((
             preceded(tag(" if "), alpha1),
             ComparisonOperator::parse,

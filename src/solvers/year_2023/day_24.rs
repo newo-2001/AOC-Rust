@@ -26,8 +26,8 @@ impl Hailstone {
         let Self { position: Point3D(x1, y1, _z1), velocity: Point3D(vx1, vy1, _vz1) } = self;
         let Self { position: Point3D(x2, y2, _z2), velocity: Point3D(vx2, vy2, _vz2) } = other;
 
-        let x = ((-vy2 / vx2 * x2 + y2) - (-vy1 / vx1 * x1 + y1)) / (vy1 / vx1 - vy2 / vx2);
-        let y = (vy1 / vx1) * x + (-vy1 / vx1 * x1 + y1);
+        let x = ((-vy2 / vx2).mul_add(x2, y2) - (-vy1 / vx1).mul_add(x1, y1)) / (vy1 / vx1 - vy2 / vx2);
+        let y = (vy1 / vx1).mul_add(x, (-vy1 / vx1).mul_add(x1, y1));
 
         ((x - x1) / vx1 >= 0.0 && (x - x2) / vx2 >= 0.0).then_some(Point2D(x, y))
     }
@@ -51,8 +51,4 @@ pub fn solve_part_1(input: &str) -> SolverResult {
         .count();
 
     Ok(Box::new(collisions))
-}
-
-pub fn solve_part_2(input: &str) -> SolverResult {
-    Ok(Box::new(1))
 }

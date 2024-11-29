@@ -1,7 +1,6 @@
 use aoc_lib::{parsing::{ParseError, TextParser, parse_lines, usize}, errors::NoSolution};
 use crate::SolverResult;
 use nom::{bytes::complete::tag, sequence::{delimited, terminated, tuple}, character::complete::char, Parser};
-use num::Integer;
 
 struct Disc {
     positions: usize,
@@ -10,27 +9,28 @@ struct Disc {
 }
 
 impl Disc {
-    fn parse(input: &str) -> Result<Disc, ParseError> {
+    fn parse(input: &str) -> Result<Self, ParseError> {
         let disc_number = delimited(tag("Disc #"), usize, tag(" has "));
         let positions = terminated(usize, tag(" positions; at time="));
         let time = terminated(usize, tag(", it is at position "));
         let starting_position = delimited(time, usize, char('.'));
 
         tuple((disc_number, positions, starting_position))
-            .map(|(index, positions, starting_position)| Disc { positions, starting_position, index })
+            .map(|(index, positions, starting_position)| Self { positions, starting_position, index })
             .run(input)
     }
 
-    fn is_aligned_at(&self, time: usize) -> bool {
-        (self.starting_position + self.index + time).is_multiple_of(&self.positions)
+    const fn is_aligned_at(&self, time: usize) -> bool {
+        (self.starting_position + self.index + time)
+            .is_multiple_of(self.positions)
     }
 }
 
 struct Machine(Vec<Disc>);
 
 impl Machine {
-    fn parse(input: &str) -> Result<Machine, ParseError> {
-        Ok(Machine(parse_lines(Disc::parse, input)?))
+    fn parse(input: &str) -> Result<Self, ParseError> {
+        Ok(Self(parse_lines(Disc::parse, input)?))
     }
 
     fn first_aligned_time(&self) -> Option<usize> {

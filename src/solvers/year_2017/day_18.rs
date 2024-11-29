@@ -93,10 +93,8 @@ impl cpu::Instruction<Register, i64> for Instruction {
             },
             Self::JumpGreaterThanZero(value, offset) => {
                 if cpu.evaluate(value) > 0 {
-                    return match isize::try_from(cpu.evaluate(offset)) {
-                        Ok(offset) => ControlFlow::Jump(Jump::Relative(offset)),
-                        Err(_) => ControlFlow::Exit
-                    }
+                    return isize::try_from(cpu.evaluate(offset))
+                        .map_or(ControlFlow::Exit, |offset| ControlFlow::Jump(Jump::Relative(offset)))
                 }
             },
             Self::Send(value) => {
@@ -140,7 +138,7 @@ struct Thread<'a> {
 }
 
 impl<'a> Thread<'a> {
-    fn new(cpu: Cpu<'a>) -> Self {
+    const fn new(cpu: Cpu<'a>) -> Self {
         Self { cpu, stdin: VecDeque::new(), awaiting: None, sends: 0 }
     }
 

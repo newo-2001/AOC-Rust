@@ -3,7 +3,7 @@ use itertools::Itertools;
 
 type Password = Vec<char>;
 
-fn inc(c: char) -> char {
+const fn inc(c: char) -> char {
     (c as u8 + 1) as char
 }
 
@@ -19,7 +19,7 @@ fn increment(password: &mut Password) {
     }
 }
 
-fn is_increasing_straight(seq: (&char, &char, &char)) -> bool {
+const fn is_increasing_straight(seq: (&char, &char, &char)) -> bool {
     let (&a, &b, &c) = seq;
     inc(a) == b && inc(b) == c
 }

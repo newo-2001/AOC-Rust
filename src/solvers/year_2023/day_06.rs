@@ -1,7 +1,7 @@
 use aoc_lib::{parsing::TextParser, math::{Quadratic, Roots}};
 use crate::SolverResult;
 use itertools::Itertools;
-use anyhow::anyhow;
+use anyhow::Context;
 use nom::{bytes::complete::tag, character::complete::{space1, line_ending, u64}, multi::separated_list1, sequence::{preceded, delimited}, Parser};
 
 struct Race {
@@ -40,7 +40,8 @@ pub fn solve_part_1(input: &str) -> SolverResult {
         separated_list1(space1, u64)
     )).run(input)?;
 
-    let margin_of_error: u64 = times.into_iter()
+    let margin_of_error: u64 = times
+        .into_iter()
         .zip(distances)
         .map(|(time, distance)| Race { time, distance }.winning_options())
         .product();
@@ -49,14 +50,16 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let (time, distance) = input.lines()
-        .map(|line| {
-            line.chars()
-                .filter(char::is_ascii_digit)
-                .collect::<String>()
-                .parse::<u64>()
-        }).collect_tuple()
-        .ok_or(anyhow!("Input did not have exactly 2 lines"))?;
+    let (time, distance) = input
+        .lines()
+        .map(|line| line
+            .chars()
+            .filter(char::is_ascii_digit)
+            .collect::<String>()
+            .parse::<u64>()
+        )
+        .collect_tuple()
+        .context("Input did not have exactly 2 lines")?;
 
     let race = Race { time: time?, distance: distance? };
     Ok(Box::new(race.winning_options()))

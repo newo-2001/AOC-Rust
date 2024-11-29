@@ -24,7 +24,7 @@ struct Mirror {
 }
 
 impl Mirror {
-    fn summary(&self) -> usize {
+    const fn summary(&self) -> usize {
         match self.axis {
             Axis::Horizontal => self.offset * 100,
             Axis::Vertical => self.offset

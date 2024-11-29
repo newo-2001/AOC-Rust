@@ -21,8 +21,8 @@ enum Register {
 impl Parsable<'_> for Register {
     fn parse(input: &str) -> TextParserResult<Self> {
         Parser::or(
-        value(Register::A, char('a')),
-            value(Register::B, char('b'))       
+        value(Self::A, char('a')),
+            value(Self::B, char('b'))       
         ).parse(input)
     }
 }
@@ -57,16 +57,16 @@ impl cpu::Instruction<Register, u32> for Instruction {
     
     fn execute(&self, cpu: &mut Cpu) -> ControlFlow<Self::Interrupt> {
         match self {
-            Instruction::Half(register) => cpu.map_register(*register, |x| x / 2),
-            Instruction::Triple(register) => cpu.map_register(*register, |x| x * 3),
-            Instruction::Increment(register) => cpu.map_register(*register, |x| x + 1),
-            Instruction::Jump(offset) => return ControlFlow::Jump(Jump::Relative(*offset)),
-            Instruction::JumpIfEven(register, offset) => {
+            Self::Half(register) => cpu.map_register(*register, |x| x / 2),
+            Self::Triple(register) => cpu.map_register(*register, |x| x * 3),
+            Self::Increment(register) => cpu.map_register(*register, |x| x + 1),
+            Self::Jump(offset) => return ControlFlow::Jump(Jump::Relative(*offset)),
+            Self::JumpIfEven(register, offset) => {
                 if cpu.read_register(register).is_even() {
                     return ControlFlow::Jump(Jump::Relative(*offset));
                 }
             },
-            Instruction::JumpIfOne(register, offset) => {
+            Self::JumpIfOne(register, offset) => {
                 if cpu.read_register(register) == 1 {
                     return ControlFlow::Jump(Jump::Relative(*offset));
                 }

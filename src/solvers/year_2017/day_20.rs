@@ -26,7 +26,7 @@ impl Parsable<'_> for Particle {
             delimited(tag("p="), parse_vec3, tag(", ")),
             delimited(tag("v="), parse_vec3, tag(", ")),
             preceded(tag("a="), parse_vec3)
-        )).map(|(position, velocity, acceleration)| Particle {
+        )).map(|(position, velocity, acceleration)| Self {
             position, velocity, acceleration
         }).parse(input)
     }

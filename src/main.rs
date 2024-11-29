@@ -10,7 +10,8 @@
     never_type,
     cmp_minmax,
     iter_intersperse,
-    anonymous_lifetime_in_impl_trait
+    anonymous_lifetime_in_impl_trait,
+    unsigned_is_multiple_of
 )]
 
 use std::fs::File;
@@ -69,7 +70,7 @@ macro_rules! solver {
         ].into_iter()
             .flatten()
             .chain(solver!($year, "25", 1))
-            .collect::<Vec<_>>();
+            .collect::<Vec<_>>()
     }
 }
 
@@ -133,7 +134,7 @@ fn main() {
         solver!(2023, "21", 1),
         solver!(2023, "22"),
         solver!(2023, "23"),
-        solver!(2023, "24"),
+        solver!(2023, "24", 1),
         solver!(2023, "25", 1),
     ].into_iter()
         .flatten()

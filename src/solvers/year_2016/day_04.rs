@@ -12,9 +12,10 @@ struct Room<'a> {
     checksum: &'a str
 }
 
-impl<'a> Room<'a> {
+impl Room<'_> {
     fn letter_frequencies(&self) -> HashMap<char, usize> {
-        self.name.chars()
+        self.name
+            .chars()
             .filter(|&c| c != '-')
             .counts()
     }
@@ -27,7 +28,8 @@ impl<'a> Room<'a> {
             }
         }
 
-        self.letter_frequencies()
+        self
+            .letter_frequencies()
             .into_iter()
             .sorted_unstable_by(compare_letters)
             .take(self.checksum.len())
@@ -45,13 +47,14 @@ impl<'a> Room<'a> {
     }
 }
 
-fn rotate_letter(c: char) -> char {
+const fn rotate_letter(c: char) -> char {
     if c == 'z' { 'a' }
     else { (c as u8 + 1) as char }
 }
 
 fn rotate_str(str: impl AsRef<str>) -> String {
-    str.as_ref()
+    str
+        .as_ref()
         .chars()
         .map(rotate_letter)
         .collect()
@@ -73,7 +76,8 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .filter(Room::is_real)
         .update(|room| {
             room.name = repeat_apply(room.sector_id, room.name.clone(), rotate_str);
-        }).find(|room| room.name.contains("northpole"))
+        })
+        .find(|room| room.name.contains("northpole"))
         .ok_or(NoSolution)?;
     
     Ok(Box::new(north_pole.sector_id))

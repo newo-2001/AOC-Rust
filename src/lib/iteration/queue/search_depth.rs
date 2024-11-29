@@ -28,12 +28,12 @@ impl<T: Default> Default for SearchDepth<T> {
 }
 
 impl<T> SearchDepth<T> {
-    pub fn new(state: T) -> Self {
+    pub const fn new(state: T) -> Self {
         Self { depth: 0, state }
     }
 
     #[must_use]
-    pub fn with(&self, state: T) -> Self {
+    pub const fn with(&self, state: T) -> Self {
         Self { depth: self.depth + 1, state }
     }
 }

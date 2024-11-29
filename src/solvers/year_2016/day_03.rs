@@ -1,14 +1,14 @@
 use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, iteration::ExtraIter};
 use crate::SolverResult;
 use itertools::Itertools;
-use nom::{sequence::{tuple, preceded}, character::complete::{multispace1, u32}, Parser};
+use nom::{character::complete::{multispace1, u32}, combinator::map, sequence::{preceded, tuple}};
 use tupletools::snd;
 
 #[derive(Clone, Copy)]
 struct Triangle(u32, u32, u32);
 
 impl Triangle {
-    fn is_valid(&self) -> bool {
+    const fn is_valid(&self) -> bool {
         let &Self(x, y, z) = self;
 
         x + y > z &&
@@ -16,13 +16,16 @@ impl Triangle {
         x + z > y
     }
 
-    fn parse(input: &str) -> Result<Triangle, ParseError> {
-        tuple((
-            preceded(multispace1, u32),
-            preceded(multispace1, u32),
-            preceded(multispace1, u32)
-        )).map(|(x, y, z)| Triangle(x, y, z))
-            .run(input)
+    fn parse(input: &str) -> Result<Self, ParseError> {
+        map(
+            tuple((
+                preceded(multispace1, u32),
+                preceded(multispace1, u32),
+                preceded(multispace1, u32)
+            )),
+            |(x, y, z)| Self(x, y, z)
+        )
+        .run(input)
     }
 }
 

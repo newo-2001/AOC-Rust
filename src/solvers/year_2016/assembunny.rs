@@ -41,7 +41,7 @@ pub enum Instruction {
 }
 
 impl Parsable<'_> for Instruction {
-    fn parse(input: &str) -> TextParserResult<Instruction> {
+    fn parse(input: &str) -> TextParserResult<Self> {
         alt((
             preceded(tag("cpy "), separated_pair(Value::parse, char(' '), Register::parse)).map2(Self::Copy),
             preceded(tag("jnz "), separated_pair(Value::parse, char(' '), Value::parse)).map2(Self::JumpNotZero),
@@ -69,8 +69,8 @@ pub enum ExecutationError {
 }
 
 impl Cpu {
-    pub fn new(instructions: Vec<Instruction>) -> Cpu {
-        Cpu { 
+    pub fn new(instructions: Vec<Instruction>) -> Self {
+        Self { 
             instructions,
             registers: HashMap::new(),
             ip: 0
@@ -189,7 +189,7 @@ impl Cpu {
 impl Parsable<'_> for Cpu {
     fn parse(input: &str) -> TextParserResult<Self> {
         lines(Instruction::parse)
-            .map(Cpu::new)
+            .map(Self::new)
             .parse(input)
     }
 }
@@ -198,7 +198,7 @@ pub struct CpuOutput<'a> {
     cpu: &'a mut Cpu
 }
 
-impl<'a> Iterator for CpuOutput<'a> {
+impl Iterator for CpuOutput<'_> {
     type Item = Result<isize, ExecutationError>;
 
     fn next(&mut self) -> Option<Self::Item> {

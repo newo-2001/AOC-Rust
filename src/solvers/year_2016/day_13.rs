@@ -29,8 +29,8 @@ impl Hash for SearchState {
 }
 
 impl Grid {
-    fn new(magic: usize) -> Grid {
-        Grid { magic }
+    const fn new(magic: usize) -> Self {
+        Self { magic }
     }
 
     fn get(&self, Point2D(x, y): Point2D::<usize>) -> Bit {

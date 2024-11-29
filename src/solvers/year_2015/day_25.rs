@@ -6,15 +6,15 @@ use nom::{character::complete::{u32, char}, bytes::complete::tag, sequence::{pre
 struct Position(u32, u32);
 
 impl Position {
-    fn next(&self) -> Position {
-        let &Position(col, row) = self;
-        if row > 1 { Position(col + 1, row - 1) }
-        else { Position(1, col + 1) }
+    const fn next(&self) -> Self {
+        let &Self(col, row) = self;
+        if row > 1 { Self(col + 1, row - 1) }
+        else { Self(1, col + 1) }
     }
 
     fn code(&self) -> u64 {
         let mut code: u64 = 2015_1125;
-        let mut position = Position(1, 1);
+        let mut position = Self(1, 1);
 
         while &position != self {
             position = position.next();

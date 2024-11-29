@@ -43,7 +43,7 @@ impl Part {
         }).parse(input)
     }
 
-    fn get(&self, category: Category) -> u16 {
+    const fn get(&self, category: Category) -> u16 {
         match category {
             Category::Aerodynamic => self.a,
             Category::Musical => self.m,
@@ -83,7 +83,7 @@ enum Action<'a> {
 }
 
 impl<'a> Action<'a> {
-    fn parse(input: &'a str) -> TextParserResult<Self> {
+    fn parse(input: &'a str) -> TextParserResult<'a, Self> {
         alpha1.map(|action| match action {
             "A" => Self::Accept,
             "R" => Self::Reject,
@@ -99,7 +99,7 @@ struct Rule<'a> {
 }
 
 impl<'a> Rule<'a> {
-    fn parse(input: &'a str) -> TextParserResult<Self> {
+    fn parse(input: &'a str) -> TextParserResult<'a, Self> {
         Parser::or(
             pair(
                 terminated(Condition::parse, char(':')),
@@ -110,7 +110,7 @@ impl<'a> Rule<'a> {
         }).parse(input)
     }
 
-    fn apply(&self, part: &Part) -> bool {
+    const fn apply(&self, part: &Part) -> bool {
         match self.condition {
             Condition::Greater(category, value) => part.get(category) > value,
             Condition::Smaller(category, value) => part.get(category) < value,
@@ -137,7 +137,7 @@ impl<'a> Rule<'a> {
 struct Workflow<'a>(Vec<Rule<'a>>);
 
 impl<'a> Workflow<'a> {
-    fn parse(input: &'a str) -> TextParserResult<(&str, Self)> {
+    fn parse(input: &'a str) -> TextParserResult<'a, (&'a str, Self)> {
         pair(
             alpha1,
             curly_brackets(
@@ -227,13 +227,13 @@ impl Area {
     }
 
     fn area(self) -> u64 {
-        let Area { x, m, a, s } = self;
+        let Self { x, m, a, s } = self;
         [x, m, a, s].into_iter()
             .map(|range| u64::from(range.interval()))
             .product()
     }
 
-    fn partition(mut self, dimension: Category, partition_point: u16) -> (Area, Area) {
+    fn partition(mut self, dimension: Category, partition_point: u16) -> (Self, Self) {
         let mut left = self;
         let range = left.get_dimension_mut(dimension);
         range.end = partition_point;

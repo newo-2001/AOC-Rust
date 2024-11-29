@@ -61,7 +61,7 @@ impl<'a> Graph<'a> {
             .sum()
     }
     
-    fn from_edges(edges: impl IntoIterator<Item=WeightedEdge<'a>> + Clone) -> Graph<'a> {
+    fn from_edges(edges: impl IntoIterator<Item=WeightedEdge<'a>> + Clone) -> Self {
         let nodes = edges.clone().into_iter()
             .map(|(Edge(from, _), _)| from)
             .chain(edges.clone().into_iter().map(|(Edge(_, to), _)| to))

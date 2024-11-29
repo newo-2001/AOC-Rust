@@ -72,7 +72,7 @@ impl_grid_traits!(Grid<T>);
 impl_grid_traits_mut!(Grid<T>);
 
 #[derive(Debug, Error)]
-pub enum GridParseError<E: Display> {
+pub enum GridParseError<E> {
     #[error(transparent)]
     InvalidToken(E),
     #[error(transparent)]
@@ -82,26 +82,27 @@ pub enum GridParseError<E: Display> {
 impl<T> Grid<T>
 {
     #[must_use]
-    pub fn empty(dimensions: Dimensions) -> Grid<T>
+    pub fn empty(dimensions: Dimensions) -> Self
         where T: Default + Clone
     {
         let tiles = vec![T::default(); dimensions.surface_area()];
 
-        Grid {
+        Self {
             dimensions,
             tiles: tiles.into_boxed_slice()
         }
     }
 
-    pub fn new(tiles: Vec<Vec<T>>) -> Result<Grid<T>, NotRectangularError>
+    pub fn new(tiles: Vec<Vec<T>>) -> Result<Self, NotRectangularError>
     {
         let dimensions: Dimensions = (&tiles).try_into()?;
-        let tiles = tiles.into_iter()
+        let tiles = tiles
+            .into_iter()
             .flat_map(Vec::into_iter)
             .collect_vec()
             .into_boxed_slice();
 
-        Ok(Grid { dimensions, tiles })
+        Ok(Self { dimensions, tiles })
     }
 
     fn valid_sub_grid(&self, area: Area<usize>) -> Result<(), InvalidGridAreaError> {
@@ -124,22 +125,23 @@ impl<T> Grid<T>
     pub fn view(&self) -> GridView<T> { self.into() }
     pub fn view_mut(&mut self) -> GridViewMut<T> { self.into() }
 
-    pub(crate) fn backing_index(&self, Point2D(x, y): Point2D<usize>) -> usize {
+    pub(crate) const fn backing_index(&self, Point2D(x, y): Point2D<usize>) -> usize {
         y * self.dimensions.width() + x
     }
 
-    pub fn parse<E: Display>(input: &str) -> Result<Grid<T>, GridParseError<E>>
+    pub fn parse<E: Display>(input: &str) -> Result<Self, GridParseError<E>>
         where T: TryFrom<char, Error = E>
     {
         let cells: Vec<Vec<T>> = input.lines()
-            .map(|line| {
-                line.chars()
-                    .map(TryInto::<T>::try_into)
-                    .try_collect()
-            }).try_collect()
+            .map(|line| line
+                .chars()
+                .map(TryInto::<T>::try_into)
+                .try_collect()
+            )
+            .try_collect()
             .map_err(GridParseError::InvalidToken)?;
 
-        Grid::new(cells)
+        Self::new(cells)
             .map_err(GridParseError::NotRectangular)
     }
 

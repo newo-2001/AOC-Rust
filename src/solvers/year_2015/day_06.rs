@@ -21,8 +21,8 @@ trait Togglable: Copy {
 impl Togglable for Bit {
     fn toggle(self, action: Action) -> Self {
         match action {
-            Action::On => Bit::On,
-            Action::Off => Bit::Off,
+            Action::On => Self::On,
+            Action::Off => Self::Off,
             Action::Toggle => self.invert()
         }
     }
@@ -45,7 +45,7 @@ struct Step {
 }
 
 impl Parsable<'_> for Step {
-    fn parse(input: &str) -> TextParserResult<Step> {
+    fn parse(input: &str) -> TextParserResult<Self> {
         let action = string_enum! {
             "turn off " => Action::Off,
             "turn on " => Action::On,
@@ -58,7 +58,7 @@ impl Parsable<'_> for Step {
             preceded(tag(" through "), Point2D::parse)
         )).map(|(action, top_left, bottom_right)| {
             let area = Area::from_corners(top_left, bottom_right);
-            Step { area, action }
+            Self { area, action }
         }).parse(input)
     }
 }

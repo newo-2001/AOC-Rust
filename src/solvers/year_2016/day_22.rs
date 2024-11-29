@@ -31,22 +31,22 @@ impl PartialOrd for Node {
 }
 
 impl Node {
-    fn parse(input: &str) -> Result<Node, ParseError> {
+    fn parse(input: &str) -> Result<Self, ParseError> {
         let position = delimited(char('x'), usize, tag("-y")).and(usize);
         let position = preceded(tag("/dev/grid/node-"), position).map(Into::into);
         let size = || delimited(space1, u16, char('T'));
         let used_percent = delimited(space1, u8, char('%'));
 
         tuple((position, size(), size(), size(), used_percent))
-            .map(|(position, size, used, avail, used_percent)| Node {
+            .map(|(position, size, used, avail, used_percent)| Self {
                 position, size, used, avail, used_percent
             }).run(input)
     }
 
-    fn is_empty(&self) -> bool { self.used == 0 }
-    fn fits_on_node(&self, other: &Self) -> bool { other.avail >= self.used }
+    const fn is_empty(&self) -> bool { self.used == 0 }
+    const fn fits_on_node(&self, other: &Self) -> bool { other.avail >= self.used }
 
-    fn as_tile<'a>(&self, neighbours: impl IntoIterator<Item=&'a Node>) -> Bit {
+    fn as_tile<'a>(&self, neighbours: impl IntoIterator<Item=&'a Self>) -> Bit {
         neighbours.into_iter()
             .any(|neighbour| self.used >= neighbour.size)
             .into()

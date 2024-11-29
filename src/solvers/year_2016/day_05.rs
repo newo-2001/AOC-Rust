@@ -51,7 +51,7 @@ impl<'a, T, F> PasswordIterator<'a, T, F>
             .flatten()
     }
 
-    fn new(door_id: &'a str, extractor: F) -> PasswordIterator<'a, T, F> {
+    fn new(door_id: &'a str, extractor: F) -> Self {
         PasswordIterator { index: 0, door_id, extractor: Arc::new(extractor) }
     }
 }

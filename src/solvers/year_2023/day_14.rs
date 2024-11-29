@@ -12,11 +12,11 @@ enum Rock {
 }
 
 impl Rock {
-    fn parse(char: char) -> Result<Option<Rock>> {
+    fn parse(char: char) -> Result<Option<Self>> {
         Ok(match char {
             '.' => None,
-            'O' => Some(Rock::Round),
-            '#' => Some(Rock::Square),
+            'O' => Some(Self::Round),
+            '#' => Some(Self::Square),
             _ => return Err(anyhow!("Invalid rock encountered: '{char}'"))
         })
     }

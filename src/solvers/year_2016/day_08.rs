@@ -16,7 +16,7 @@ enum Instruction {
 }
 
 impl Instruction {
-    fn parse(input: &str) -> Result<Instruction, ParseError> {
+    fn parse(input: &str) -> Result<Self, ParseError> {
         let rotate_instruction = || usize.and(preceded(tag(" by "), usize))
             .map(|(index, amount)| RotateInstruction { index, amount });
 
@@ -29,16 +29,16 @@ impl Instruction {
 
     fn apply(self, mut grid: Grid<Bit>) -> Result<Grid<Bit>, InvalidGridAreaError> {
         match self {
-            Instruction::Fill(dimensions) => {
+            Self::Fill(dimensions) => {
                 grid.sub_grid_mut(dimensions.into())?.fill(Bit::On);
             },
-            Instruction::RotateRow(RotateInstruction { index, amount }) => {
+            Self::RotateRow(RotateInstruction { index, amount }) => {
                 let row = grid.get_row_mut(index)
                     .unwrap_or_else(|| panic!("Grid row index out of range: {index}"));
 
                 rotate_slice(row, amount);
             },
-            Instruction::RotateColumn(RotateInstruction { index, amount }) => {
+            Self::RotateColumn(RotateInstruction { index, amount }) => {
                 let column = grid.get_column_mut(index)
                     .unwrap_or_else(|| panic!("Grid column index out of range: {index}"));
 

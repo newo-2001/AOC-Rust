@@ -20,7 +20,7 @@ enum Instruction {
 fn rotation_index(index: usize) -> usize { index + 1 + usize::from(index >= 4) }
 
 impl Instruction {
-    fn parse(input: &str) -> Result<Instruction, ParseError> {
+    fn parse(input: &str) -> Result<Self, ParseError> {
         let swap_positions = preceded(tag("swap position "), usize)
             .and(preceded(tag(" with position "), usize))
             .map(|(first, second)| Self::SwapPositions(first, second));

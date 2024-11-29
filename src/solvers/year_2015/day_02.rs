@@ -7,7 +7,7 @@ use crate::SolverResult;
 struct Present(u32, u32, u32);
 
 impl Parsable<'_> for Present {
-    fn parse(input: &str) -> TextParserResult<Present> {
+    fn parse(input: &str) -> TextParserResult<Self> {
         tuple((
             u32,
             preceded(char('x'), u32),

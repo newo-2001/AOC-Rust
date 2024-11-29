@@ -4,10 +4,7 @@ use ahash::{HashSet, HashSetExt};
 use aoc_lib::{parsing::{TextParser, Parsable, TextParserResult}, errors::NoSolution};
 use crate::SolverResult;
 use nom:: {
-    sequence::{preceded, separated_pair},
-    Parser,
-    bytes::complete::tag,
-    character::complete::{u32, line_ending}
+    bytes::complete::tag, character::complete::{line_ending, u32}, combinator::map, sequence::{preceded, separated_pair}, Parser
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -36,17 +33,17 @@ impl PartialEq for StatusEffect {
 }
 
 impl StatusEffect {
-    fn apply(mut self, battle: &mut Battle) -> Option<StatusEffect> {
+    fn apply(mut self, battle: &mut Battle) -> Option<Self> {
         self.duration -= 1;
         
         match self {
-            StatusEffect { effect: Effect::Poisoned, duration: _ } => {
+            Self { effect: Effect::Poisoned, duration: _ } => {
                 battle.enemy.hurt(3);
             },
-            StatusEffect { effect: Effect::Recharging, duration: _ } => {
+            Self { effect: Effect::Recharging, duration: _ } => {
                 battle.player.mana += 101;
             }
-            StatusEffect { effect: Effect::Shielded, duration: 0 } => {
+            Self { effect: Effect::Shielded, duration: 0 } => {
                 battle.player.armor -= 7;
             }
             _ => {}
@@ -55,7 +52,7 @@ impl StatusEffect {
         (!self.ended()).then_some(self)
     }
     
-    fn ended(&self) -> bool { self.duration == 0 }
+    const fn ended(&self) -> bool { self.duration == 0 }
 }
 
 #[derive(Debug)]
@@ -68,7 +65,7 @@ enum Spell {
 }
 
 impl Spell {
-    fn cost(&self) -> u32 {
+    const fn cost(&self) -> u32 {
         match self {
             Self::MagicMissile => 53,
             Self::Drain        => 73,
@@ -78,7 +75,7 @@ impl Spell {
         }
     }
 
-    fn effect(&self) -> Option<StatusEffect> {
+    const fn effect(&self) -> Option<StatusEffect> {
         match self {
             Self::Poison   => Some(StatusEffect { effect: Effect::Poisoned,   duration: 6 }),
             Self::Shield   => Some(StatusEffect { effect: Effect::Shielded,   duration: 6 }),
@@ -110,10 +107,9 @@ trait Alive {
 impl Spell {
     fn castable(&self, battle: &Battle) -> bool {
         if battle.player.mana < self.cost() { return false; }
-        match self.effect() {
-            Some(effect) => !battle.effects.contains(&effect),
-            None => true
-        }
+
+        self.effect()
+            .map_or(true, |effect| !battle.effects.contains(&effect))
     }
 
     fn cast(&self, battle: &mut Battle) {
@@ -166,13 +162,16 @@ struct Enemy {
 }
 
 impl Parsable<'_> for Enemy {
-    fn parse(input: &str) -> TextParserResult<Enemy> {
-        separated_pair(
-            preceded(tag("Hit Points: "), u32),
-            line_ending,
-            preceded(tag("Damage: "), u32)
-        ).map(|(health, damage)| Enemy { health, damage })
-            .parse(input)
+    fn parse(input: &str) -> TextParserResult<Self> {
+        map(
+            separated_pair(
+                preceded(tag("Hit Points: "), u32),
+                line_ending,
+                preceded(tag("Damage: "), u32)
+            ),
+            |(health, damage)| Self { health, damage }
+        )
+        .parse(input)
     }
 }
 
@@ -204,8 +203,8 @@ impl PartialOrd for Battle {
 }
 
 impl Battle {
-    fn new(player: Player, enemy: Enemy, difficulty: Difficulty) -> Battle {
-        Battle {
+    fn new(player: Player, enemy: Enemy, difficulty: Difficulty) -> Self {
+        Self {
             player, enemy, difficulty,
             mana_expended: 0,
             effects: HashSet::new()
@@ -221,7 +220,8 @@ impl Battle {
     }
 
     fn apply_effects(&mut self) {
-        let effects = self.effects.clone()
+        let effects = self.effects
+            .clone()
             .into_iter()
             .filter_map(|effect| effect.apply(self))
             .collect();
@@ -229,7 +229,7 @@ impl Battle {
         self.effects = effects;
     }
 
-    fn with_spell(mut self, spell: &Spell) -> Battle {
+    fn with_spell(mut self, spell: &Spell) -> Self {
         match self.difficulty {
             Difficulty::Normal => { },
             Difficulty::Hard => {
@@ -248,7 +248,7 @@ impl Battle {
         self
     }
 
-    fn possible_moves(&self) -> Vec<Battle> {
+    fn possible_moves(&self) -> Vec<Self> {
         [
             Spell::MagicMissile,
             Spell::Poison,
@@ -299,8 +299,7 @@ fn least_mana_for_input(input: &str, difficulty: Difficulty) -> Result<u32> {
 
     let battle = Battle::new(player, enemy, difficulty);
 
-    let mana = least_amount_of_mana_for_victory(battle.clone())
-        .ok_or(NoSolution)?;
+    let mana = least_amount_of_mana_for_victory(battle).ok_or(NoSolution)?;
 
     Ok(mana)
 }

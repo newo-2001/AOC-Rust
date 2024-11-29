@@ -18,7 +18,7 @@ impl TryFrom<char> for Tile {
         Ok(match value {
             '.' => Self::Period,
             char => char.to_digit(10)
-                .map_or(Tile::Symbol(char), Tile::Digit)
+                .map_or(Self::Symbol(char), Tile::Digit)
         })
     }
 }

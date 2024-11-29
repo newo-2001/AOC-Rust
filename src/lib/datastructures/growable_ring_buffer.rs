@@ -12,8 +12,8 @@ impl<T> GrowableRingBuffer<T> {
     }
 
     #[must_use]
-    pub fn new() -> Self {
-        GrowableRingBuffer { buffer: VecDeque::new() }
+    pub const fn new() -> Self {
+        Self { buffer: VecDeque::new() }
     }
 
     #[must_use]

@@ -25,7 +25,7 @@ struct Sue {
 }
 
 impl Sue {
-    fn parse(input: &str) -> Result<Sue, ParseError> {
+    fn parse(input: &str) -> Result<Self, ParseError> {
         let number = delimited(tag("Sue "), u16, char(':'));
         let compound = delimited(char(' '), alpha1, tag(": "))
             .and(terminated(u8, opt(char(','))));
@@ -35,7 +35,7 @@ impl Sue {
             .map(|compounds| COMPOUNDS.iter().map(|compound| compounds.get(compound).copied()).collect_vec().try_into());
         
         number.and(compounds)
-            .map(|(number, compounds)| Sue { number, compounds: compounds.unwrap() })
+            .map(|(number, compounds)| Self { number, compounds: compounds.unwrap() })
             .run(input)
     }
 }
@@ -70,7 +70,7 @@ const FACT: Fact = [3, 7, 2, 3, 0, 0, 5, 3, 2, 1];
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let sues = parse_lines(Sue::parse, input)?;
-    let solution = solve(FACT, sues.clone(), is_valid_solution)?;
+    let solution = solve(FACT, sues, is_valid_solution)?;
 
     Ok(Box::new(solution.number))
 }

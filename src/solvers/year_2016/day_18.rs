@@ -21,11 +21,11 @@ impl TryFrom<char> for Tile {
 }
 
 impl Tile {
-    fn from_neighbours(neighbours: (&Tile, &Tile, &Tile)) -> Tile {
+    const fn from_neighbours(neighbours: (&Self, &Self, &Self)) -> Self {
         match neighbours {
-            | (Tile::Trap, _, Tile::Safe)
-            | (Tile::Safe, _, Tile::Trap) => Tile::Trap,
-            _ => Tile::Safe
+            | (Self::Trap, _, Self::Safe)
+            | (Self::Safe, _, Self::Trap) => Self::Trap,
+            _ => Self::Safe
         }
     }
 }
@@ -42,8 +42,8 @@ struct RowIterator {
 }
 
 impl RowIterator {
-    fn new(row: Vec<Tile>) -> Self {
-        RowIterator { next: row }
+    const fn new(row: Vec<Tile>) -> Self {
+        Self { next: row }
     }
 }
 

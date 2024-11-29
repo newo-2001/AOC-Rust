@@ -23,8 +23,8 @@ struct State {
 }
 
 impl State {
-    fn new(position: Point2D<usize>) -> Self {
-        State {
+    const fn new(position: Point2D<usize>) -> Self {
+        Self {
             visited_targets: Vec::new(),
             returning: false,
             position

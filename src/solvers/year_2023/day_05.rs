@@ -2,13 +2,13 @@ use aoc_lib::{math::{Range, InvalidRangeError}, between, parsing::{TextParserRes
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{char, u64, line_ending}, sequence::{tuple, preceded, delimited}, Parser, multi::separated_list1, bytes::complete::tag, combinator::map_res};
-use anyhow::{anyhow, Result};
+use anyhow::{Context, Result};
 use rayon::iter::{ParallelBridge, ParallelIterator, IntoParallelIterator};
 
 struct Almanac(Vec<Map>);
 
 impl Almanac {
-    fn parse(input: &str) -> Result<(Vec<u64>, Almanac), ParseError> {
+    fn parse(input: &str) -> Result<(Vec<u64>, Self), ParseError> {
         Parser::and(
             delimited(tag("seeds: "), separated_list1(char(' '), u64), line_ending.and(line_ending)),
             separated_list1(line_ending, Map::parse).map(Self)
@@ -16,9 +16,12 @@ impl Almanac {
     }
 
     fn min_distance(&self, seeds: impl IntoParallelIterator<Item=u64>) -> Result<u64> {
-        seeds.into_par_iter().map(|seed| {
-            self.0.iter().fold(seed, |value, map| map.map(value))
-        }).min().ok_or(anyhow!("No seeds in input"))
+        seeds.into_par_iter().map(|seed| self.0
+            .iter()
+            .fold(seed, |value, map| map.map(value))
+        )
+        .min()
+        .context("No seeds in input")
     }
 }
 

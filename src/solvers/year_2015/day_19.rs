@@ -30,7 +30,7 @@ impl Ord for Mutation {
 }
 
 impl<'a> Parsable<'a> for Replacement<'a> {
-    fn parse(input: &'a str) -> TextParserResult<Self> {
+    fn parse(input: &'a str) -> TextParserResult<'a, Self> {
         separated_pair(alpha1, tag(" => "), alpha1)
             .map(|(from, to)| Replacement { from, to })
             .parse(input)
@@ -71,7 +71,8 @@ fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize
 
         if chemical == "e" { return Ok(distance); }
        
-        let mutations = replacements.iter()
+        let mutations = replacements
+            .iter()
             .flat_map(|replacement| backwards_mutations(&chemical, replacement))
             .filter(|x| !cache.contains(x))
             .collect_vec();

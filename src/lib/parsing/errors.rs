@@ -12,7 +12,7 @@ pub struct ParseError(String);
 
 impl ParseError {
     #[must_use]
-    pub fn new(error: String) -> Self {
+    pub const fn new(error: String) -> Self {
         Self(error)
     }
 }

@@ -14,9 +14,9 @@ enum Move {
 impl Move {
     fn perform(self, programs: &mut [char]) {
         match self {
-            Move::Spin(length) => programs.rotate_right(length),
-            Move::Exchange(a, b) => programs.swap(a, b),
-            Move::Partner(a, b) => {
+            Self::Spin(length) => programs.rotate_right(length),
+            Self::Exchange(a, b) => programs.swap(a, b),
+            Self::Partner(a, b) => {
                 let a = programs.iter().position(|x| x == &a).unwrap();
                 let b = programs.iter().position(|x| x == &b).unwrap();
                 programs.swap(a, b);

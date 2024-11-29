@@ -20,7 +20,7 @@ struct KeyIterator<'a, F>
     generator: F
 }
 
-impl<'a, F> Iterator for KeyIterator<'a, F>
+impl<F> Iterator for KeyIterator<'_, F>
     where F: Fn(String) -> String
 {
     type Item = usize;
@@ -52,7 +52,7 @@ impl<'a, F> Iterator for KeyIterator<'a, F>
 impl<'a, F> KeyIterator<'a, F>
     where F: Fn(String) -> String
 {
-    fn new(salt: &'a str, generator: F) -> KeyIterator<'a, F> {
+    const fn new(salt: &'a str, generator: F) -> Self {
         KeyIterator {
             salt, generator, index: 0,
             history: Vec::new(),

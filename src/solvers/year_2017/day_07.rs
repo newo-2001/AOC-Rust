@@ -15,7 +15,7 @@ struct Program<'a> {
 }
 
 impl<'a> Parsable<'a> for Program<'a> {
-    fn parse(input: &'a str) -> TextParserResult<Program<'a>> {
+    fn parse(input: &'a str) -> TextParserResult<'a, Self> {
         let name = terminated(alpha1, space1);
         let weight = parens(u32);
         let children = preceded(tag(" -> "), separated_list1(tag(", "), alpha1));
@@ -89,8 +89,9 @@ enum Balanced {
 fn unbalanced_difference<'a: 'b, 'b>(tower: impl IntoIterator<Item=&'b Program<'a>>) -> Result<u32, Error> {
     fn weight_difference<'a: 'b, 'b>(tower: &HashMap<&'a str, &'b Program<'a>>, root: &'b Program<'a>) -> Result<Balanced, Error> {
         let child_weights = root.children.iter().map(|&name| {
-            let child = tower.get(&name)
-                .ok_or(Error::InvalidNode(name.to_string()))?;
+            let child = tower
+                .get(&name)
+                .ok_or_else(|| Error::InvalidNode(name.to_string()))?;
             
             weight_difference(tower, child)
         }).collect::<Result<Vec<_>, _>>()?

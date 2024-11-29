@@ -19,34 +19,34 @@ struct Entity {
 }
 
 impl Entity {
-    fn alive(&self) -> bool { self.health > 0 }
+    const fn alive(&self) -> bool { self.health > 0 }
     
     fn attack(&self, target: &mut Self) {
         let damage = max(1, self.damage.saturating_sub(target.armor));
         target.health -= min(damage, target.health);
     }
 
-    fn parse(input: &str) -> Result<Entity, ParseError> {
+    fn parse(input: &str) -> Result<Self, ParseError> {
         let kv = |key| delimited(tag(key).and(tag(": ")), u32, opt(line_ending));
 
         let entity = tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
-            .map(|(health, damage, armor)| Entity { health, damage, armor });
+            .map(|(health, damage, armor)| Self { health, damage, armor });
         
         entity.run(input)
     }
 
-    fn with_gear(&self, gear: &[&Item]) -> Entity {
+    fn with_gear(&self, gear: &[&Item]) -> Self {
         let gear_armor: u32 = gear.iter().map(|item| item.armor).sum();
         let gear_damage: u32 = gear.iter().map(|item| item.damage).sum();
 
-        Entity {
+        Self {
             health: self.health,
             armor: self.armor + gear_armor,
             damage: self.damage + gear_damage
         }
     }
 
-    fn fight(mut self: Entity, mut other: Entity) -> BattleResult {
+    fn fight(mut self, mut other: Self) -> BattleResult {
         loop {
             self.attack(&mut other);
             other.attack(&mut self);
@@ -54,7 +54,7 @@ impl Entity {
             match (self.alive(), other.alive()) {
                 (_, false) => return BattleResult::Victory,
                 (false, true) => return BattleResult::Defeat,
-                (true, true) => { }
+                (true, true) => continue
             }
         }
     }
@@ -75,15 +75,15 @@ type Shop = HashMap<ItemSlot, Vec<Item>>;
 type Gear<'a> = Vec<&'a Item>;
 
 fn make_shop() -> Shop {
-    fn make_weapon(cost: u32, damage: u32) -> Item {
+    const fn make_weapon(cost: u32, damage: u32) -> Item {
         Item { cost, damage, armor: 0 }
     }
 
-    fn make_armor(cost: u32, armor: u32) -> Item {
+    const fn make_armor(cost: u32, armor: u32) -> Item {
         Item { cost, armor, damage: 0 }
     }
 
-    fn make_ring(cost: u32, damage: u32, armor: u32) -> Item {
+    const fn make_ring(cost: u32, damage: u32, armor: u32) -> Item {
         Item { cost, damage, armor }
     }
 
@@ -118,7 +118,7 @@ enum BattleResult {
 }
 
 impl BattleResult {
-    fn won(&self) -> bool { self == &BattleResult::Victory }
+    fn won(&self) -> bool { self == &Self::Victory }
 }
 
 fn gear_cost(gear: &Gear) -> u32 {

@@ -35,7 +35,7 @@ struct Module<'a> {
 }
 
 impl<'a> Module<'a> {
-    fn parse(input: &'a str) -> Result<(&'a str, Module<'a>), ParseError> {
+    fn parse(input: &'a str) -> Result<(&'a str, Self), ParseError> {
         separated_pair(
             Parser::or(
                 value((ModuleType::Broadcast, "broadcaster"), tag("broadcaster")),
@@ -120,7 +120,7 @@ impl<'a> Network<'a> {
         Ok(Self(modules))
     }
 
-    fn find_output(&'a self, needle: &'a str) -> impl Iterator<Item=(&'a str, &'a Module)> {
+    fn find_output(&'a self, needle: &'a str) -> impl Iterator<Item=(&'a str, &'a Module<'a>)> {
         self.0.iter()
             .filter_map(move |(&name, module)| {
                 module.outgoing.contains(&needle).then_some((name, module))

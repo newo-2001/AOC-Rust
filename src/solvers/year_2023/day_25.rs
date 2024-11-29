@@ -101,6 +101,7 @@ impl<'a> Graph<'a> {
             for (from, to) in self.shortest_path(from, to).tuple_windows() {
                 let [small, big] = minmax(from, to);
                 match counts.get_mut(&(small, big)) {
+                    #[allow(clippy::tuple_array_conversions)]
                     None => _ = counts.insert((small, big), 1),
                     Some(value) => *value += 1
                 }

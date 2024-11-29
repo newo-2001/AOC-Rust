@@ -14,20 +14,20 @@ pub struct Area<T> {
 impl<T: Copy> Copy for Area<T> {}
 
 impl<T> Area<T> {
-    pub fn from_corners(Point2D(x, y): Point2D<T>, Point2D(x2, y2): Point2D<T>) -> Area<T>
+    pub fn from_corners(Point2D(x, y): Point2D<T>, Point2D(x2, y2): Point2D<T>) -> Self
         where T: Ord
     {
         let [min_x, max_x] = minmax(x, x2);
         let [min_y, max_y] = minmax(y, y2);
         let top_left = Point2D(min_x, min_y);
         let bottom_right = Point2D(max_x, max_y);
-        Area { top_left, bottom_right }
+        Self { top_left, bottom_right }
     }
     
-    pub fn from_dimensions_at(top_left: Point2D<T>, dimensions: Dimensions) -> Area<T>
+    pub fn from_dimensions_at(top_left: Point2D<T>, dimensions: Dimensions) -> Self
         where T: From<usize> + Add<Output=T> + Clone
     {
-        Area {
+        Self {
             top_left: top_left.clone(),
             bottom_right: top_left + dimensions.into()
         }
@@ -115,7 +115,7 @@ impl<T> From<Dimensions> for Area<T>
 {
     fn from(Dimensions(width, height): Dimensions) -> Self {
         let bottom_right: Point2D<T> = Point2D(width.into(), height.into()) - Point2D::one();
-        Area { top_left: Point2D::zero(), bottom_right }
+        Self { top_left: Point2D::zero(), bottom_right }
     }
 }
 

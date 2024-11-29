@@ -32,7 +32,7 @@ pub enum Value<R, D> {
 }
 
 impl<'a, R: Parsable<'a>, D: Parsable<'a>> Parsable<'a> for Value<R, D> {
-    fn parse(input: &'a str) -> TextParserResult<'_, Self> {
+    fn parse(input: &'a str) -> TextParserResult<'a, Self> {
         Parser::or(
             R::parse.map(Value::Register),
             D::parse.map(Value::Constant)
@@ -72,7 +72,7 @@ impl<'a, I, R, D> Cpu<'a, I, R, D> {
     }
 
     #[must_use]
-    pub fn state(&self) -> CpuState { self.state }
+    pub const fn state(&self) -> CpuState { self.state }
 
     #[must_use]
     pub fn has_terminated(&self) -> bool { self.state == CpuState::Terminated }
@@ -157,7 +157,7 @@ impl<'a, I, R, D> Cpu<'a, I, R, D>
     }
 
     #[must_use]
-    pub fn stream(self) -> InterruptStream<'a, I, R, D> {
+    pub const fn stream(self) -> InterruptStream<'a, I, R, D> {
         InterruptStream { cpu: self }
     }
 }
@@ -166,7 +166,7 @@ pub struct InterruptStream<'a, I, R, D> {
     cpu: Cpu<'a, I, R, D>
 }
 
-impl<'a, I, R, D> Iterator for InterruptStream<'a, I, R, D>
+impl<I, R, D> Iterator for InterruptStream<'_, I, R, D>
     where I: Instruction<R, D> + Clone,
 {
     type Item = I::Interrupt;

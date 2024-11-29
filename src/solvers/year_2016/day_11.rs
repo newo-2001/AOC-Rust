@@ -24,14 +24,14 @@ impl<'a> Item<'a> {
         }
     }
 
-    fn material(&self) -> &Material {
+    const fn material(&self) -> &Material {
         match self {
             | Self::Chip(material)
             | Self::Generator(material) => material
         }
     }
 
-    fn is_generator(&self) -> bool {
+    const fn is_generator(&self) -> bool {
         match self {
             Self::Chip(..) => false,
             Self::Generator(..) => true
@@ -151,7 +151,7 @@ impl Configuration<'_> {
 }
 
 impl<'a> Configuration<'a> {
-    fn with<'b>(&'b self, inventory: &Inventory<'a, 'b>, direction: ElevatorDirection) -> Option<Configuration<'a>> {
+    fn with<'b>(&'b self, inventory: &Inventory<'a, 'b>, direction: ElevatorDirection) -> Option<Self> {
         let target_floor_number = match (direction, self.current_floor) {
             (ElevatorDirection::Down, floor) if floor > 0 => floor - 1,
             (ElevatorDirection::Up, floor) if floor < 3 => floor + 1,

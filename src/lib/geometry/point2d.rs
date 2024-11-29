@@ -23,18 +23,18 @@ impl<T: Copy> Copy for Point2D<T> {}
 impl<T> Point2D<T> {
     /// The point located at ``(0, 0)`` (The origin)
     #[must_use]
-    pub fn zero() -> Self where T: Zero { Point2D(Zero::zero(), Zero::zero()) }
+    pub fn zero() -> Self where T: Zero { Self(Zero::zero(), Zero::zero()) }
 
     /// The point located at ``(1, 1)``
     #[must_use]
-    pub fn one() -> Self where T: One { Point2D(One::one(), One::one()) }
+    pub fn one() -> Self where T: One { Self(One::one(), One::one()) }
 
     pub fn x(self) -> T { self.0 }
     pub fn y(self) -> T { self.1 }
 
     /// Perform a termwise checked addition with another point.
     /// Returns `None` if any component overflows.
-    pub fn checked_add<U>(self, rhs: Point2D<U>) -> Option<Point2D<T>>
+    pub fn checked_add<U>(self, rhs: Point2D<U>) -> Option<Self>
         where U: TryInto<T> + Add<Output=U>,
               T: TryInto<U>
     {
@@ -42,7 +42,7 @@ impl<T> Point2D<T> {
 
         let x = add(self.0, rhs.0)?;
         let y = add(self.1, rhs.1)?;
-        Some(Point2D(x, y))
+        Some(Self(x, y))
     }
 
     /// The distance between two points when using the
@@ -65,12 +65,12 @@ impl<T> Point2D<T> {
         let Self(x, y) = self;
         let x = clamp(x, min.clone(), max.clone());
         let y = clamp(y, min, max);
-        Point2D(x, y)
+        Self(x, y)
     }
 
     /// Computes the neigbours of this point in the given directions
     /// If this calculation would overflow `T`, the neighbours are not included in the list.
-    pub fn neighbours<U, D>(self, directions: impl IntoIterator<Item=D>) -> impl Iterator<Item=Point2D<T>>
+    pub fn neighbours<U, D>(self, directions: impl IntoIterator<Item=D>) -> impl Iterator<Item=Self>
         where T: Clone + TryFrom<U>,
               U: TryFrom<T> + Add<Output=U>,
               D: Directional<Point2D<U>>
@@ -103,7 +103,7 @@ impl<T> Point2D<T> {
 
 impl<'a, T: Parsable<'a>> Parsable<'a> for Point2D<T> {
     /// Parses a [`Point2D`] from a string in the form ``x, y`` or ``(x, y)``, the space is optional.
-    fn parse(input: &'a str) -> TextParserResult<Point2D<T>>
+    fn parse(input: &'a str) -> TextParserResult<'a, Self>
     {
         let point = || separated_pair(
             T::parse,
@@ -122,13 +122,13 @@ impl<'a, T: Parsable<'a>> Parsable<'a> for Point2D<T> {
 
 impl<T> From<(T, T)> for Point2D<T> {
     fn from((x, y): (T, T)) -> Self {
-        Point2D(x, y)
+        Self(x, y)
     }
 }
 
 impl<T: From<usize>> From<Dimensions> for Point2D<T> {
     fn from(Dimensions(width, height): Dimensions) -> Self {
-        Point2D(width.into(), height.into())
+        Self(width.into(), height.into())
     }
 }
 

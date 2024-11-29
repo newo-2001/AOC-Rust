@@ -12,7 +12,7 @@ pub struct GridViewMut<'a, T> {
     pub(crate) area: Area<usize>
 }
 
-impl<'a, T> GridLikeMut for GridViewMut<'a, T> {
+impl<T> GridLikeMut for GridViewMut<'_, T> {
     fn get_mut(&mut self, location: Point2D<usize>) -> Option<&mut T> {
         if !self.area.contains(&location) { return None; }
 
@@ -46,14 +46,16 @@ impl<'a, T> GridLikeMut for GridViewMut<'a, T> {
     }
 }
 
+#[allow(clippy::fallible_impl_from)]
 impl<'a, T> From<&'a Grid<T>> for GridView<'a, T> {
-    fn from(grid: &'a Grid<T>) -> GridView<'a, T> {
+    fn from(grid: &'a Grid<T>) -> Self {
         grid.sub_grid(grid.area()).unwrap()
     }
 }
 
+#[allow(clippy::fallible_impl_from)]
 impl<'a, T> From<&'a mut Grid<T>> for GridViewMut<'a, T> {
-    fn from(grid: &'a mut Grid<T>) -> GridViewMut<'a, T> {
+    fn from(grid: &'a mut Grid<T>) -> Self {
         grid.sub_grid_mut(grid.area()).unwrap()
     }
 }

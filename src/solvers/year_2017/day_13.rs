@@ -9,18 +9,18 @@ struct Scanner {
 }
 
 impl Scanner {
-    fn parse(input: &str) -> Result<Scanner, ParseError> {
+    fn parse(input: &str) -> Result<Self, ParseError> {
         map(
             separated_pair(u32, tag(": "), u32),
-            |(depth, range)| Scanner { depth, range }
+            |(depth, range)| Self { depth, range }
         ).run(input)
     }
 
-    fn severity(&self) -> u32 {
+    const fn severity(&self) -> u32 {
         self.depth * self.range
     }
 
-    fn cycle(&self) -> u32 {
+    const fn cycle(&self) -> u32 {
         (self.range - 1) * 2
     }
 }
@@ -29,7 +29,7 @@ fn trip_severity<'a>(scanners: impl IntoIterator<Item=&'a Scanner>, time: u32) -
     let mut severities = scanners.into_iter()
         .filter_map(|scanner| {
             (scanner.depth + time)
-                .is_multiple_of(&scanner.cycle())
+                .is_multiple_of(scanner.cycle())
                 .then_some(scanner.severity())
         }).peekable();
         

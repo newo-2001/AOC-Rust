@@ -133,7 +133,7 @@ impl State {
     }
 
     fn transfer_chips(
-        self: &mut State,
+        &mut self,
         forwards: impl IntoIterator<Item=Forward>
     ) -> Result<impl Iterator<Item=Robot>, RobotError> {
         Ok(forwards.into_iter()

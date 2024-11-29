@@ -21,7 +21,7 @@ pub struct Range<T = i32> {
 impl<T> Range<T> {
     /// Produces the empty range: `(0..0)`.
     #[must_use]
-    pub fn empty() -> Range<T> where
+    pub fn empty() -> Self where
         T: Zero
     {
         Self { start: T::zero(), end: T::zero() }
@@ -29,7 +29,7 @@ impl<T> Range<T> {
 
     /// Creates a range with an exclusive upperbound.
     /// If `start > end` this returns an error.
-    pub fn exclusive(start: T, end: T) -> Result<Range<T>, InvalidRangeError<T>> where
+    pub fn exclusive(start: T, end: T) -> Result<Self, InvalidRangeError<T>> where
         T: PartialOrd
     {
         let range = Self { start, end };
@@ -41,7 +41,7 @@ impl<T> Range<T> {
     /// Creates a range with an inclusive upperbound.
     /// If `start > end` this returns an error.
     /// Additionally, this function panics if `end == T::MAX`.
-    pub fn inclusive(start: T, end: T) -> Result<Range<T>, InvalidRangeError<T>> where
+    pub fn inclusive(start: T, end: T) -> Result<Self, InvalidRangeError<T>> where
         T: Step + PartialOrd
     {
         let range = Self { start, end: T::forward(end, 1) };
@@ -78,7 +78,7 @@ impl<T> Range<T> {
         where T: Ord
     {
         if other.start <= self.end {
-            Ok(Range { start: self.start,end: max(self.end, other.end) })
+            Ok(Self { start: self.start,end: max(self.end, other.end) })
         } else { Err((self, other)) }
     }
 
@@ -102,13 +102,13 @@ impl<T> Range<T> {
     {
         if self.contains_range(&other) {
             (
-                Range { start: self.start, end: other.start },
-                Some(Range { start: other.end, end: self.end })
+                Self { start: self.start, end: other.start },
+                Some(Self { start: other.end, end: self.end })
             )
         } else if other.end < self.end {
-            (Range { start: max(self.start, other.end), end: self.end }, None)
+            (Self { start: max(self.start, other.end), end: self.end }, None)
         } else {
-            (Range { start: self.start, end: min(self.end, other.start) }, None)
+            (Self { start: self.start, end: min(self.end, other.start) }, None)
         }
     }
 }
@@ -121,7 +121,7 @@ impl<T: Display> Display for Range<T> {
 
 impl<T: Default> Default for Range<T> where {
     fn default() -> Self {
-        Range { start: T::default(), end: T::default() }
+        Self { start: T::default(), end: T::default() }
     }
 }
 

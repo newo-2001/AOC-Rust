@@ -30,8 +30,8 @@ impl Tile {
     fn exit_direction(self, facing: CardinalDirection) -> Option<CardinalDirection> {
         let entrance = facing.reverse();
         match self {
-            Tile::Pipe(start, end) if entrance == start => Some(end),
-            Tile::Pipe(start, end) if entrance == end => Some(start),
+            Self::Pipe(start, end) if entrance == start => Some(end),
+            Self::Pipe(start, end) if entrance == end => Some(start),
             _ => None,
         }
     }

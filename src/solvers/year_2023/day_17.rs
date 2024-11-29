@@ -56,7 +56,7 @@ impl State {
             (self.since_turn >= min_turn).then_some(0)?
         };
         
-        Some(State { direction, location, since_turn })
+        Some(Self { direction, location, since_turn })
     }
 }
 
