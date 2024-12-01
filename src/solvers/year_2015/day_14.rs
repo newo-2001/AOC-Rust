@@ -1,7 +1,8 @@
 use std::cmp::min;
 
 use ahash::HashMap;
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, errors::NoSolution};
+use aoc_lib::parsing::{parse_lines, TextParser, ParseError};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{sequence::{tuple, preceded, delimited}, bytes::complete::tag, character::complete::{alpha1, u32}, Parser};

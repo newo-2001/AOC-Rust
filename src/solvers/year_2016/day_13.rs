@@ -1,6 +1,7 @@
 use std::{collections::VecDeque, iter::once, hash::Hash};
 
-use aoc_lib::{geometry::{Point2D, CardinalDirection}, iteration::queue::{Dedupable, FindState, IterState}, math::Bit, errors::NoSolution};
+use aoc_lib::{geometry::{Point2D, CardinalDirection}, iteration::queue::{Dedupable, FindState, IterState}, math::Bit};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
 use num::Integer;
@@ -71,7 +72,8 @@ impl Grid {
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let grid = Grid::new(input.parse::<usize>()?);
-    let distance = grid.shortest_distance(Point2D::one(), Point2D(31, 39))
+    let distance = grid
+        .shortest_distance(Point2D::one(), Point2D(31, 39))
         .ok_or(NoSolution)?;
 
     Ok(Box::new(distance))

@@ -1,7 +1,8 @@
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::InvalidTokenError, geometry::{grid::{Grid, GridLike}, Point2D, CardinalDirection, Directional}, iteration::{ExtraIter, SingleError}};
+use aoc_lib::{parsing::InvalidTokenError, geometry::{grid::{Grid, GridLike}, Point2D, CardinalDirection, Directional}};
+use yuki::iterators::{ExtraIter, SingleError};
 use crate::SolverResult;
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{bail, Context, Result};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {
@@ -49,8 +50,8 @@ impl Map {
 
         match column {
             Ok(column) => Ok(Point2D(column, 0)),
-            Err(SingleError::More) => Err(anyhow!("There are multiple starting locations")),
-            Err(SingleError::None) => Err(anyhow!("There are no starting locations"))
+            Err(SingleError::More) => bail!("There are multiple starting locations"),
+            Err(SingleError::None) => bail!("There are no starting locations")
         }
     }
 

@@ -1,5 +1,6 @@
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::{TextParserResult, TextParser, ParseError}, geometry::{Point2D, CardinalDirection, RotationDirection, Directional}, errors::NoSolution};
+use aoc_lib::{parsing::{TextParserResult, TextParser, ParseError}, geometry::{Point2D, CardinalDirection, RotationDirection, Directional}};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use nom::{Parser, character::complete::{char, u16}, combinator::value, multi::separated_list0, bytes::complete::tag};
 
@@ -74,7 +75,8 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let path = path_to_end(start, &instructions);
     
     let mut seen = HashSet::<Point2D<i32>>::new();
-    let first_duplicate = path.into_iter()
+    let first_duplicate = path
+        .into_iter()
         .find(|&location| !seen.insert(location))
         .ok_or(NoSolution)?;
 

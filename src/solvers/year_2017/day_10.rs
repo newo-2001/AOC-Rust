@@ -1,6 +1,6 @@
-use aoc_lib::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
+use yuki::errors::NoSolution;
 
 use super::knot_hash;
 

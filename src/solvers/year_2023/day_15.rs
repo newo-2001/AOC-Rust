@@ -1,20 +1,26 @@
-use aoc_lib::{iteration::ExtraIter, parsing::{TextParser, ParseError}};
+use std::array;
+
+use aoc_lib::parsing::{TextParser, ParseError};
 use crate::SolverResult;
-use arr_macro::arr;
-use composing::compose_fn;
 use indexmap::IndexMap;
-use nom::{sequence::{terminated, separated_pair}, character::complete::{alpha1, char, u8}, Parser};
+use nom::{character::complete::{alpha1, char, u8}, combinator::map, sequence::{separated_pair, terminated}, Parser};
 
 fn hash(input: &[u8]) -> u8 {
-    input.iter().fold(0, |acc, &char| {
-        ((acc + u32::from(char)) * 17) % 256
-    }).try_into().unwrap()
+    input
+        .iter()
+        .fold(0, |acc, &char| {
+            ((acc + u32::from(char)) * 17) % 256
+        })
+        .try_into()
+        .unwrap()
 }
 
 #[allow(clippy::unnecessary_wraps)]
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let sum: u32 = input.split(',')
-        .sum_by(compose_fn!(str::as_bytes => hash => Into::<u32>::into));
+    let sum: u32 = input
+        .split(',')
+        .map(|op| u32::from(hash(op.as_bytes())))
+        .sum();
 
     Ok(Box::new(sum))
 }
@@ -30,9 +36,14 @@ enum Operation<'a> {
 impl<'a> Operation<'a> {
     fn parse(input: &'a str) -> Result<Self, ParseError> {
         Parser::or(
-            terminated(alpha1, char('-')).map(Self::Remove),
-            separated_pair(alpha1, char('='), u8)
-                .map(|(label, focal_length)| Self::Insert { label, focal_length })
+            map(
+                terminated(alpha1, char('-')),
+                Self::Remove
+            ),
+            map(
+                separated_pair(alpha1, char('='), u8),
+                |(label, focal_length)| Self::Insert { label, focal_length }
+            )
         ).run(input)
     }
 }
@@ -43,7 +54,9 @@ struct Map<'a> {
 
 impl<'a> Map<'a> {
     fn new() -> Self {
-        Self { buckets: arr![IndexMap::<&str, u8>::new(); 256] }
+        Self {
+            buckets: array::from_fn(|_| IndexMap::<&str, u8>::new())
+        }
     }
 
     fn insert(&mut self, label: &'a str, focal_length: u8) {

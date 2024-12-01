@@ -1,7 +1,8 @@
 use std::{cmp::{min, max}, collections::VecDeque, iter, hash::{Hash, Hasher}};
 use anyhow::Result;
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::{TextParser, Parsable, TextParserResult}, errors::NoSolution};
+use aoc_lib::parsing::{TextParser, Parsable, TextParserResult};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use nom:: {
     bytes::complete::tag, character::complete::{line_ending, u32}, combinator::map, sequence::{preceded, separated_pair}, Parser
@@ -299,7 +300,8 @@ fn least_mana_for_input(input: &str, difficulty: Difficulty) -> Result<u32> {
 
     let battle = Battle::new(player, enemy, difficulty);
 
-    let mana = least_amount_of_mana_for_victory(battle).ok_or(NoSolution)?;
+    let mana = least_amount_of_mana_for_victory(battle)
+        .ok_or(NoSolution)?;
 
     Ok(mana)
 }

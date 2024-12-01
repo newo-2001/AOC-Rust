@@ -1,5 +1,6 @@
 use ahash::HashMap;
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, errors::NoSolution};
+use aoc_lib::parsing::{parse_lines, TextParser, ParseError};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 
 use std::{collections::VecDeque, iter::{self, once}};
@@ -98,7 +99,8 @@ fn all_cookies<'a>(teaspoons: u32, ingredients: &'a Ingredients) -> impl Iterato
 
 fn best_score<'a>(cookies: impl Iterator<Item=&'a Cookie<'a>>, ingredients: &Ingredients) -> Result<u64, NoSolution> {
     cookies.map(|cookie| cookie_score(cookie, ingredients))
-        .max().ok_or(NoSolution)
+        .max()
+        .ok_or(NoSolution)
 }
 
 fn parse_ingredients(input: &str) -> Result<Ingredients, ParseError> {

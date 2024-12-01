@@ -1,18 +1,13 @@
 use itertools::Itertools;
-use nom::{character::complete::{line_ending, space1, u32}, combinator::map, multi::separated_list0, sequence::separated_pair, Parser};
-use yuki::parsing::{run_parser, ParsingResult};
+use nom::{character::complete::{space1, u32}, sequence::separated_pair, Parser};
+use yuki::parsing::{combinators::lines, run_parser, ParsingResult};
 
 use crate::SolverResult;
 
 fn parse_list(input: &str) -> ParsingResult<(Vec<u32>, Vec<u32>)> {
-    map(
-        separated_list0(
-            line_ending,
-            separated_pair(u32, space1, u32),
-        ),
-        |lists| lists.into_iter().unzip() 
-    )
-    .parse(input)
+    lines(separated_pair(u32, space1, u32))
+        .map(|lists| lists.into_iter().unzip())
+        .parse(input)
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {

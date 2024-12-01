@@ -9,7 +9,6 @@ use nom::{
     branch::alt, combinator::value,
     bytes::complete::tag
 };
-use num::Integer;
 
 type Cpu<'a> = cpu::Cpu<'a, Instruction, Register, u32>;
 
@@ -62,7 +61,7 @@ impl cpu::Instruction<Register, u32> for Instruction {
             Self::Increment(register) => cpu.map_register(*register, |x| x + 1),
             Self::Jump(offset) => return ControlFlow::Jump(Jump::Relative(*offset)),
             Self::JumpIfEven(register, offset) => {
-                if cpu.read_register(register).is_even() {
+                if cpu.read_register(register).is_multiple_of(2) {
                     return ControlFlow::Jump(Jump::Relative(*offset));
                 }
             },

@@ -3,11 +3,11 @@ use std::{iter::once, collections::VecDeque, cmp::minmax};
 use ahash::{HashMap, HashSet, HashMapExt, HashSetExt};
 use anyhow::{Result, anyhow, Context};
 use aoc_lib::{parsing::{ParseError, parse_lines, TextParser}, iteration::generate};
+use yuki::tuples::fst;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{alpha1, char}, sequence::separated_pair, bytes::complete::tag, multi::separated_list1};
 use rand::random;
-use tupletools::fst;
 
 fn parse_component(input: &str) -> Result<(&str, Vec<&str>), ParseError> {
     separated_pair(
@@ -57,7 +57,8 @@ impl<'a> Graph<'a> {
         while let Some(node) = queue.pop() {
             if !seen.insert(node) { continue; }
 
-            self.0.get(node)
+            self.0
+                .get(node)
                 .ok_or_else(|| anyhow!("Node not found: {node}"))?
                 .iter()
                 .filter(|&&node| !seen.contains(node))
@@ -108,7 +109,8 @@ impl<'a> Graph<'a> {
             }
         }
 
-        counts.into_iter()
+        counts
+            .into_iter()
             .sorted_by_key(|(_, frequency)| *frequency)
             .map(fst)
             .rev()

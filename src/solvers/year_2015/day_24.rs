@@ -1,10 +1,9 @@
 use std::{num::ParseIntError, iter::IntoIterator};
 
 use anyhow::Result;
-use aoc_lib::errors::NoSolution;
+use yuki::{errors::NoSolution, tuples::fst};
 use crate::SolverResult;
 use itertools::Itertools;
-use tupletools::fst;
 
 fn parse_items(str: &str) -> Result<Vec<u32>, ParseIntError> {
     str.lines()
@@ -29,7 +28,8 @@ fn quantum_entanglement<'a >(group: impl IntoIterator<Item = &'a u32>) -> u64 {
 fn optimal_group(items: Vec<u32>, groups: u32) -> Result<Vec<u32>, NoSolution> {
     let target = target_weight(&items, groups);
 
-    items.into_iter()
+    items
+        .into_iter()
         .powerset()
         .skip_while(|group| !is_valid_group(group, target))
         .tuple_windows()

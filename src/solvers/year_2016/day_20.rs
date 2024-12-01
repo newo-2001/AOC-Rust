@@ -1,5 +1,6 @@
 use anyhow::bail;
-use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, math::Range, errors::NoSolution};
+use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, math::Range};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{char, u64}, sequence::separated_pair, combinator::map_res};

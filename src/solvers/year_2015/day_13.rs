@@ -1,5 +1,6 @@
 use ahash::{HashMap, HashSet};
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, errors::NoSolution};
+use aoc_lib::parsing::{parse_lines, TextParser, ParseError};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{
@@ -27,12 +28,14 @@ struct Graph<'a> {
 impl Graph<'_> {
     fn from_edges<'a>(edges: impl IntoIterator<Item=WeightedEdge<'a>> + Clone) -> Graph<'a> {
         Graph {
-            edges: edges.clone()
+            edges: edges
+                .clone()
                 .into_iter()
                 .map(|WeightedEdge { edge, weight }| (edge, weight))
                 .collect(),
             
-            nodes: edges.into_iter()
+            nodes: edges
+                .into_iter()
                 .flat_map(|WeightedEdge { edge: Edge(from, to), .. }| [from, to])
                 .collect()
         }
@@ -44,20 +47,28 @@ impl Graph<'_> {
     }
 
     fn arrangement_happiness(&self, arrangement: Vec<&str>) -> i32 {
-        arrangement.clone().into_iter().circular_tuple_windows()
+        arrangement
+            .clone()
+            .into_iter()
+            .circular_tuple_windows()
             .chain(arrangement.into_iter().rev().circular_tuple_windows())
             .map(|(from, to)| self.edge_happiness(&Edge(from, to)))
             .sum()
     }
     
     fn all_arrangments(&self) -> impl Iterator<Item = Vec<&str>> {
-        self.nodes.clone().into_iter().permutations(self.nodes.len())
+        self.nodes
+            .clone()
+            .into_iter()
+            .permutations(self.nodes.len())
     }
 
     fn most_happiness(&self) -> Result<i32, NoSolution> {
-        self.all_arrangments()
+        self
+            .all_arrangments()
             .map(|arrangement| self.arrangement_happiness(arrangement))
-            .max().ok_or(NoSolution)
+            .max()
+            .ok_or(NoSolution)
     }
 }
 

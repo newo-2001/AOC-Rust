@@ -1,4 +1,5 @@
-use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, errors::{NoSolution, NoInput}};
+use aoc_lib::parsing::{ParseError, TextParser, parse_lines};
+use yuki::errors::{NoInput, NoSolution};
 use crate::SolverResult;
 use nom::{character::complete::u32, sequence::separated_pair, bytes::complete::tag, combinator::map};
 use num::Integer;

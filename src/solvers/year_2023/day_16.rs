@@ -1,6 +1,7 @@
 use std::iter::once;
 
-use aoc_lib::{geometry::{grid::{Grid, GridLike}, Axis, Point2D, CardinalDirection, Directional}, iteration::queue::{Dedupable, IterState}, errors::NoInput, parsing::InvalidTokenError};
+use aoc_lib::{geometry::{grid::{Grid, GridLike}, Axis, Point2D, CardinalDirection, Directional}, iteration::queue::{Dedupable, IterState}, parsing::InvalidTokenError};
+use yuki::errors::NoInput;
 use crate::SolverResult;
 use anyhow::Result;
 use itertools::Itertools;

@@ -138,14 +138,14 @@ impl<T: Step> IntoIterator for Range<T> {
 macro_rules! range {
     ($start: literal..$end: literal) => {
         {
-            static_assertions::const_assert!($start <= $end);
+            const { assert!($start <= $end) };
             $crate::math::Range { start: $start, end: $end }
         }
     };
 
     ($start: literal..=$end: literal) => {
         {
-            static_assertions::const_assert!($start <= $end);
+            const { assert!($start <= $end) };
             $crate::math::Range { start: $start, end: $end + 1 }
         }
     }

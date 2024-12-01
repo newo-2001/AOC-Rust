@@ -1,6 +1,7 @@
 use std::{collections::VecDeque, fmt::Debug};
 use anyhow::anyhow;
-use aoc_lib::{cpu::{self, Jump, ControlFlow}, parsing::{Parsable, TextParserResult, TextParser, Map2, lines}, errors::NoSolution};
+use aoc_lib::{cpu::{self, Jump, ControlFlow}, parsing::{Parsable, TextParserResult, TextParser, Map2, lines}};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{branch::alt, bytes::complete::tag, character::complete::{satisfy, char}, Parser, sequence::{separated_pair, preceded}};

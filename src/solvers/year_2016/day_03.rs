@@ -1,8 +1,8 @@
 use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, iteration::ExtraIter};
+use yuki::tuples::snd;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{multispace1, u32}, combinator::map, sequence::{preceded, tuple}};
-use tupletools::snd;
 
 #[derive(Clone, Copy)]
 struct Triangle(u32, u32, u32);

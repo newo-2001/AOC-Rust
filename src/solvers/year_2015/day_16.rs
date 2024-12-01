@@ -1,5 +1,6 @@
 use ahash::HashMap;
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, errors::NoSolution};
+use aoc_lib::parsing::{parse_lines, TextParser, ParseError};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{

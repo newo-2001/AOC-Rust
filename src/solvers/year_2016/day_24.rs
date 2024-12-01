@@ -1,10 +1,10 @@
 use std::{collections::VecDeque, iter::once};
 
-use aoc_lib::{math::Bit, parsing::InvalidTokenError, geometry::{Dimensions, grid::{Grid, GridLike}, Point2D, CardinalDirection}, iteration::{queue::{SearchDepth, Dedupable, FindState}, ExtraIter}, errors::NoSolution};
+use aoc_lib::{math::Bit, parsing::InvalidTokenError, geometry::{Dimensions, grid::{Grid, GridLike}, Point2D, CardinalDirection}, iteration::queue::{SearchDepth, Dedupable, FindState}};
+use yuki::{errors::NoSolution, tuples::fst};
 use crate::SolverResult;
 use itertools::{Itertools, Either};
 use anyhow::Result;
-use tupletools::fst;
 
 fn parse_tile(input: char) -> Result<(Bit, Option<u32>), InvalidTokenError<char>> {
     Ok(match input {
@@ -62,7 +62,8 @@ impl Vent {
             }).collect_vec();
             
             FindState::Branch(branches)
-        }).ok_or(NoSolution)
+        })
+        .ok_or(NoSolution)
     }
 }
 
@@ -75,17 +76,19 @@ fn parse_vent(input: &str) -> Result<Vent> {
 
     let point_from_index = |index| Point2D(index % dimensions.width(), index / dimensions.width());
 
-    let (start, targets): (Vec<_>, Vec<_>) = tiles.iter()
+    let (start, targets): (Vec<_>, Vec<_>) = tiles
+        .iter()
         .flatten()
         .enumerate()
-        .filter_map(|(index, (_, target))| {
-            target.map(|target| (target, point_from_index(index)))
-        }).partition_map(|target| match target {
+        .filter_map(|(index, (_, target))| target
+            .map(|target| (target, point_from_index(index)))
+        )
+        .partition_map(|target| match target {
             (0, position) => Either::Left(position),
             (_, position) => Either::Right(position)
         });
     
-    let start = start.into_iter().single()?;
+    let start = start.into_iter().exactly_one()?;
     let tiles = tiles.into_iter()
         .map(|row| row.into_iter().map(fst).collect_vec())
         .collect_vec();

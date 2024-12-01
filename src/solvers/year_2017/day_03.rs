@@ -1,7 +1,8 @@
 use std::iter::once;
 use anyhow::bail;
 use ahash::HashMap;
-use aoc_lib::{geometry::{Point2D, CardinalDirection, RotationDirection, Directional, Direction2D}, errors::NoSolution};
+use aoc_lib::geometry::{Point2D, CardinalDirection, RotationDirection, Directional, Direction2D};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use num::{abs, Integer};
 

@@ -1,7 +1,8 @@
 use std::cmp::Ordering;
 
 use anyhow::bail;
-use aoc_lib::{geometry::Point3D, parsing::{Parsable, angle_brackets, Map3, TextParserResult, lines, TextParser}, errors::{MultipleSolutions, NoInput}, iteration::{ExtraIter, SingleError}};
+use aoc_lib::{geometry::Point3D, parsing::{Parsable, angle_brackets, Map3, TextParserResult, lines, TextParser}};
+use yuki::{errors::{MultipleSolutions, NoInput}, iterators::{ExtraIter, SingleError}};
 use crate::SolverResult;
 use nom::{sequence::{tuple, terminated, delimited, preceded}, character::complete::{i32, char}, Parser, bytes::complete::tag};
 use itertools::Itertools;

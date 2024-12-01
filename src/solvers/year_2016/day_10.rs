@@ -2,11 +2,11 @@ use std::{hash::Hash, collections::VecDeque, cmp::minmax};
 
 use ahash::{HashMap, HashMapExt};
 use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, iteration::queue::{Dedupable, FoldState}};
+use yuki::tuples::Fst;
 use crate::SolverResult;
 use itertools::{Itertools, Either};
 use nom::{sequence::{preceded, delimited, tuple, terminated}, bytes::complete::tag, character::complete::u16, Parser};
 use thiserror::Error;
-use tupletools::Fst;
 
 #[derive(Clone, Copy)]
 enum Destination {
@@ -181,9 +181,11 @@ fn solve(instructions: Vec<Instruction>) -> Result<State, RobotError> {
 pub fn solve_part_1(input: &str) -> SolverResult {
     let instructions = parse_lines(parse_instruction, input)?;
     let state = solve(instructions)?;
-    let robot = state.robots.into_iter()
+    let robot = state.robots
+        .into_iter()
         .find(|(_, robot)| robot.values == Chips::Double((17, 61)))
-        .ok_or(RobotError::NoComparison)?.fst();
+        .ok_or(RobotError::NoComparison)?
+        .fst();
 
 
     Ok(Box::new(robot))
@@ -193,7 +195,8 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let instructions = parse_lines(parse_instruction, input)?;
     let outputs = solve(instructions)?.outputs;
 
-    let output: u16 = [0, 1, 2].into_iter()
+    let output: u16 = [0, 1, 2]
+        .into_iter()
         .map(|bin| outputs.get(&bin).copied())
         .collect::<Option<Vec<u16>>>()
         .ok_or(RobotError::MissingOutput)?

@@ -4,7 +4,7 @@ use crate::SolverResult;
 use hex::ToHex;
 use itertools::Itertools;
 use rayon::prelude::{ParallelBridge, ParallelIterator, IntoParallelIterator};
-use tupletools::snd;
+use yuki::tuples::snd;
 
 struct PasswordIterator<'a, T, F>
     where F: Fn(&str) -> Option<T> + 'a

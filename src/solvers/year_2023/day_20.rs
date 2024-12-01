@@ -1,7 +1,8 @@
 use std::{iter::{once, repeat}, collections::VecDeque};
 
 use ahash::{HashMap, HashMapExt};
-use aoc_lib::{parsing::{TextParserResult, ParseError, TextParser, parse_lines}, string_enum, iteration::{SingleError, ExtraIter, queue::{Queue, FoldState}}};
+use aoc_lib::{iteration::queue::{Queue, FoldState}, parsing::{parse_lines, ParseError, TextParser, TextParserResult}, string_enum};
+use yuki::iterators::{ExtraIter, SingleError};
 use crate::SolverResult;
 use anyhow::{Result, anyhow, Context, bail};
 use itertools::Itertools;

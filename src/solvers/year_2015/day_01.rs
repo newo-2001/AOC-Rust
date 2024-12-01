@@ -1,5 +1,6 @@
-use aoc_lib::{parsing::{TextParserResult, TextParser}, errors::NoSolution};
+use aoc_lib::parsing::{TextParserResult, TextParser};
 use nom::{character::complete::char, combinator::value, Parser, multi::many1};
+use yuki::errors::NoSolution;
 
 use crate::SolverResult;
 

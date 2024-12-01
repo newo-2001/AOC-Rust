@@ -1,6 +1,5 @@
 use std::{hash::Hash, ops::{DerefMut, Deref, Add}};
 
-mod single;
 mod mode;
 mod try_fold_while;
 mod generator;
@@ -8,18 +7,10 @@ mod transpose;
 pub mod queue;
 
 pub use generator::{Generator, generate};
-pub use single::SingleError;
 pub use try_fold_while::TryFoldWhile;
 pub use transpose::Transpose;
 
 pub trait ExtraIter: Iterator + Sized {
-    /// Returns `Ok` if the iterator contained exactly one element.
-    /// Otherwise it will return [`SingleError`]
-    /// indicating whether the iterator was empty or contained more items.
-    fn single(self) -> Result<Self::Item, SingleError> {
-        single::single(self)
-    }
-
     /// Returns true if the iterator contains no elements.
     fn empty(mut self) -> bool {
         self.next().is_none()

@@ -1,4 +1,5 @@
-use aoc_lib::{parsing::{ParseError, TextParser, parse_lines, usize}, errors::NoSolution};
+use aoc_lib::parsing::{ParseError, TextParser, parse_lines, usize};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use nom::{bytes::complete::tag, sequence::{delimited, terminated, tuple}, character::complete::char, Parser};
 

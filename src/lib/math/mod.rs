@@ -8,12 +8,6 @@ pub use bit::*;
 pub use range::*;
 pub use quadratic::*;
 
-use num::{FromPrimitive, Integer, One};
-
-pub fn gauss_sum<T: Integer + FromPrimitive + Copy>(n: T) -> T {
-    n * (n + One::one()) / T::from_u32(2).unwrap()
-}
-
 pub fn min_max_by<T>(a: T, b: T, compare: impl FnOnce(&T, &T) -> Ordering) -> (T, T) {
     match compare(&a, &b) {
         Ordering::Equal | Ordering::Less => (a, b),

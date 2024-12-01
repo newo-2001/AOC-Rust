@@ -1,6 +1,7 @@
 use std::num::ParseIntError;
 
-use aoc_lib::{parsing::parse_lines, errors::NoSolution};
+use aoc_lib::parsing::parse_lines;
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::{Itertools, MinMaxResult};
 

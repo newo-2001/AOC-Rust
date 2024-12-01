@@ -1,10 +1,10 @@
 use std::{collections::HashMap, cmp::Ordering};
 
-use aoc_lib::{parsing::{parse_lines, TextParser, ParseError, square_brackets}, functional::repeat_apply, errors::NoSolution};
+use aoc_lib::{parsing::{parse_lines, TextParser, ParseError, square_brackets}, functional::repeat_apply};
+use yuki::{errors::NoSolution, tuples::fst};
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{character::{is_alphabetic, complete::{alpha1, u32}}, bytes::complete::take_while1, sequence::tuple, Parser};
-use tupletools::fst;
 
 struct Room<'a> {
     name: String,

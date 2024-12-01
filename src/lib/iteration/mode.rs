@@ -1,7 +1,7 @@
 use std::hash::Hash;
 
 use itertools::Itertools;
-use tupletools::fst;
+use yuki::tuples::fst;
 
 pub fn mode<T>(it: impl Iterator<Item=T>) -> Option<T>
     where T: Eq + Hash

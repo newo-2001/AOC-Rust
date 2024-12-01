@@ -1,6 +1,7 @@
 use std::{collections::VecDeque, iter::once, fmt::{Display, Formatter, self}};
 
-use aoc_lib::{geometry::{Point2D, CardinalDirection, Area, Dimensions, Directional}, iteration::queue::{Queue, FindState, FoldState}, errors::NoSolution};
+use aoc_lib::{geometry::{Point2D, CardinalDirection, Area, Dimensions, Directional}, iteration::queue::{Queue, FindState, FoldState}};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use hex::ToHex;
 
@@ -88,7 +89,8 @@ impl Grid<'_> {
         queue.recursive_find(|state| {
             if state.position == self.area.bottom_right() { FindState::Result(state.path) }
             else { FindState::Branch(state.valid_moves(self)) }
-        }).ok_or(NoSolution)
+        })
+        .ok_or(NoSolution)
     }
 
     fn longest_path_to_vault(&self) -> Result<Path, NoSolution> {
@@ -98,7 +100,8 @@ impl Grid<'_> {
             let vault = moves.extract_if(|state| state.position == self.area.bottom_right()).next();
             let longest = vault.map(|vault| vault.path).max(longest);
             FoldState::Branch(longest, moves)
-        }).ok_or(NoSolution)
+        })
+        .ok_or(NoSolution)
     }
 }
 

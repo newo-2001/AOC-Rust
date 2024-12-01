@@ -1,7 +1,8 @@
 use std::cmp::Ordering;
 
 use ahash::{HashMap, HashMapExt};
-use aoc_lib::{parsing::{ParseError, TextParserResult, TextParser, parse_lines}, errors::NoSolution, string_enum};
+use aoc_lib::{parsing::{ParseError, TextParserResult, TextParser, parse_lines}, string_enum};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use nom::{Parser, bytes::complete::tag, character::complete::{alpha1, i32}, sequence::{preceded, tuple}};
 
@@ -142,10 +143,13 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let instructions = parse_lines(Instruction::parse, input)?;
     let mut cpu = Cpu::new();
 
-    let max_register = instructions.iter().fold(None, |max, instruction| {
-        cpu.execute(instruction);
-        max.max(cpu.max_register())
-    }).ok_or(NoSolution)?;
+    let max_register = instructions
+        .iter()
+        .fold(None, |max, instruction| {
+            cpu.execute(instruction);
+            max.max(cpu.max_register())
+        })
+        .ok_or(NoSolution)?;
 
     Ok(Box::new(max_register))
 }

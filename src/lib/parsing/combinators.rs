@@ -11,7 +11,7 @@ use nom::{
     sequence::delimited,
     multi::{many_till, separated_list0}
 };
-use tupletools::{Snd, snd};
+use yuki::tuples::{snd, Snd};
 
 pub fn skip_until<I, O, E, F, C>(parser: F) -> impl Parser<I, O, E>
     where E: ParseError<I>,

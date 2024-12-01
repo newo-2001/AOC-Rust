@@ -17,6 +17,4 @@ pub mod geometry;
 pub mod iteration;
 pub mod functional;
 pub mod datastructures;
-
-pub mod errors;
 pub mod cpu;

@@ -1,11 +1,11 @@
 use ahash::HashMap;
 use aoc_lib::{geometry::RotationDirection, parsing::{ParseError, Parsable, TextParser, TextParserResult, parens, Map2}, iteration::{TryFoldWhile, ExtraIter}};
+use yuki::tuples::fst;
 use crate::SolverResult;
 use nom::{multi::{many1, count, separated_list1}, character::complete::{line_ending, alphanumeric1}, sequence::{terminated, separated_pair}, Parser, bytes::complete::tag};
 use anyhow::{anyhow, Context, Result};
 use derive_more::Display;
 use num::Integer;
-use tupletools::fst;
 
 #[derive(Clone, PartialEq, Eq, Hash, Display)]
 struct NodeId<'a>(&'a str);
@@ -69,7 +69,8 @@ fn distance_until<'a, I>(
                     else { TryFoldWhile::Continue(next) }
                 }
             }
-        }).map(fst)
+        })
+        .map(fst)
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
@@ -84,9 +85,8 @@ pub fn solve_part_2(input: &str) -> SolverResult {
 
     let distance: usize = map.keys()
         .filter(|node| node.is_start())
-        .map(|start| {
-            distance_until(&map, &instructions, start, NodeId::is_end)
-        }).collect::<Result<Vec<_>, _>>()?
+        .map(|start| distance_until(&map, &instructions, start, NodeId::is_end))
+        .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .reduce(|x, y| x.lcm(&y))
         .context("Input contained no starting nodes")?;

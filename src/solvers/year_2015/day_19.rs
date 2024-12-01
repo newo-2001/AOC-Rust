@@ -1,7 +1,8 @@
 use std::collections::BTreeSet;
 
 use ahash::{HashSet, HashSetExt};
-use aoc_lib::{parsing::{Parsable, TextParserResult, lines, TextParser}, errors::NoSolution};
+use aoc_lib::parsing::{Parsable, TextParserResult, lines, TextParser};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{alpha1, line_ending}, Parser, sequence::separated_pair, bytes::complete::tag};

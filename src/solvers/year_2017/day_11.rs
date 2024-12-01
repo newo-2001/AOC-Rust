@@ -1,6 +1,7 @@
 use std::ops::Add;
 
-use aoc_lib::{geometry::{Point3D, HexDirection, Directional}, parsing::{TextParser, ParseError}, errors::NoInput};
+use aoc_lib::{geometry::{Point3D, HexDirection, Directional}, parsing::{TextParser, ParseError}};
+use yuki::errors::NoInput;
 use crate::SolverResult;
 use nom::{multi::separated_list0, character::complete::char};
 
@@ -24,7 +25,9 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         .scan(Point3D::<i32>::zero(), |position, direction| {
             *position += direction.direction_vector();
             Some(position.hex_distance(Point3D::zero()))
-        }).max().ok_or(NoInput)?;
+        })
+        .max()
+        .ok_or(NoInput)?;
 
     Ok(Box::new(furthest))
 }

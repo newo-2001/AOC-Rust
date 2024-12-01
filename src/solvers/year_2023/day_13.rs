@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use aoc_lib::{math::Bit, parsing::{ParseError, TextParser}, iteration::ExtraIter, geometry::Axis};
 use crate::SolverResult;
 use itertools::Itertools;
@@ -68,8 +68,8 @@ fn find_mirrors<T: PartialEq>(pattern: &[Vec<T>]) -> impl Iterator<Item=Mirror> 
 
 fn find_smudgy_mirror(mut pattern: Vec<Vec<Bit>>) -> Result<Mirror> {
     let clean_mirror: Mirror = find_mirrors(&pattern)
-        .single()
-        .context("Failed to identify clean mirror")?;
+        .exactly_one()
+        .map_err(|_| anyhow!("Failed to identify clean mirror"))?;
     
     // I will find a better way to do this
     // I just want to go to bed
@@ -81,7 +81,7 @@ fn find_smudgy_mirror(mut pattern: Vec<Vec<Bit>>) -> Result<Mirror> {
 
             let result = find_mirrors(&pattern)
                 .filter(|&mirror| mirror != clean_mirror)
-                .single()
+                .exactly_one()
                 .ok();
 
             let row = &mut pattern[row_index];
@@ -98,8 +98,8 @@ pub fn solve_part_1(input: &str) -> SolverResult {
         .into_iter()
         .map(|pattern| {
             find_mirrors(&pattern)
-                .single()
-                .context("Failed to identify mirror")
+                .exactly_one()
+                .map_err(|_| anyhow!("Failed to identify mirror"))
         }).collect::<Result<Vec<Mirror>>>()?
         .iter()
         .sum_by(Mirror::summary);

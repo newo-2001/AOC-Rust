@@ -1,5 +1,6 @@
 use std::{collections::{BTreeSet, VecDeque}, hash::Hash, iter::once};
-use aoc_lib::{parsing::{ParseError, parse_lines, TextParser, skip_over}, iteration::queue::{Dedupable, FindState}, errors::NoSolution};
+use aoc_lib::{parsing::{ParseError, parse_lines, TextParser, skip_over}, iteration::queue::{Dedupable, FindState}};
+use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{bytes::complete::{tag, take_till}, sequence::{terminated, preceded}, Parser, multi::separated_list0, combinator::opt, character::complete::char};

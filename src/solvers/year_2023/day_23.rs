@@ -2,10 +2,10 @@ use std::{iter::once, cmp::max, collections::BTreeSet};
 
 use ahash::{HashSet, HashSetExt, HashMap, HashMapExt};
 use anyhow::{Result, bail, Context};
-use aoc_lib::{geometry::{CardinalDirection, grid::{Grid, GridLike}, Point2D}, iteration::{SingleError, ExtraIter}};
+use aoc_lib::geometry::{CardinalDirection, grid::{Grid, GridLike}, Point2D};
+use yuki::{iterators::{ExtraIter, SingleError}, tuples::fst};
 use crate::SolverResult;
 use itertools::Itertools;
-use tupletools::fst;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {
@@ -37,7 +37,8 @@ struct Map {
 }
 
 fn find_hole(row: impl IntoIterator<Item=&Tile>) -> Result<usize, SingleError> {
-    row.into_iter()
+    row
+        .into_iter()
         .enumerate()
         .filter_map(|(x, &tile)| (tile == Tile::Path).then_some(x))
         .single()
@@ -85,7 +86,8 @@ impl Map {
             };
 
             distance += 1;
-            let branches = position.neighbours::<isize, _>(directions)
+            let branches = position
+                .neighbours::<isize, _>(directions)
                 .filter(|&neighbour| {
                     neighbour != previous &&
                     self.tiles.get(neighbour)
@@ -118,9 +120,10 @@ impl Map {
                     self.follow_straight(node, neighbour)
                 }).collect_vec();
             
-            edges.iter()
-                .map(fst)
+            edges
+                .iter()
                 .copied()
+                .map(fst)
                 .filter(|end| !graph.contains_key(end))
                 .collect_into(&mut queue);
 
@@ -150,7 +153,8 @@ impl Map {
                 continue;
             }
             
-            graph.get(&state.position)
+            graph
+                .get(&state.position)
                 .unwrap()
                 .iter()
                 .filter(|(node, _)| !state.seen.contains(node))
@@ -160,7 +164,8 @@ impl Map {
                         distance: state.distance + distance,
                         seen: state.seen.clone()
                     }
-                }).collect_into(&mut queue);
+                })
+                .collect_into(&mut queue);
         }
 
         best.context("No path to the exit exists")
