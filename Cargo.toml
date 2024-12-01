@@ -36,6 +36,7 @@ serde_yml = "0.0.12"
 static_assertions = "1.1.0"
 thiserror = "1.0.47"
 tupletools = "0.3.0"
+yuki = { git = "https://github.com/newo-2001/yuki" }
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
