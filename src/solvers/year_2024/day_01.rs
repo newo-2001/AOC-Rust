@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use nom::{character::complete::{space1, u32}, sequence::separated_pair, Parser};
-use yuki::parsing::{combinators::lines, run_parser, ParsingResult};
+use yuki::parsing::{combinators::lines, run_parser, ParserExt, ParsingResult};
 
 use crate::SolverResult;
 
@@ -25,7 +25,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let (left, right) = run_parser(parse_list, input)?;
+    let (left, right) = parse_list.run(input)?;
 
     let frequencies = right
         .into_iter()

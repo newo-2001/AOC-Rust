@@ -55,7 +55,8 @@ impl Node {
 }
 
 fn parse_nodes(input: &str) -> Result<Vec<Node>, ParseError> {
-    input.lines()
+    input
+        .lines()
         .skip(2)
         .map(Node::parse)
         .try_collect()

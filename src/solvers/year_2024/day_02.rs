@@ -1,7 +1,7 @@
 use anyhow::Result;
 use itertools::Itertools;
 use nom::{character::complete::{space1, u32}, multi::separated_list0, Parser};
-use yuki::parsing::{combinators::lines, run_parser, Parsable, ParsingResult};
+use yuki::parsing::{parse_lines, Parsable, ParsingResult};
 
 use crate::SolverResult;
 
@@ -30,16 +30,20 @@ impl Report {
     }
 
     fn is_safe_with_tolerance(&self) -> bool {
-        (0..self.0.len()).any(move |index| {
-            let mut report = self.clone();
-            report.0.remove(index);
-            report.is_safe()
+        let mut report = self.clone();
+
+        (0..self.0.len()).any(|index| {
+            let value = report.0.remove(index);
+            let safe = report.is_safe();
+            report.0.insert(index, value);
+
+            safe
         })
     }
 }
 
 fn count_safe_reports(input: &str, predicate: impl Fn(&Report) -> bool) -> Result<usize> {
-    let safe = run_parser(lines(Report::parse), input)?
+    let safe = parse_lines::<Report>(input)?
         .into_iter()
         .filter(predicate)
         .count();

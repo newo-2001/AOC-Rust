@@ -29,7 +29,8 @@ impl<'a, O, F> TextParser<'a, O> for F
 pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
     where F: Fn(&'a str) -> Result<T, E>
 {
-    input.lines()
+    input
+        .lines()
         .map(parser)
         .collect()
 }
