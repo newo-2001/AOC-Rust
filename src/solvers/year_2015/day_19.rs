@@ -1,7 +1,8 @@
-use std::collections::BTreeSet;
+use std::iter::once;
 
 use ahash::{HashSet, HashSetExt};
 use aoc_lib::parsing::{Parsable, TextParserResult, lines, TextParser};
+use priority_queue::PriorityQueue;
 use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
@@ -10,24 +11,6 @@ use nom::{character::complete::{alpha1, line_ending}, Parser, sequence::separate
 struct Replacement<'a> {
     from: &'a str,
     to: &'a str
-}
-
-#[derive(PartialEq, Eq, Clone)]
-struct Mutation {
-    chemical: String,
-    distance: usize,
-}
-
-impl PartialOrd for Mutation {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Mutation {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        (self.distance).cmp(&(other.distance)).reverse()
-    }
 }
 
 impl<'a> Parsable<'a> for Replacement<'a> {
@@ -59,32 +42,20 @@ fn backwards_mutations(chemical: &str, replacement: &Replacement) -> Vec<String>
 }
 
 fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize, NoSolution> {
-    let mut queue: BTreeSet<Mutation> = BTreeSet::new();
-    let mut cache: HashSet<String> = HashSet::new();
-    
-    _ = queue.insert(Mutation {
-        chemical: String::from(target),
-        distance: 0
-    });
+    let mut seen: HashSet<String> = HashSet::new();
+    let mut queue: PriorityQueue<String, usize> = once((String::from(target), 0)).collect();
 
-    while let Some(current_mutation) = queue.iter().next() {
-        let Mutation { chemical, distance, .. } = current_mutation.clone();
-
+    while let Some((chemical, distance)) = queue.pop() {
         if chemical == "e" { return Ok(distance); }
-       
+
         let mutations = replacements
             .iter()
-            .flat_map(|replacement| backwards_mutations(&chemical, replacement))
-            .filter(|x| !cache.contains(x))
-            .collect_vec();
+            .flat_map(|replacement| backwards_mutations(&chemical, replacement));
 
         for mutation in mutations {
-            cache.insert(mutation.clone());
-
-            _ = queue.insert(Mutation {
-                chemical: mutation,
-                distance: distance + 1
-            });
+            if seen.insert(mutation.clone()) {
+                queue.push(mutation, distance + 1);
+            }
         }
     }
 
