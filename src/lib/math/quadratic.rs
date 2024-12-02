@@ -13,14 +13,14 @@ pub enum Roots<T> {
 }
 
 impl<T> Quadratic<T> {
-    pub fn roots(self) -> Roots<T> where T: Real {
+    pub fn roots(self) -> Roots<T> where T: Real + From<u8> {
         let Self { a, b, c } = self;
 
-        let discriminant = b * b - T::from(4).unwrap() * a * c;
+        let discriminant = b * b - <T as From<u8>>::from(4) * a * c;
         if discriminant.is_zero() { return Roots::None }
 
         let root = discriminant.sqrt();
-        let denominator = T::from(2).unwrap() * a;
+        let denominator = <T as From<u8>>::from(2) * a;
 
         let first = (-b - root) / denominator;        
         if discriminant.is_sign_negative() { return Roots::Single(first) }

@@ -2,7 +2,7 @@ use aoc_lib::{parsing::TextParser, math::{Quadratic, Roots}};
 use crate::SolverResult;
 use itertools::Itertools;
 use anyhow::Context;
-use nom::{bytes::complete::tag, character::complete::{space1, line_ending, u64}, multi::separated_list1, sequence::{preceded, delimited}, Parser};
+use nom::{bytes::complete::tag, character::complete::{line_ending, space1, u64}, multi::separated_list1, sequence::{pair, preceded, separated_pair}};
 
 struct Race {
     time: u64,
@@ -23,7 +23,7 @@ impl Race {
         };
 
         match formula.roots() {
-            Roots::Pair(left, right) => (left.floor() - right.ceil()) as u64 + 1,
+            Roots::Pair(left, right) => (left.ceil() - right.floor()) as u64 - 1,
             Roots::Single(_) => 1,
             Roots::None => 0
         }
@@ -31,14 +31,17 @@ impl Race {
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let (times, distances) = delimited(
-        tag("Time:").and(space1),
-        separated_list1(space1, u64),
-        line_ending
-    ).and(preceded(
-        tag("Distance:").and(space1),
-        separated_list1(space1, u64)
-    )).run(input)?;
+    let (times, distances) = separated_pair(
+        preceded(
+            pair(tag("Time:"), space1),
+            separated_list1(space1, u64),
+        ),
+        line_ending,
+        preceded(
+            pair(tag("Distance:"), space1),
+            separated_list1(space1, u64)
+        )
+    ).run(input)?;
 
     let margin_of_error: u64 = times
         .into_iter()
