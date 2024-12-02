@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, iter::once, collections::VecDeque};
 
-use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, Direction2D, CardinalDirection, Dimensions}, parsing::{ParseError, TextParser, usize}, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
+use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, CardinalDirection, Dimensions}, parsing::{ParseError, TextParser, usize}, math::Bit, iteration::{queue::{Dedupable, FindState, SearchDepth}, ExtraIter}};
 use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
@@ -81,7 +81,7 @@ fn find_path(grid: &Grid<Bit>, from: Point2D<usize>, to: Point2D<usize>) -> Resu
             if depth.state == to { return FindState::Result(depth.depth) }
 
             let moves = depth.state
-                .neighbours::<isize, _>(Direction2D::all())
+                .neighbours::<isize, _>(CardinalDirection::all())
                 .filter_map(|position| {
                     (!grid.get(position)?.is_solid())
                         .then_some(depth.with(position))
@@ -114,12 +114,14 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     
     let goal_position = grid
         .get(grid.area().top_right())
-        .ok_or(NoSolution)?.position;
+        .ok_or(NoSolution)?
+        .position;
 
     let empty_position = grid
         .iter()
         .find(|node| node.used == 0)
-        .ok_or(NoSolution)?.position;
+        .ok_or(NoSolution)?
+        .position;
 
     // Inefficient, but whatever
     let grid = grid.clone().map(|node| {
@@ -132,7 +134,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     });
 
     let moves = find_path(&grid, empty_position, goal_position)? +
-        (find_path(&grid, goal_position, Point2D::zero())? + 1) * 5;
+        (find_path(&grid, goal_position, Point2D::zero())? - 1) * 5;
 
     Ok(Box::new(moves))
 }

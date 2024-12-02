@@ -39,10 +39,12 @@ fn step(mut locations: BTreeSet<Point2D<usize>>, grid: &Grid<Tile>) -> BTreeSet<
     let mut new_locations: BTreeSet<Point2D<usize>> = BTreeSet::new();
 
     while let Some(location) = locations.pop_first() {
-        location.neighbours::<isize, _>(CardinalDirection::all())
+        location
+            .neighbours::<isize, _>(CardinalDirection::all())
             .filter_map(|neighbour| {
                 (grid.get(neighbour)? == &Tile::GardenPlot).then_some(neighbour)
-            }).collect_into(&mut new_locations);
+            }).
+            collect_into(&mut new_locations);
     }
 
     new_locations
