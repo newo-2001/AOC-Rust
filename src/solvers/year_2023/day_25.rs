@@ -7,7 +7,7 @@ use yuki::tuples::fst;
 use crate::SolverResult;
 use itertools::Itertools;
 use nom::{character::complete::{alpha1, char}, sequence::separated_pair, bytes::complete::tag, multi::separated_list1};
-use rand::random;
+use rand::{rngs::StdRng, Rng, SeedableRng};
 
 fn parse_component(input: &str) -> Result<(&str, Vec<&str>), ParseError> {
     separated_pair(
@@ -90,13 +90,14 @@ impl<'a> Graph<'a> {
     }
 
     fn most_common_edges(&self) -> impl Iterator<Item=(&str, &str)> {
+        let mut rng = StdRng::seed_from_u64(0);
         let mut counts = HashMap::<(&str, &str), u32>::new();
         let nodes = self.0.keys().copied().collect_vec();
 
         // Not a fan of this because it is probabilistic
-        for _ in 0..100 {
-            let from = nodes[random::<usize>() % nodes.len()];
-            let to = nodes[random::<usize>() % nodes.len()];
+        for _ in 0..1000 {
+            let from = nodes[rng.gen_range(0..nodes.len())];
+            let to = nodes[rng.gen_range(0..nodes.len())];
             if from == to { continue; }
 
             for (from, to) in self.shortest_path(from, to).tuple_windows() {
@@ -120,8 +121,8 @@ impl<'a> Graph<'a> {
 pub fn solve_part_1(input: &str) -> SolverResult {
     let mut graph = Graph::parse(input)?;
 
-    // Fuck the borrowchecker
-    let edges = graph.most_common_edges()
+    let edges = graph
+        .most_common_edges()
         .take(3)
         .map(|(from, to)| (from.to_owned(), to.to_owned()))
         .collect_vec();
@@ -130,7 +131,8 @@ pub fn solve_part_1(input: &str) -> SolverResult {
         graph.remove_edge(from.as_str(), to.as_str());
     }
 
-    let node = *graph.0.iter()
+    let node = *graph.0
+        .iter()
         .skip_while(|(_, edges)| edges.is_empty())
         .map(fst)
         .next()
