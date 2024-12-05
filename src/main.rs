@@ -141,7 +141,7 @@ fn main() {
         solver!(2024, "02"),
         solver!(2024, "03"),
         solver!(2024, "04"),
-        solver!(2024, "05", 1)
+        solver!(2024, "05")
     ].into_iter()
         .flatten()
         .collect();

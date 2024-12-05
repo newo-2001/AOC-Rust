@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cmp::Ordering, collections::HashMap};
 
 use itertools::Itertools;
 use nom::{character::complete::{char, line_ending, u32}, combinator::map, multi::{count, separated_list1}, sequence::separated_pair, Parser};
@@ -6,10 +6,10 @@ use yuki::parsing::{combinators::lines, ParserExt, ParsingResult};
 
 use crate::SolverResult;
 
-#[derive(Debug)]
+type Rules = HashMap<u32, Vec<u32>>;
 struct Update(Vec<u32>);
 
-fn parse_manual(input: &str) -> ParsingResult<(HashMap<u32, Vec<u32>>, Vec<Update>)> {
+fn parse_manual(input: &str) -> ParsingResult<(Rules, Vec<Update>)> {
     separated_pair(
         map(
             lines(
@@ -31,7 +31,7 @@ fn parse_manual(input: &str) -> ParsingResult<(HashMap<u32, Vec<u32>>, Vec<Updat
 }
 
 impl Update {
-    fn is_ordered(&self, rules: &HashMap<u32, Vec<u32>>) -> bool {
+    fn is_ordered(&self, rules: &Rules) -> bool {
         self.0
             .iter()
             .enumerate()
@@ -42,6 +42,16 @@ impl Update {
                     .any(|dependant| self.0[..i].contains(dependant))
                 )
             )
+    }
+
+    fn order(&mut self, rules: &Rules) {
+        self.0.sort_by(|a, b| rules
+            .get(a)
+            .map_or(Ordering::Equal, |dependant| {
+                if dependant.contains(b) { Ordering::Less }
+                else { Ordering::Greater }
+            })
+        );
     }
 
     fn middle(&self) -> Option<u32> {
@@ -57,6 +67,19 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let sum: u32 = updates
         .into_iter()
         .filter(|update| update.is_ordered(&rules))
+        .filter_map(|update| update.middle())
+        .sum();
+
+    Ok(Box::new(sum))
+}
+
+pub fn solve_part_2(input: &str) -> SolverResult {
+    let (rules, updates) = parse_manual.run(input)?;
+
+    let sum: u32 = updates
+        .into_iter()
+        .filter(|update| !update.is_ordered(&rules))
+        .update(|update| update.order(&rules))
         .filter_map(|update| update.middle())
         .sum();
 
