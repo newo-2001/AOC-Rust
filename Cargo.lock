@@ -922,7 +922,7 @@ dependencies = [
 [[package]]
 name = "yuki"
 version = "0.1.0"
-source = "git+https://github.com/newo-2001/yuki#414c182c3e4ee47665ecf52b8a95571db71dac3c"
+source = "git+https://github.com/newo-2001/yuki#e6a2dd4a1d7b863b68d609330607ce0e3a13f67e"
 dependencies = [
  "derive_more 1.0.0",
  "itertools 0.13.0",

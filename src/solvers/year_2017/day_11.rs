@@ -5,7 +5,7 @@ use yuki::errors::NoInput;
 use crate::SolverResult;
 use nom::{multi::separated_list0, character::complete::char};
 
-pub fn parse_steps(input: &str) -> Result<Vec<HexDirection>, ParseError> {
+fn parse_steps(input: &str) -> Result<Vec<HexDirection>, ParseError> {
     separated_list0(char(','), HexDirection::parse).run(input)
 }
 
