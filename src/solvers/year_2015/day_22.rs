@@ -109,8 +109,9 @@ impl Spell {
     fn castable(&self, battle: &Battle) -> bool {
         if battle.player.mana < self.cost() { return false; }
 
-        self.effect()
-            .map_or(true, |effect| !battle.effects.contains(&effect))
+        self
+            .effect()
+            .is_none_or(|effect| !battle.effects.contains(&effect))
     }
 
     fn cast(&self, battle: &mut Battle) {
@@ -273,7 +274,7 @@ fn least_amount_of_mana_for_victory(battle: Battle) -> Option<u32> {
     let mut best_mana: Option<u32> = None;
 
     while let Some(battle) = queue.pop_front() {
-        if best_mana.map_or(false, |best| battle.mana_expended >= best) { continue; }
+        if best_mana.is_some_and(|best| battle.mana_expended >= best) { continue; }
 
         match battle.is_finished() {
             Some(BattleResult::Victory) => {

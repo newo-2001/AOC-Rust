@@ -37,10 +37,9 @@ impl Update {
             .enumerate()
             .all(|(i, num)| rules
                 .get(num)
-                .map_or(true, |dependant| !dependant
+                    .is_none_or(|dependant| !dependant
                     .iter()
-                    .any(|dependant| self.0[..i].contains(dependant))
-                )
+                    .any(|dependant| self.0[..i].contains(dependant)))
             )
     }
 

@@ -38,7 +38,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
 
         let mut todo = vec![location];
         while let Some(location) = todo.pop() {
-            let is_enabled = grid.get(location).map_or(false, |state| state.is_enabled());
+            let is_enabled = grid.get(location).is_some_and(|state| state.is_enabled());
             if !is_enabled || seen.contains(&location) { continue; }
 
             todo.extend(location.neighbours::<isize, _>(CardinalDirection::all()));
