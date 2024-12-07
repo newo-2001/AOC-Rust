@@ -132,10 +132,9 @@ impl State {
         })
     }
 
-    fn transfer_chips(
-        &mut self,
-        forwards: impl IntoIterator<Item=Forward>
-    ) -> Result<impl Iterator<Item=Robot>, RobotError> {
+    fn transfer_chips<I>(&mut self, forwards: I) -> Result<impl Iterator<Item=Robot> + use<I>, RobotError> where
+        I: IntoIterator<Item=Forward>,
+    {
         Ok(forwards.into_iter()
             .map(|forward| self.transfer_chip(forward))
             .collect::<Result<Vec<_>, _>>()?
@@ -161,7 +160,8 @@ fn solve(instructions: Vec<Instruction>) -> Result<State, RobotError> {
         robots
     };
 
-    state.transfer_chips(forwards)?
+    state
+        .transfer_chips(forwards)?
         .collect::<VecDeque<_>>()
         .filter_duplicates()
         .try_recursive_fold(state, |mut state: State, robot: Robot| {

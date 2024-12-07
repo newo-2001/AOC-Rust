@@ -32,7 +32,7 @@ impl Mirror {
     }
 }
 
-fn reflection_locations<T: PartialEq>(pattern: &[T]) -> impl Iterator<Item=usize> {
+fn reflection_locations<T: PartialEq>(pattern: &[T]) -> impl Iterator<Item=usize> + use<T> {
     fn reflect<T: PartialEq>(pattern: &[T]) -> Option<usize> {
         if pattern.len() < 2 { return None; }
 
@@ -57,7 +57,8 @@ fn reflection_locations<T: PartialEq>(pattern: &[T]) -> impl Iterator<Item=usize
 }
 
 fn find_mirrors<T: PartialEq>(pattern: &[Vec<T>]) -> impl Iterator<Item=Mirror> + '_ {
-    let transposed = pattern.iter()
+    let transposed = pattern
+        .iter()
         .transpose()
         .collect_vec();
 

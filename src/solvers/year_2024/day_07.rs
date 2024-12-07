@@ -68,7 +68,7 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let operators = |lhs, rhs: u64| [
+    let operators = |lhs: u64, rhs: u64| [
         lhs + rhs,
         lhs * rhs,
         lhs * 10u64.pow(rhs.ilog10() + 1) + rhs
