@@ -1,22 +1,29 @@
 use ahash::{HashSet, HashSetExt};
-use yuki::{iterators::{ExtraIter, SingleError}, spatial::{direction::{self, Directions}, Point}, tuples::fst};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use yuki::{iterators::{ExtraIter, SingleError}, spatial::{direction::{self, Directions}, Area, Point}, tuples::fst};
 use anyhow::{anyhow, Result};
 
 use crate::SolverResult;
 
-type State = (Point<i32>, direction::Cardinal);
+type State = (Point<usize>, direction::Cardinal);
 
-fn parse_grid(input: &str) -> Result<(State, HashSet<Point<i32>>)> {
+#[derive(Clone)]
+struct Grid {
+    objects: HashSet<Point<usize>>,
+    area: Area<usize>
+}
+
+fn parse_grid(input: &str) -> Result<(Grid, State)> {
     let iter = input
         .lines()
         .enumerate()
         .flat_map(|(y, line)| line
             .chars()
             .enumerate()
-            .map(move |(x, char)| (Point { x: x as i32, y: y as i32 }, char))
+            .map(move |(x, char)| (Point { x, y }, char))
         );
     
-    let grid = iter
+    let objects = iter
         .clone()
         .filter(|(_, char)| *char == '#')
         .map(fst)
@@ -39,23 +46,30 @@ fn parse_grid(input: &str) -> Result<(State, HashSet<Point<i32>>)> {
             SingleError::More => anyhow!("Multiple starting positions found in input"),
         })?;
 
-    Ok((initial_state, grid))
+    let height = input.lines().count();
+    let width = input.lines()
+        .next()
+        .unwrap_or_default()
+        .chars()
+        .count();
+
+    let grid = Grid { objects, area: (width, height).into() };
+    Ok((grid, initial_state))
 }
 
-fn walk(width: i32, height: i32, mut state: State, grid: &HashSet<Point<i32>>) -> Option<HashSet<Point<i32>>> {
-    let mut seen: HashSet<Point<i32>> = HashSet::new();
+fn walk(grid: &Grid, mut state: State) -> Option<HashSet<Point<usize>>> {
+    let mut seen: HashSet<Point<usize>> = HashSet::new();
     let mut seen_states: HashSet<State> = HashSet::new();
 
-    while (0..width).contains(&state.0.x) && (0..height).contains(&state.0.y) {
+    while grid.area.contains(state.0) {
         let (pos, direction) = state;
         seen.insert(pos);
         if !seen_states.insert(state) { return None; }
 
-        let mut next_pos = pos.add_signed(direction.vector()).unwrap();
         let mut next_direction = direction;
+        let Some(mut next_pos) = pos.add_signed(direction.vector()) else { break };
 
-        let mut i = 0;
-        while grid.contains(&next_pos) {
+        while grid.objects.contains(&next_pos) {
             next_direction = next_direction.turn(direction::Rotation::Clockwise);
             next_pos = pos.add_signed(next_direction.vector()).unwrap();
         };
@@ -67,32 +81,26 @@ fn walk(width: i32, height: i32, mut state: State, grid: &HashSet<Point<i32>>) -
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
-    let height = input.lines().count() as i32;
-    let width = input.lines().next().map(|line| line.chars().count()).unwrap_or_default() as i32;
-
-    let (state, grid) = parse_grid(input)?;
-    let locations = walk(width, height, state, &grid).unwrap();
+    let (grid, state) = parse_grid(input)?;
+    let locations = walk(&grid, state).unwrap();
 
     Ok(Box::new(locations.len()))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
-    let height = input.lines().count() as i32;
-    let width = input.lines().next().map(|line| line.chars().count()).unwrap_or_default() as i32;
-
-    let (state, mut grid) = parse_grid(input)?;
-    let mut locations = walk(width, height, state, &grid).unwrap();
-
+    let (grid, state) = parse_grid(input)?;
+    let mut locations = walk(&grid, state).unwrap();
     locations.remove(&state.0);
 
-    let mut loops: u32 = 0;
-    for location in locations {
-        grid.insert(location);
+    let loops = locations
+        .into_par_iter()
+        .filter(|&location| {
+            let mut grid = grid.clone();
+            grid.objects.insert(location);
 
-        if walk(width, height, state, &grid).is_none() { loops += 1; }
-
-        grid.remove(&location);
-    }
+            walk(&grid, state).is_none()
+        })
+        .count();
 
     Ok(Box::new(loops))
 }
