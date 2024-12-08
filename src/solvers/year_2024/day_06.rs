@@ -1,6 +1,6 @@
 use ahash::{HashSet, HashSetExt};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use yuki::{iterators::{ExtraIter, SingleError}, spatial::{direction::{self, Directions}, Area, Point}, tuples::fst};
+use yuki::{iterators::{Enumerate2D, ExtraIter, SingleError}, spatial::{direction::{self, Directions}, Area, Point}, tuples::fst};
 use anyhow::{anyhow, Result};
 
 use crate::SolverResult;
@@ -14,22 +14,18 @@ struct Grid {
 }
 
 fn parse_grid(input: &str) -> Result<(Grid, State)> {
-    let iter = input
+    let objects = input
         .lines()
-        .enumerate()
-        .flat_map(|(y, line)| line
-            .chars()
-            .enumerate()
-            .map(move |(x, char)| (Point { x, y }, char))
-        );
-    
-    let objects = iter
-        .clone()
+        .map(str::chars)
+        .enumerate2d()
         .filter(|(_, char)| *char == '#')
         .map(fst)
         .collect();
 
-    let initial_state = iter
+    let initial_state = input
+        .lines()
+        .map(str::chars)
+        .enumerate2d()
         .filter_map(|(pos, char)| {
             match char {
                 '^' => Some(direction::Cardinal::North),

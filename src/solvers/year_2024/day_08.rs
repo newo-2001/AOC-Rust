@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use num::Integer;
-use yuki::spatial::{Area, Point};
+use yuki::{iterators::Enumerate2D, spatial::{Area, Point}};
 
 use crate::SolverResult;
 
@@ -18,17 +18,13 @@ struct Grid {
 fn parse_grid(input: &str) -> Grid {
     let antennas = input
         .lines()
-        .enumerate()
-        .flat_map(|(y, line)| line
-            .chars()
-            .enumerate()
-            .filter(|(_, char)| *char != '.')
-            .map(move |(x, char)| Antenna {
-                #[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
-                position: Point { x: x as i32, y: y as i32 },
-                frequency: char
-            })
-        )
+        .map(str::chars)
+        .enumerate2d()
+        .filter(|(_, char)| *char != '.')
+        .map(|(point, char)| Antenna {
+            position: point.cast::<i32>().unwrap(),
+            frequency: char
+        })
         .collect();
 
     let height = input.lines().count();
@@ -49,8 +45,8 @@ impl Grid {
         self.antennas
             .iter()
             .into_group_map_by(|antenna| antenna.frequency)
-            .into_iter()
-            .flat_map(|(_, locations)| locations
+            .into_values()
+            .flat_map(|locations| locations
                 .into_iter()
                 .map(|antenna| antenna.position)
                 .tuple_combinations()
@@ -85,6 +81,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         let direction = offset / gcd;
 
         // Cast rays in both directions from one of the points
+        // until they run of the grid
         let positive = (0..)
             .map(|distance| a - direction * distance)
             .take_while(|&pos| grid.area.contains(pos));
