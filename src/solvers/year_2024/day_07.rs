@@ -5,7 +5,6 @@ use anyhow::Result;
 
 use crate::SolverResult;
 
-#[derive(Debug)]
 struct Equation {
     result: u64,
     operands: Vec<u64>
