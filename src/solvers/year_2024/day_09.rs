@@ -2,7 +2,6 @@ use std::{cmp::Ordering, fmt::Display, iter::repeat_n};
 
 use anyhow::{Context, Result};
 use itertools::Itertools;
-use yuki::iterators::ExtraIter;
 
 use crate::SolverResult;
 
@@ -86,25 +85,15 @@ impl DiskMap {
     }
 
     fn format_without_fragmentation(&mut self) {
-        let (min_id, max_id ) = self.0
-            .iter()
-            .filter_map(|block| match block {
-                Block::Data { id, .. } => Some(id),
-                Block::Free(_) => None
-            })
-            .copied()
-            .min_max()
-            .unwrap();
-
-        for data_id in (min_id..=max_id).rev() {
-            let (data_pos, data_length) = self.0
+        let max_id = self.0.len() / 2;
+        for data_id in (0..=max_id).rev() {
+            let Some((data_pos, data_length)) = self.0
                 .iter()
                 .enumerate()
                 .find_map(|(pos, block)| match block {
                     &Block::Data { id, length } if id == data_id => Some((pos, length)),
                     Block::Data { ..} | Block::Free(_) => None
-                })
-                .unwrap();
+                }) else { return };
 
             if let Some((free_pos, free_length)) = self.0
                 .iter()
