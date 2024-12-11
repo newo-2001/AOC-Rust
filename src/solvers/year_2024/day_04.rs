@@ -1,4 +1,4 @@
-use yuki::{iterators::ExtraIter, spatial::{direction::{self, Directions}, matrix::{Matrix, VariableRows}, Point}};
+use yuki::{iterators::{Enumerate2D, ExtraIter}, spatial::{direction::{self, Directions}, matrix::{Matrix, VariableRows}, Point}};
 
 use crate::SolverResult;
 
@@ -30,7 +30,8 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let grid = parse_grid(input)?;
 
     let solutions = grid
-        .enumerate()
+        .iter_rows()
+        .enumerate2d()
         .flat_map(|(pos, _)| direction::Compass::all()
             .map(move |dir| (pos, dir))
         )
@@ -44,7 +45,8 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let grid = parse_grid(input)?;
 
     let solutions = grid
-        .enumerate()
+        .iter_rows()
+        .enumerate2d()
         .filter(|(pos, _)| direction::Ordinal::all()
             .filter_map(|dir| Some((pos.add_signed(dir.vector())?, dir.inverted())))
             .filter(|&(pos, dir)| is_word("MAS", &grid, pos, dir))

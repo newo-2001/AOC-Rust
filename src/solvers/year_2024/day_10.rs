@@ -1,6 +1,6 @@
 use ahash::{HashSet, HashSetExt};
 use anyhow::{Context, Result};
-use yuki::{iterators::ExtraIter, spatial::{direction, Matrix, Point}};
+use yuki::{iterators::{Enumerate2D, ExtraIter}, spatial::{direction, Matrix, Point}};
 
 use crate::SolverResult;
 
@@ -30,7 +30,8 @@ fn measure_map(map: &Matrix<u32>, metric: Metric) -> u32 {
     let mut score = 0;
     let mut seen = HashSet::<Point<usize>>::new();
     let mut queue: Vec<(Point<usize>, u32)> = map
-        .enumerate()
+        .iter_rows()
+        .enumerate2d()
         .filter(|(_, height)| **height == 0)
         .map(|(point, &value)| (point, value))
         .collect();
