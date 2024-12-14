@@ -1,5 +1,6 @@
 use mathru::{algebra::{abstr::AbsDiffEq, linear::{matrix::{General, Solve}, vector::Vector}}, matrix, vector};
 use nom::{bytes::complete::tag, character::complete::{char, newline, u64}, multi::{count, separated_list0}, sequence::{delimited, preceded, separated_pair, tuple}, Parser};
+use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use yuki::{parsing::{NomError, Parsable, ParserExt, ParsingResult}, spatial::point::Point};
 
 use crate::SolverResult;
@@ -66,7 +67,7 @@ impl ClawMachine {
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let cost: u64 = parse_claw_machines.run(input)?
-        .iter()
+        .par_iter()
         .filter_map(ClawMachine::prize_cost)
         .sum();
 
@@ -77,7 +78,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     const OFFSET: u64 = 10_000_000_000_000;
 
     let cost: u64 = parse_claw_machines.run(input)?
-        .into_iter()
+        .into_par_iter()
         .map(|ClawMachine { a, b, prize }| ClawMachine {
             a, b,
             prize: prize + Point::new(OFFSET, OFFSET)

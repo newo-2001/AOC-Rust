@@ -1,5 +1,7 @@
-use ahash::{HashSet, HashSetExt};
+use std::iter::once;
+
 use anyhow::{Context, Result};
+use itertools::Itertools;
 use yuki::{iterators::{Enumerate2D, ExtraIter}, spatial::{direction, Matrix, Point}};
 
 use crate::SolverResult;
@@ -20,46 +22,57 @@ fn parse_map(input: &str) -> Result<Matrix<u32>> {
     Ok(map)
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum Metric {
-    Score,
-    Rating
-}
-
-fn measure_map(map: &Matrix<u32>, metric: Metric) -> u32 {
-    let mut score = 0;
-    let mut seen = HashSet::<Point<usize>>::new();
-    let mut queue: Vec<(Point<usize>, u32)> = map
+fn trail_heads(map: &Matrix<u32>) -> impl Iterator<Item=(Point<usize>, u32)> {
+    map
         .iter_rows()
         .enumerate2d()
         .filter(|(_, height)| **height == 0)
         .map(|(point, &value)| (point, value))
-        .collect();
+}
 
-    while let Some((pos, height)) = queue.pop() {
-        if metric == Metric::Score && !seen.insert(pos) { continue; };
+struct TrailWalker<'a> {
+    map: &'a Matrix<u32>,
+    queue: Vec<(Point<usize>, u32)>
+}
 
-        if height == 9 {
-            score += 1;
-            continue;
+impl<'a> TrailWalker<'a> {
+    fn new(map: &'a Matrix<u32>, trail_head: (Point<usize>, u32)) -> Self {
+        Self { map, queue: once(trail_head).collect() }
+    }
+}
+
+impl Iterator for TrailWalker<'_> {
+    type Item = Point<usize>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some((pos, height)) = self.queue.pop() {
+            if height == 9 { return Some(pos) }
+
+            pos
+                .neighbours::<direction::Cardinal>()
+                .filter_map(|pos| Some((pos, *self.map.get(pos)?)))
+                .filter(|(_, neighbour_height)| *neighbour_height == height + 1)
+                .collect_into(&mut self.queue);
         }
 
-        pos
-            .neighbours::<direction::Cardinal>()
-            .filter_map(|pos| Some((pos, *map.get(pos)?)))
-            .filter(|(_, neighbour_height)| *neighbour_height == height + 1)
-            .collect_into(&mut queue);
+        None
     }
-
-    score
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let map = parse_map(input)?;
-    Ok(Box::new(measure_map(&map, Metric::Score)))
+    let score: usize = trail_heads(&map)
+        .map(|head| TrailWalker::new(&map, head).unique().count())
+        .sum();
+
+    Ok(Box::new(score))
 }
 
 pub fn solve_part_2(input: &str) -> SolverResult {
     let map = parse_map(input)?;
-    Ok(Box::new(measure_map(&map, Metric::Rating)))
+    let rating: usize = trail_heads(&map)
+        .map(|head| TrailWalker::new(&map, head).count())
+        .sum();
+
+    Ok(Box::new(rating))
 }
