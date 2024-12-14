@@ -11,7 +11,8 @@
     cmp_minmax,
     iter_intersperse,
     anonymous_lifetime_in_impl_trait,
-    unsigned_is_multiple_of
+    unsigned_is_multiple_of,
+    let_chains
 )]
 
 use std::fs::File;
@@ -147,7 +148,8 @@ fn main() {
         solver!(2024, "08"),
         solver!(2024, "09"),
         solver!(2024, "10"),
-        solver!(2024, "11")
+        solver!(2024, "11"),
+        solver!(2024, "12")
     ].into_iter()
         .flatten()
         .collect();
