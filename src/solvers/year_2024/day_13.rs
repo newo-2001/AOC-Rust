@@ -48,7 +48,7 @@ impl ClawMachine {
     #[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     fn prize_cost(&self) -> Option<u64> {
         // Solve the system of linear equations
-        let system= matrix![
+        let system = matrix![
             self.a.x as f64, self.b.x as f64;
             self.a.y as f64, self.b.y as f64
         ];
