@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, iter::once};
+use std::{cmp::Ordering, collections::VecDeque, convert::identity, iter::once};
 
 use ahash::{HashSet, HashSetExt};
 use nom::{character::complete::{char, u16}, sequence::separated_pair, Parser};
@@ -57,17 +57,20 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 
 pub fn solve_part_2(input: &str) -> SolverResult {
     let bytes = lines(parse_byte).run(input)?;
-    let mut grid = HashSet::new();
     let area = Area::from_dimensions(DIMENSIONS, DIMENSIONS);
 
-    // TODO: only recalculate path if obstruction is placed on the current path
-    for byte in bytes {
-        grid.insert(byte);
-        let steps = minimal_steps(&grid, Point::zero(), Point::new(DIMENSIONS - 1, DIMENSIONS - 1), area);
-        if steps.is_none() {
-            return Ok(Box::new(format!("{},{}", byte.x, byte.y)));
-        }
-    }
+    let index = (0..bytes.len())
+        .collect::<Vec<_>>()
+        .binary_search_by(|&i| {
+            let grid: HashSet<Point<usize>> = bytes[0..=i].iter().copied().collect();
+            let steps = minimal_steps(&grid, Point::zero(), Point::new(DIMENSIONS - 1, DIMENSIONS - 1), area);
+            match steps {
+                None => Ordering::Greater,
+                Some(_) => Ordering::Less
+            }
+        })
+        .unwrap_or_else(identity);
 
-    Err(NoSolution)?
+    let result = bytes[index];
+    Ok(Box::new(format!("{},{}", result.x, result.y)))
 }
