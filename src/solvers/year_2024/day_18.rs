@@ -22,10 +22,7 @@ struct State {
     steps: usize
 }
 
-fn minimal_steps<I>(bytes: I, from: Point<usize>, to: Point<usize>, area: Area) -> Option<usize> where
-    I: IntoIterator<Item=Point<usize>>
-{
-    let grid: HashSet<Point<usize>> = bytes.into_iter().collect();
+fn minimal_steps(grid: &HashSet<Point<usize>>, from: Point<usize>, to: Point<usize>, area: Area) -> Option<usize> {
     let mut seen = HashSet::<Point<usize>>::new();
     let mut queue: VecDeque<State> = once(State { position: from, steps: 0 }).collect();
 
@@ -43,16 +40,34 @@ fn minimal_steps<I>(bytes: I, from: Point<usize>, to: Point<usize>, area: Area) 
     None
 }
 
-const DIMENSIONS: usize = 70;
+const DIMENSIONS: usize = 71;
 
 pub fn solve_part_1(input: &str) -> SolverResult {
     let bytes = lines(parse_byte).run(input)?
         .into_iter()
-        .take(1024);
+        .take(1024)
+        .collect();
 
-    let area = Area::from_dimensions(DIMENSIONS + 1, DIMENSIONS + 1);
-    let steps = minimal_steps(bytes, Point::zero(), Point::new(DIMENSIONS, DIMENSIONS), area)
+    let area = Area::from_dimensions(DIMENSIONS, DIMENSIONS);
+    let steps = minimal_steps(&bytes, Point::zero(), Point::new(DIMENSIONS - 1, DIMENSIONS - 1), area)
         .ok_or(NoSolution)?;
 
     Ok(Box::new(steps))
+}
+
+pub fn solve_part_2(input: &str) -> SolverResult {
+    let bytes = lines(parse_byte).run(input)?;
+    let mut grid = HashSet::new();
+    let area = Area::from_dimensions(DIMENSIONS, DIMENSIONS);
+
+    // TODO: only recalculate path if obstruction is placed on the current path
+    for byte in bytes {
+        grid.insert(byte);
+        let steps = minimal_steps(&grid, Point::zero(), Point::new(DIMENSIONS - 1, DIMENSIONS - 1), area);
+        if steps.is_none() {
+            return Ok(Box::new(format!("{},{}", byte.x, byte.y)));
+        }
+    }
+
+    Err(NoSolution)?
 }
