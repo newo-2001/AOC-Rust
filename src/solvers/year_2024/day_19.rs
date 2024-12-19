@@ -1,40 +1,43 @@
-use nom::{bytes::complete::tag, character::complete::{alpha1, line_ending}, combinator::map, multi::{count, separated_list0}, sequence::separated_pair, Parser};
+use ahash::{HashMap, HashMapExt};
+use nom::{bytes::complete::tag, character::complete::{alpha1, line_ending}, multi::{count, separated_list0}, sequence::separated_pair, Parser};
 use recursive::recursive;
-use yuki::parsing::{Parsable, ParserExt, ParsingResult};
+use yuki::parsing::{ParserExt, ParsingResult};
 
 use crate::SolverResult;
 
-struct Towel<'a>(&'a str);
-
-impl<'a> Parsable<'a> for Towel<'a> {
-    fn parse(input: &'a str) -> ParsingResult<'a, Self> {
-        map(
-            alpha1,
-            Self
-        )
-        .parse(input)
-    }
-}
-
-fn parse_towels(input: &str) -> ParsingResult<'_, (Vec<Towel<'_>>, Vec<Towel<'_>>)> {
+fn parse_towels(input: &str) -> ParsingResult<(Vec<&str>, Vec<&str>)> {
     separated_pair(
-        separated_list0(tag(", "), Towel::parse),
+        separated_list0(tag(", "), alpha1),
         count(line_ending, 2),
-        separated_list0(line_ending, Towel::parse)
+        separated_list0(line_ending, alpha1)
     )
     .parse(input)
 }
 
-impl Towel<'_> {
-    #[recursive]
-    fn is_composite_of(&self, towels: &[Self]) -> bool {
-        if self.0.is_empty() { return true; }
+#[recursive]
+fn is_composite_of(target: &str, towels: &[&str]) -> bool {
+    if target.is_empty() { return true; }
 
-        towels
-            .iter()
-            .filter(|&towel| self.0.starts_with(towel.0))
-            .any(|towel| Towel(&self.0[towel.0.len()..]).is_composite_of(towels))
-    }
+    towels
+        .iter()
+        .filter(|&towel| target.starts_with(towel))
+        .any(|towel| is_composite_of(&target[towel.len()..], towels))
+}
+
+#[recursive]
+fn count_possible_arrangements<'a>(target: &'a str, towels: &[&'a str], cache: &mut HashMap<(&'a str, Vec<&'a str>), usize>) -> usize {
+    let state = (target, towels.to_vec());
+    if let Some(&cached) = cache.get(&state) { return cached; }
+    if target.is_empty() { return 1; }
+
+    let arrangements = towels
+        .iter()
+        .filter(|&towel| target.starts_with(towel))
+        .map(|towel| count_possible_arrangements(&target[towel.len()..], towels, cache))
+        .sum();
+
+    cache.insert(state, arrangements);
+    arrangements
 }
 
 pub fn solve_part_1(input: &str) -> SolverResult {
@@ -42,8 +45,20 @@ pub fn solve_part_1(input: &str) -> SolverResult {
 
     let possible = desired_patterns
         .into_iter()
-        .filter(|pattern| pattern.is_composite_of(&towels))
+        .filter(|pattern| is_composite_of(pattern, &towels))
         .count();
 
     Ok(Box::new(possible))
+}
+
+pub fn solve_part_2(input: &str) -> SolverResult {
+    let mut cache = HashMap::<(&str, Vec<&str>), usize>::new();
+    let (towels, desired_patterns) = parse_towels.run(input)?;
+
+    let arrangements: usize = desired_patterns
+        .into_iter()
+        .map(|pattern| count_possible_arrangements(pattern, &towels, &mut cache))
+        .sum();
+
+    Ok(Box::new(arrangements))
 }
