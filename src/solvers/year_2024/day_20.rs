@@ -1,8 +1,7 @@
 use std::{collections::VecDeque, iter::once};
 
-use ahash::{HashMap, HashMapExt, HashSet};
+use ahash::{HashMap, HashMapExt, HashSet, HashSetExt};
 use anyhow::{anyhow, Result};
-use itertools::Itertools;
 use yuki::{iterators::{Enumerate2D, ExtraIter, SingleError}, spatial::{direction, Point}};
 
 use crate::SolverResult;
@@ -14,7 +13,7 @@ struct Track {
     end: Point<usize>
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 struct State {
     position: Point<usize>,
     distance: usize
@@ -75,26 +74,54 @@ impl Track {
         distances
     }
 
-    fn count_cheats(&self, min_gain: usize) -> usize {
+    fn count_cheats(&self, cheat_length: usize, min_gain: usize) -> usize {
         let distances = self.distance_map();
+        let cheat_offsets: Vec<(Point<isize>, usize)> = cheats(cheat_length).collect();
 
         distances
             .iter()
-            .flat_map(|(pos, distance)| pos
-                .neighbours::<direction::Cardinal>()
-                .flat_map(Point::neighbours::<direction::Cardinal>)
-                .unique()
-                .filter(|&neighbour| pos.manhattan_distance(neighbour) == 2)
-                .filter_map(|pos| Some((pos, distances.get(&pos)?)))
-                .filter(move |(_, neighbour_distance)| **neighbour_distance >= distance + min_gain + 2)
+            .flat_map(|(pos, distance)| cheat_offsets
+                .iter()
+                .filter_map(|&(offset, cheat_length)| Some((pos.add_signed(offset)?, cheat_length)))
+                .filter_map(|(pos, cheat_length)| Some((distances.get(&pos)?, cheat_length)))
+                .filter(move |&(end_distance, cheat_length)| *end_distance >= distance + min_gain + cheat_length)
             )
             .count()
     }
 }
 
+fn cheats(cheat_length: usize) -> impl Iterator<Item=(Point<isize>, usize)> {
+    let mut dest = HashMap::<Point<isize>, usize>::new();
+    let mut seen = HashSet::<(Point::<isize>, usize)>::new();
+    let mut queue: Vec<(Point::<isize>, usize)> = once((Point::zero(), 0)).collect();
+
+    while let Some((position, distance)) = queue.pop() {
+        if dest.get(&position).is_none_or(|&dist| dist > distance) {
+            dest.insert(position, distance);
+        }
+
+        if distance == cheat_length { continue }
+
+        position
+            .neighbours::<direction::Cardinal>()
+            .map(|position| (position, distance + 1 ))
+            .filter(|&state| seen.insert(state))
+            .collect_into(&mut queue);
+    }
+
+    dest.into_iter()
+}
+
 pub fn solve_part_1(input: &str) -> SolverResult {
     let track = Track::parse(input)?;
-    let cheats = track.count_cheats(100);
+    let cheats = track.count_cheats(2, 100);
+
+    Ok(Box::new(cheats))
+}
+
+pub fn solve_part_2(input: &str) -> SolverResult {
+    let track = Track::parse(input)?;
+    let cheats = track.count_cheats(20, 100);
 
     Ok(Box::new(cheats))
 }
