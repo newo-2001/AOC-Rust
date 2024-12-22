@@ -13,7 +13,8 @@
     anonymous_lifetime_in_impl_trait,
     unsigned_is_multiple_of,
     let_chains,
-    iter_map_windows
+    iter_map_windows,
+    array_windows
 )]
 
 use std::fs::File;
@@ -160,7 +161,7 @@ fn main() {
         solver!(2024, "19"),
         solver!(2024, "20"),
         solver!(2024, "21", 1),
-        solver!(2024, "22", 1)
+        solver!(2024, "22")
     ].into_iter()
         .flatten()
         .collect();
