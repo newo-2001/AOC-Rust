@@ -1,8 +1,6 @@
-use std::iter::repeat;
-
-use itertools::Itertools;
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
-use yuki::{errors::NoSolution, parsing::parse_lines};
+use ahash::{HashMap, HashMapExt, HashSet, HashSetExt};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use yuki::parsing::parse_lines;
 
 use crate::SolverResult;
 
@@ -57,22 +55,23 @@ pub fn solve_part_2(input: &str) -> SolverResult {
         )
         .collect();
 
-    let max_bananas = repeat(-9..=9)
-        .take(4)
-        .multi_cartesian_product()
-        .par_bridge()
-        .map(|history| price_changes
-            .iter()
-            .map(|monkey| monkey
-                .array_windows::<4>()
-                .map(|&[(_, a), (_, b), (_, c), (price, d)]| (price, [a, b, c, d]))
-                .find_map(|(price, window)| (window == history.as_slice()).then_some(price))
-                .unwrap_or(0)
-            )
-            .sum::<u32>()
-        )
+    let mut max_bananas = HashMap::<[i32; 4], u32>::new();
+
+    for changes in price_changes {
+        let mut seen = HashSet::<[i32; 4]>::new();
+        for [(_, a), (_, b), (_, c), (price, d)] in changes.array_windows::<4>().copied() {
+            let change = [a, b, c, d];
+            if !seen.insert(change) { continue; }
+
+            let count = max_bananas.get(&change).unwrap_or(&0) + price;
+            max_bananas.insert(change, count);
+        }
+    }
+
+    let max_bananas: u32 = *max_bananas
+        .values()
         .max()
-        .ok_or(NoSolution)?;
+        .unwrap_or(&0);
 
     Ok(Box::new(max_bananas))
 }
