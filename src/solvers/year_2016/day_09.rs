@@ -19,7 +19,7 @@ enum Chunk<'a> {
     Uncompressed(String)
 }
 
-fn parse_marker(input: &str) -> TextParserResult<Marker> {
+fn parse_marker(input: &str) -> TextParserResult<'_, Marker<'_>> {
     let parse_marker = usize.and(preceded(char('x'), usize));
 
     let (input, (length, times)) = parens(parse_marker).parse(input)?;
@@ -28,7 +28,7 @@ fn parse_marker(input: &str) -> TextParserResult<Marker> {
     Ok((remaining, Marker { times, data }))
 }
 
-fn decompress(input: &str) -> Result<Vec<Chunk>> {
+fn decompress(input: &str) -> Result<Vec<Chunk<'_>>> {
     let (remaining, chunks) = many0(many_till(anychar, parse_marker))
         .parse(input)
         .map_err(|err| anyhow!(err.to_string()))?;

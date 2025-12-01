@@ -5,7 +5,7 @@ use aoc_lib::{parsing::{ParseError, TextParser, parse_lines}, iteration::queue::
 use yuki::tuples::Fst;
 use crate::SolverResult;
 use itertools::{Itertools, Either};
-use nom::{sequence::{preceded, delimited, tuple, terminated}, bytes::complete::tag, character::complete::u16, Parser};
+use nom::{sequence::{preceded, delimited, terminated}, bytes::complete::tag, character::complete::u16, Parser};
 use thiserror::Error;
 
 #[derive(Clone, Copy)]
@@ -40,11 +40,11 @@ fn parse_instruction(input: &str) -> Result<Instruction, ParseError> {
         Instruction::Forward(Forward { destination, value })
     });
 
-    let comparison = tuple((
+    let comparison = (
         terminated(bot(), tag(" gives low to ")),
         terminated(destination(), tag(" and high to ")),
         destination()
-    )).map(|(source, low, high)| {
+    ).map(|(source, low, high)| {
         Instruction::Compare(Comparison { source, high, low })
     });
 

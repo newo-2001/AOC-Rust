@@ -20,7 +20,7 @@ pub fn solve_part_2(input: &str) -> SolverResult {
     let combinations: Vec<Vec<&u32>> = different_sums(150, &containers).collect();
 
     let sized_combinations = combinations.iter()
-        .group_by(|containers| containers.len());
+        .chunk_by(|containers| containers.len());
 
     let (_, combinations) = sized_combinations.into_iter()
         .sorted_unstable_by_key(|(amount, _)| *amount)

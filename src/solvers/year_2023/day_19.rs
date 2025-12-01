@@ -13,7 +13,7 @@ enum Category {
 }
 
 impl Category {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         map_res(anychar, |char| Ok(match char {
             'x' => Self::ExtremelyCool,
             'm' => Self::Musical,
@@ -33,7 +33,7 @@ struct Part {
 }
 
 impl Part {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         map_res(curly_brackets(separated_list1(
             char(','),
             preceded(pair(anychar, char('=')), u16)
@@ -67,7 +67,7 @@ enum Condition {
 }
 
 impl Condition {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         Parser::or(
             separated_pair(Category::parse, char('>'), u16).map2(Self::Greater),
             separated_pair(Category::parse, char('<'), u16).map2(Self::Smaller),

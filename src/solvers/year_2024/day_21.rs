@@ -28,7 +28,7 @@ impl<'a> Parsable<'a> for Key {
     }
 }
 
-fn parse_code(input: &str) -> ParsingResult<Vec<Key>> {
+fn parse_code(input: &str) -> ParsingResult<'_, Vec<Key>> {
     many1(Key::parse).parse(input)
 }
 
@@ -138,13 +138,6 @@ impl KeyPad {
                     .update(|path| path.push(Key::Confirm))
                     .collect();
 
-                /*let from_key = self.keys[&position];
-                let to_key = self.keys[&dest];
-                println!("{:?} -> {:?} = {}", from_key, to_key, format_code(code));
-                for solution in &start {
-                    println!("+ {}", format_code(solution));
-                }*/
-                
                 start
                     .into_iter()
                     .cartesian_product(children)
@@ -169,37 +162,9 @@ fn solve(keypads: &[&KeyPad], code: Vec<Key>) -> Vec<Vec<Key>> {
 
             codes
                 .into_iter()
-                .flat_map(|code| {
-                    //println!("{}:", format_code(&code));
-
-                    let solutions = pad.solve(&mut cache, pad.start, &code);
-
-                    /*for solution in &solutions {
-                        println!("  {}", format_code(solution));
-                    }*/
-
-                    solutions
-                })
+                .flat_map(|code| pad.solve(&mut cache, pad.start, &code))
                 .collect()
         })
-}
-
-fn format_code(code: &[Key]) -> String {
-    let mut str = String::new();
-    for key in code {
-        let char = match *key {
-            Key::Confirm => 'A',
-            Key::Num(digit) => ('0' as u8 + digit as u8) as char,
-            Key::Direction(direction::Cardinal::North) => '^',
-            Key::Direction(direction::Cardinal::East) => '>',
-            Key::Direction(direction::Cardinal::South) => 'v',
-            Key::Direction(direction::Cardinal::West) => '<'
-        };
-
-        str.push(char);
-    }
-
-    str
 }
 
 #[allow(clippy::unnecessary_wraps)]
@@ -236,13 +201,5 @@ pub fn solve_part_1(input: &str) -> SolverResult {
         .into_iter()
         .sum();
 
-    /*let code = vec![Key::Num(0), Key::Num(2), Key::Num(9), Key::Confirm];
-    let results = solve(&[&numpad, &dpad], code);
-
-    for result in results {
-        println!("{}", format_code(&result));
-    }
-
-    Ok(Box::new(1))*/
     Ok(Box::new(complexity))
 }

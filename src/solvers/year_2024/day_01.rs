@@ -4,7 +4,7 @@ use yuki::parsing::{combinators::lines, run_parser, ParserExt, ParsingResult};
 
 use crate::SolverResult;
 
-fn parse_list(input: &str) -> ParsingResult<(Vec<u32>, Vec<u32>)> {
+fn parse_list(input: &str) -> ParsingResult<'_, (Vec<u32>, Vec<u32>)> {
     lines(separated_pair(u32, space1, u32))
         .map(|lists| lists.into_iter().unzip())
         .parse(input)

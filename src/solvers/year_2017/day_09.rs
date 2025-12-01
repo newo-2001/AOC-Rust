@@ -9,7 +9,7 @@ enum Group {
 
 impl Group {
     // I think this solution is beautiful
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         Parser::or(
             map(
                 curly_brackets(

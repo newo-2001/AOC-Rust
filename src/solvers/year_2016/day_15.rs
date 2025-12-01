@@ -1,7 +1,7 @@
 use aoc_lib::parsing::{ParseError, TextParser, parse_lines, usize};
 use yuki::errors::NoSolution;
 use crate::SolverResult;
-use nom::{bytes::complete::tag, sequence::{delimited, terminated, tuple}, character::complete::char, Parser};
+use nom::{bytes::complete::tag, sequence::{delimited, terminated}, character::complete::char, Parser};
 
 struct Disc {
     positions: usize,
@@ -16,7 +16,7 @@ impl Disc {
         let time = terminated(usize, tag(", it is at position "));
         let starting_position = delimited(time, usize, char('.'));
 
-        tuple((disc_number, positions, starting_position))
+        (disc_number, positions, starting_position)
             .map(|(index, positions, starting_position)| Self { positions, starting_position, index })
             .run(input)
     }

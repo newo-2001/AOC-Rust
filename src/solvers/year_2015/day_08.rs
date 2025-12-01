@@ -12,26 +12,26 @@ use nom::{
     Parser
 };
 
-fn hex_escape_code(input: &str) -> TextParserResult<char> {
+fn hex_escape_code(input: &str) -> TextParserResult<'_, char> {
     map_res(
         preceded(tag("\\x"), take_while_m_n(2, 2, |x: char| x.is_ascii_hexdigit())),
         |x| u8::from_str_radix(x, 16).map(char::from)
-    )(input)
+    ).parse(input)
 }
 
-fn escape_character(input: &str) -> TextParserResult<char> {
+fn escape_character(input: &str) -> TextParserResult<'_, char> {
     alt((
         hex_escape_code,
         value('\\', tag("\\\\")),
         value('\"', tag("\\\"")),
-    ))(input)
+    )).parse(input)
 }
 
-fn character(input: &str) -> TextParserResult<char> {
+fn character(input: &str) -> TextParserResult<'_, char> {
     escape_character.or(none_of("\"")).parse(input)
 }
 
-fn deserialize(input: &str) -> TextParserResult<String> {
+fn deserialize(input: &str) -> TextParserResult<'_, String> {
     quoted(many0(character))
         .map(|x| x.iter().collect::<String>())
         .parse(input)

@@ -1,7 +1,7 @@
 use aoc_lib::{math::{Range, InvalidRangeError}, between, parsing::{TextParserResult, ParseError, TextParser, skip_until}};
 use crate::SolverResult;
 use itertools::Itertools;
-use nom::{character::complete::{char, u64, line_ending}, sequence::{tuple, preceded, delimited}, Parser, multi::separated_list1, bytes::complete::tag, combinator::map_res};
+use nom::{character::complete::{char, u64, line_ending}, sequence::{preceded, delimited}, Parser, multi::separated_list1, bytes::complete::tag, combinator::map_res};
 use anyhow::{Context, Result};
 use rayon::iter::{ParallelBridge, ParallelIterator, IntoParallelIterator};
 
@@ -34,7 +34,7 @@ impl Map {
             .unwrap_or(n)
     }
 
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         preceded(
             skip_until(tag("map:")).and(line_ending),
             separated_list1(line_ending, MappingRange::parse)
@@ -55,9 +55,9 @@ impl MappingRange {
         })
     }
 
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         map_res(
-            tuple((u64, between!(char(' '), u64), u64)),
+            (u64, between!(char(' '), u64), u64),
             |(dest_start, source_start, length)| {
                 Result::<_, InvalidRangeError<_>>::Ok(Self {
                     from: Range::exclusive(source_start, source_start + length)?,

@@ -25,7 +25,7 @@ impl Dimensions {
 }
 
 impl Parsable<'_> for Dimensions {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         usize.and(preceded(char('x'), usize))
             .map(|(width, height)| Self(width, height))
             .parse(input)

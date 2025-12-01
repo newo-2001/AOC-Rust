@@ -1,18 +1,18 @@
 use aoc_lib::parsing::{lines, Map3, Parsable, TextParserResult, TextParser};
 use itertools::Itertools;
-use nom::{character::complete::{char, u32}, sequence::{tuple, preceded}, Parser};
+use nom::{character::complete::{char, u32}, sequence::preceded, Parser};
 
 use crate::SolverResult;
 
 struct Present(u32, u32, u32);
 
 impl Parsable<'_> for Present {
-    fn parse(input: &str) -> TextParserResult<Self> {
-        tuple((
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
+        (
             u32,
             preceded(char('x'), u32),
             preceded(char('x'), u32)
-        )).map3(Present)
+        ).map3(Present)
             .parse(input)
     }
 }

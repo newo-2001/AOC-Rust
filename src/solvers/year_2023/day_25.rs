@@ -96,8 +96,8 @@ impl<'a> Graph<'a> {
 
         // Not a fan of this because it is probabilistic
         for _ in 0..1000 {
-            let from = nodes[rng.gen_range(0..nodes.len())];
-            let to = nodes[rng.gen_range(0..nodes.len())];
+            let from = nodes[rng.random_range(0..nodes.len())];
+            let to = nodes[rng.random_range(0..nodes.len())];
             if from == to { continue; }
 
             for (from, to) in self.shortest_path(from, to).tuple_windows() {

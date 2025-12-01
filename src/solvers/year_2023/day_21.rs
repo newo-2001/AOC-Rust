@@ -2,8 +2,8 @@ use std::{collections::BTreeSet, iter::once};
 
 use anyhow::{Context, Result, bail};
 use aoc_lib::{geometry::{grid::{Grid, GridLike}, Point2D, CardinalDirection}, functional::repeat_apply};
+use nom::Input;
 use crate::SolverResult;
-use nom::InputIter;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {

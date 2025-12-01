@@ -4,7 +4,7 @@ use aoc_lib::{
     math::Bit, string_enum
 };
 use crate::SolverResult;
-use nom::{bytes::complete::tag, sequence::{tuple, preceded}, Parser};
+use nom::{bytes::complete::tag, sequence::preceded, Parser};
 use anyhow::Result;
 
 #[derive(Clone, Copy)]
@@ -45,18 +45,18 @@ struct Step {
 }
 
 impl Parsable<'_> for Step {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         let action = string_enum! {
             "turn off " => Action::Off,
             "turn on " => Action::On,
             "toggle " => Action::Toggle
         };
 
-        tuple((
+        (
             action,
             Point2D::parse,
             preceded(tag(" through "), Point2D::parse)
-        )).map(|(action, top_left, bottom_right)| {
+        ).map(|(action, top_left, bottom_right)| {
             let area = Area::from_corners(top_left, bottom_right);
             Self { area, action }
         }).parse(input)

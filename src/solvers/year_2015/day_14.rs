@@ -5,7 +5,7 @@ use aoc_lib::parsing::{parse_lines, TextParser, ParseError};
 use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
-use nom::{sequence::{tuple, preceded, delimited}, bytes::complete::tag, character::complete::{alpha1, u32}, Parser};
+use nom::{sequence::{preceded, delimited}, bytes::complete::tag, character::complete::{alpha1, u32}, Parser};
 
 struct Reindeer<'a> {
     name: &'a str,
@@ -15,12 +15,12 @@ struct Reindeer<'a> {
 }
 
 impl Reindeer<'_> {
-    fn parse(input: &str) -> Result<Reindeer, ParseError> {
+    fn parse(input: &str) -> Result<Reindeer<'_>, ParseError> {
         let speed = preceded(tag(" can fly "), u32);
         let stamina = preceded(tag(" km/s for "), u32);
         let recovery = delimited(tag(" seconds, but then must rest for "), u32, tag(" seconds."));
 
-        tuple((alpha1, speed, stamina, recovery))
+        (alpha1, speed, stamina, recovery)
             .map(|(name, speed, stamina, recovery)| Reindeer { name, speed, stamina, recovery })
             .run(input)    
     }

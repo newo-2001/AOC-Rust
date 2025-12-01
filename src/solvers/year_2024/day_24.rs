@@ -32,7 +32,7 @@ impl<'a> Parsable<'a> for Name<'a> {
 
 type Graph<'a> = HashMap<Name<'a>, Operation<'a>>;
 
-fn parse_node(input: &str) -> ParsingResult<(Name<'_>, Operation<'_>)> {
+fn parse_node(input: &str) -> ParsingResult<'_, (Name<'_>, Operation<'_>)> {
     separated_pair(
         alt((
             separated_pair(Name::parse, tag(" AND "), Name::parse).map2(Operation::And),
@@ -46,7 +46,7 @@ fn parse_node(input: &str) -> ParsingResult<(Name<'_>, Operation<'_>)> {
     .parse(input)
 }
 
-fn parse_graph(input: &str) -> ParsingResult<Graph<'_>> {
+fn parse_graph(input: &str) -> ParsingResult<'_, Graph<'_>> {
     separated_pair(
         lines(
             map(

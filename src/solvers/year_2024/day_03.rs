@@ -1,4 +1,4 @@
-use nom::{branch::alt, bytes::complete::{tag, take_while_m_n}, character::{complete::{anychar, char, u32}, is_digit}, combinator::{map_parser, rest, value}, multi::{many0, many_till}, sequence::{preceded, separated_pair, terminated}, Parser};
+use nom::{AsChar, Parser, branch::alt, bytes::complete::{tag, take_while_m_n}, character::complete::{anychar, char, u32}, combinator::{map_parser, rest, value}, multi::{many_till, many0}, sequence::{preceded, separated_pair, terminated}};
 use yuki::{parsing::{combinators::{map2, parens}, Parsable, ParserExt, ParsingResult}, tuples::{snd, Fst}};
 
 use crate::SolverResult;
@@ -10,9 +10,9 @@ enum Instruction {
     Dont
 }
 
-fn parse_num(input: &str) -> ParsingResult<u32> {
+fn parse_num(input: &str) -> ParsingResult<'_, u32> {
     map_parser(
-        take_while_m_n(1, 3, |c| is_digit(c as u8)),
+        take_while_m_n(1, 3, AsChar::is_dec_digit),
         u32
     )
     .parse(input)
@@ -41,7 +41,7 @@ impl<'a> Parsable<'a> for Instruction {
     }
 }
 
-fn parse_instructions(input: &str) -> ParsingResult<Vec<Instruction>> {
+fn parse_instructions(input: &str) -> ParsingResult<'_, Vec<Instruction>> {
     terminated(
         many0(
             many_till(

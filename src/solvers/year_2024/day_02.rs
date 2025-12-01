@@ -9,7 +9,7 @@ use crate::SolverResult;
 struct Report(Vec<u32>);
 
 impl Parsable<'_> for Report {
-    fn parse(input: &str) -> ParsingResult<Self> {
+    fn parse(input: &str) -> ParsingResult<'_, Self> {
         separated_list0(
             space1,
             u32

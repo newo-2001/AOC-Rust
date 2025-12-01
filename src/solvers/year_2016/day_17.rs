@@ -80,7 +80,7 @@ struct Grid<'a> {
 }
 
 impl Grid<'_> {
-    fn new(passcode: &str) -> Grid {
+    fn new(passcode: &str) -> Grid<'_> {
         Grid { passcode, area: Dimensions(4, 4).into() }
     }
 
@@ -97,7 +97,7 @@ impl Grid<'_> {
         let queue: VecDeque<State> = once(State::default()).collect();
         queue.recursive_fold(None, |longest: Option<Path>, state| {
             let mut moves = state.valid_moves(self);
-            let vault = moves.extract_if(|state| state.position == self.area.bottom_right()).next();
+            let vault = moves.extract_if(.., |state| state.position == self.area.bottom_right()).next();
             let longest = vault.map(|vault| vault.path).max(longest);
             FoldState::Branch(longest, moves)
         })

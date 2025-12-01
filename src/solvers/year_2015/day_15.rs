@@ -6,7 +6,7 @@ use crate::SolverResult;
 use std::{collections::VecDeque, iter::{self, once}};
 
 use nom::{
-    sequence::{tuple, preceded, terminated},
+    sequence::{preceded, terminated},
     bytes::complete::tag,
     character::complete::{alpha1, char, i32},
     Parser, combinator::opt
@@ -26,20 +26,22 @@ struct Ingredient<'a> {
 }
 
 impl Ingredient<'_> {
-    fn parse(input: &str) -> Result<Ingredient, ParseError> {
+    fn parse(input: &str) -> Result<Ingredient<'_>, ParseError> {
         let property = |name| preceded(
-            tuple((char(' '), tag(name), char(' '))),
-            terminated(i32, opt(char(','))));
+            (char(' '), tag(name), char(' ')),
+            terminated(i32, opt(char(',')))
+        );
+
         let name = terminated(alpha1, char(':'));
 
-        tuple((
+        (
             name,
             property("capacity"),
             property("durability"),
             property("flavor"),
             property("texture"),
             property("calories")
-        )).map(|(name, capacity, durability, flavor, texture, calories)|
+        ).map(|(name, capacity, durability, flavor, texture, calories)|
             Ingredient { name, capacity, durability, flavor, texture, calories }
         ).run(input)
     }   
@@ -103,7 +105,7 @@ fn best_score<'a>(cookies: impl Iterator<Item=&'a Cookie<'a>>, ingredients: &Ing
         .ok_or(NoSolution)
 }
 
-fn parse_ingredients(input: &str) -> Result<Ingredients, ParseError> {
+fn parse_ingredients(input: &str) -> Result<Ingredients<'_>, ParseError> {
     let ingredients = parse_lines(Ingredient::parse, input)?;
 
     Ok(ingredients.into_iter()

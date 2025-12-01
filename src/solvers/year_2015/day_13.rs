@@ -8,7 +8,7 @@ use nom::{
     bytes::complete::tag,
     Parser,
     character::complete::{alpha1, char, u16},
-    sequence::{tuple, preceded, delimited}
+    sequence::{preceded, delimited}
 };
 
 #[derive(Eq, PartialEq, Hash, Clone)]
@@ -72,7 +72,7 @@ impl Graph<'_> {
     }
 }
 
-fn parse_edge(input: &str) -> Result<WeightedEdge, ParseError> {
+fn parse_edge(input: &str) -> Result<WeightedEdge<'_>, ParseError> {
     #[derive(Clone)]
     enum Sign {
         Positive,
@@ -87,12 +87,12 @@ fn parse_edge(input: &str) -> Result<WeightedEdge, ParseError> {
         });
     
     let neighbour = delimited(tag(" happiness units by sitting next to "), alpha1, char('.'));
-    tuple((alpha1, weight, neighbour))
+    (alpha1, weight, neighbour)
         .map(|(person, weight, neighbour)| WeightedEdge { edge: Edge(person, neighbour), weight })
         .run(input)
 }
 
-fn build_graph(input: &str) -> Result<Graph, ParseError> {
+fn build_graph(input: &str) -> Result<Graph<'_>, ParseError> {
     let edges = parse_lines(parse_edge, input)?;
     Ok(Graph::from_edges(edges))
 }

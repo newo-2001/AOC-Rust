@@ -8,7 +8,7 @@ use thiserror::Error;
 pub struct Register(pub char);
 
 impl Parsable<'_> for Register {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         anychar.map(Self).parse(input)
     }
 }
@@ -20,7 +20,7 @@ pub enum Value {
 }
 
 impl Parsable<'_> for Value {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         Parser::or(
             isize.map(Value::Constant),
             Register::parse.map(Value::Register)
@@ -41,7 +41,7 @@ pub enum Instruction {
 }
 
 impl Parsable<'_> for Instruction {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         alt((
             preceded(tag("cpy "), separated_pair(Value::parse, char(' '), Register::parse)).map2(Self::Copy),
             preceded(tag("jnz "), separated_pair(Value::parse, char(' '), Value::parse)).map2(Self::JumpNotZero),
@@ -77,7 +77,7 @@ impl Cpu {
         }
     }
 
-    pub fn execute(&mut self) -> CpuOutput {
+    pub fn execute(&mut self) -> CpuOutput<'_> {
         CpuOutput { cpu: self }
     }
 
@@ -187,7 +187,7 @@ impl Cpu {
 }
 
 impl Parsable<'_> for Cpu {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         lines(Instruction::parse)
             .map(Self::new)
             .parse(input)

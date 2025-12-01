@@ -42,7 +42,7 @@ impl RotationDirection {
 }
 
 impl Parsable<'_> for RotationDirection {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         Parser::or(
             value(Self::Left, one_of("Ll")),
             value(Self::Right, one_of("Rr"))
@@ -140,13 +140,13 @@ impl Parsable<'_> for CardinalDirection {
     /// L   R | W   E | <   >
     ///   D   |   S   |   V
     /// ```
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         alt((
             value(Self::North, one_of("UuNn^")),
             value(Self::East, one_of("RrEe>")),
             value(Self::South, one_of("DdSsVv")),
             value(Self::West, one_of("LlWw<"))
-        ))(input)
+        )).parse(input)
     }
 }
 
@@ -314,7 +314,7 @@ impl HexDirection {
 
     /// Parse a [`HexDirection`] from a string.
     /// Valid representations are: NE, SE, S, N, NW, and SW.
-    pub fn parse(input: &str) -> TextParserResult<Self> {
+    pub fn parse(input: &str) -> TextParserResult<'_, Self> {
         alt((
             value(Self::NorthEast, tag("ne").or(tag("NE"))),
             value(Self::NorthWest, tag("nw").or(tag("NW"))),

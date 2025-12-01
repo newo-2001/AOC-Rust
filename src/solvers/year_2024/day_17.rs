@@ -1,19 +1,19 @@
 use anyhow::{bail, Result};
 use itertools::Itertools;
-use nom::{bytes::complete::tag, character::complete::{char, line_ending, u64, u8}, combinator::verify, multi::separated_list0, sequence::{delimited, preceded, separated_pair, tuple}, Parser};
+use nom::{bytes::complete::tag, character::complete::{char, line_ending, u64, u8}, combinator::verify, multi::separated_list0, sequence::{delimited, preceded, separated_pair}, Parser};
 use num::Integer;
 use recursive::recursive;
 use yuki::{errors::NoSolution, parsing::{parse, NomError, Parsable, ParsingResult}};
 
 use crate::SolverResult;
 
-fn parse_register<'a>(name: char) -> impl Parser<&'a str, u64, NomError<'a>> {
+fn parse_register<'a>(name: char) -> impl Parser<&'a str, Output = u64, Error = NomError<'a>> {
     delimited(
-        tuple((
+        (
             tag("Register "),
             char(name),
             tag(": ")
-        )),
+        ),
         u64,
         line_ending
     )
@@ -32,11 +32,11 @@ struct Cpu {
 impl<'a> Parsable<'a> for Cpu {
     fn parse(input: &'a str) -> ParsingResult<'a, Self> {
         separated_pair(
-            tuple((
+            (
                 parse_register('A'),
                 parse_register('B'),
                 parse_register('C'),
-            )),
+            ),
             line_ending,
             preceded(
                 tag("Program: "),

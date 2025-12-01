@@ -14,7 +14,7 @@ enum Color {
 }
 
 impl Color {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         string_enum! {
             "red" => Self::Red,
             "blue" => Self::Blue,
@@ -26,7 +26,7 @@ impl Color {
 struct Hand(HashMap<Color, u32>);
 
 impl Hand {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         let cubes = separated_pair(u32, char(' '), Color::parse).map(swap);
         separated_list1(tag(", "), cubes)
             .map(|cubes| Self(cubes.into_iter().collect()))

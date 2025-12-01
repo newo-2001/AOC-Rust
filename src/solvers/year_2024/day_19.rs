@@ -5,7 +5,7 @@ use yuki::parsing::{ParserExt, ParsingResult};
 
 use crate::SolverResult;
 
-fn parse_towels(input: &str) -> ParsingResult<(Vec<&str>, Vec<&str>)> {
+fn parse_towels(input: &str) -> ParsingResult<'_, (Vec<&str>, Vec<&str>)> {
     separated_pair(
         separated_list0(tag(", "), alpha1),
         count(line_ending, 2),

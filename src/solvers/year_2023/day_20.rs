@@ -19,7 +19,7 @@ enum ModuleType<'a> {
 }
 
 impl ModuleType<'_> {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         string_enum!(
             "broadcaster" => Self::Broadcast,
             "%" => Self::FlipFlop,

@@ -7,7 +7,7 @@ use itertools::Itertools;
 use nom::{
     bytes::complete::tag,
     character::complete::{line_ending, u32},
-    sequence::{tuple, delimited},
+    sequence::delimited,
     Parser, combinator::opt
 };
 
@@ -29,7 +29,7 @@ impl Entity {
     fn parse(input: &str) -> Result<Self, ParseError> {
         let kv = |key| delimited(tag(key).and(tag(": ")), u32, opt(line_ending));
 
-        let entity = tuple((kv("Hit Points"), kv("Damage"), kv("Armor")))
+        let entity = (kv("Hit Points"), kv("Damage"), kv("Armor"))
             .map(|(health, damage, armor)| Self { health, damage, armor });
         
         entity.run(input)
@@ -125,7 +125,7 @@ fn gear_cost(gear: &Gear) -> u32 {
     gear.iter().map(|item| item.cost).sum()
 }
 
-fn all_loadouts(shop: &Shop) -> Vec<Gear> {
+fn all_loadouts(shop: &Shop) -> Vec<Gear<'_>> {
     let no_ring = shop[&ItemSlot::Ring].iter()
         .find(|ring| ring.cost == 0).unwrap();
 

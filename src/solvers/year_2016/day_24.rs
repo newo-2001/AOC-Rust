@@ -4,7 +4,7 @@ use aoc_lib::{math::Bit, parsing::InvalidTokenError, geometry::{Dimensions, grid
 use yuki::{errors::NoSolution, tuples::fst};
 use crate::SolverResult;
 use itertools::{Itertools, Either};
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 fn parse_tile(input: char) -> Result<(Bit, Option<u32>), InvalidTokenError<char>> {
     Ok(match input {
@@ -88,7 +88,9 @@ fn parse_vent(input: &str) -> Result<Vent> {
             (_, position) => Either::Right(position)
         });
     
-    let start = start.into_iter().exactly_one()?;
+    let start = Iterator::exactly_one(start.into_iter())
+        .context("Multiple starting points in input")?;
+
     let tiles = tiles.into_iter()
         .map(|row| row.into_iter().map(fst).collect_vec())
         .collect_vec();

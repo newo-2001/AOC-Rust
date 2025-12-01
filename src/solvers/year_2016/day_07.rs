@@ -46,7 +46,7 @@ fn find_subseqs<'a, T>(str: &'a str, subseq: impl Fn(T) -> bool + 'a) -> impl It
         .filter(move |&seq| subseq(seq))
 }
 
-fn parse_ip(input: &str) -> Result<Ip, ParseError> {
+fn parse_ip(input: &str) -> Result<Ip<'_>, ParseError> {
     let supernet = alpha1.map(|seq| (NetworkType::Supernet, seq));
     let hypernet = square_brackets(alpha0).map(|seq| (NetworkType::Hypernet, seq));
 

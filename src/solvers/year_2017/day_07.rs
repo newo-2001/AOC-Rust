@@ -4,7 +4,7 @@ use ahash::HashMap;
 use aoc_lib::parsing::{TextParser, parens, lines, TextParserResult, Parsable};
 use crate::SolverResult;
 use itertools::Itertools;
-use nom::{character::complete::{alpha1, space1, u32}, sequence::{terminated, preceded, tuple}, multi::separated_list1, bytes::complete::tag, combinator::opt, Parser};
+use nom::{character::complete::{alpha1, space1, u32}, sequence::{terminated, preceded}, multi::separated_list1, bytes::complete::tag, combinator::opt, Parser};
 use thiserror::Error;
 
 #[derive(PartialEq, Eq, Hash)]
@@ -20,7 +20,7 @@ impl<'a> Parsable<'a> for Program<'a> {
         let weight = parens(u32);
         let children = preceded(tag(" -> "), separated_list1(tag(", "), alpha1));
 
-        tuple((name, weight, opt(children))).map(|(name, weight, children)| Program {
+        (name, weight, opt(children)).map(|(name, weight, children)| Program {
             children: children.unwrap_or_else(Vec::new),
             name, weight,
         }).parse(input)

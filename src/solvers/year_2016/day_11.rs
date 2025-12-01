@@ -25,7 +25,7 @@ impl<'a> Item<'a> {
         }
     }
 
-    const fn material(&self) -> &Material {
+    const fn material(&self) -> &Material<'_> {
         match self {
             | Self::Chip(material)
             | Self::Generator(material) => material
@@ -98,7 +98,7 @@ impl<'a> Floor<'a> {
     }
 }
 
-fn parse_floor(input: &str) -> Result<Floor, ParseError> {
+fn parse_floor(input: &str) -> Result<Floor<'_>, ParseError> {
     if input.contains("nothing relevant") { return Ok(Floor(BTreeSet::new()))}
 
     let material = || take_till(|c| " -".contains(c))
@@ -160,7 +160,7 @@ impl<'a> Configuration<'a> {
         };
 
         let mut floors = self.floors.clone();
-        let [floor, target_floor] = floors.get_many_mut([self.current_floor, target_floor_number]).ok()?;
+        let [floor, target_floor] = floors.get_disjoint_mut([self.current_floor, target_floor_number]).ok()?;
         
         let mut move_item = |item| {
             target_floor.place_item(floor.take_item(item)?);
@@ -189,7 +189,7 @@ impl<'a> Configuration<'a> {
     }
 }
 
-fn initial_configuration(input: &str) -> Result<Configuration, ParseError> {
+fn initial_configuration(input: &str) -> Result<Configuration<'_>, ParseError> {
     Ok(Configuration {
         floors: parse_lines(parse_floor, input)?,
         current_floor: 0,

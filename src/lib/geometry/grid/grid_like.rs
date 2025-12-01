@@ -22,19 +22,19 @@ pub trait GridLike: Sized {
         self.area().into_iter().zip(self.iter())
     }
 
-    fn iter_rows(&self) -> GridRowIterator<Self> {
+    fn iter_rows(&self) -> GridRowIterator<'_, Self> {
         GridRowIterator { grid: self, row: 0 }
     }
 
-    fn iter_columns(&self) -> GridColumnIterator<Self> {
+    fn iter_columns(&self) -> GridColumnIterator<'_, Self> {
         GridColumnIterator { grid: self, column: 0 }
     }
 
-    fn enumerate_rows(&self) -> Enumerate<GridRowIterator<Self>> {
+    fn enumerate_rows(&self) -> Enumerate<GridRowIterator<'_, Self>> {
         self.iter_rows().enumerate()
     }
 
-    fn enumerate_columns(&self) -> Enumerate<GridColumnIterator<Self>> {
+    fn enumerate_columns(&self) -> Enumerate<GridColumnIterator<'_, Self>> {
         self.iter_columns().enumerate()
     }
 }

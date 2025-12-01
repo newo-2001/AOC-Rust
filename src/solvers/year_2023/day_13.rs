@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use aoc_lib::{math::Bit, parsing::{ParseError, TextParser}, iteration::ExtraIter, geometry::Axis};
 use crate::SolverResult;
 use itertools::Itertools;
@@ -68,9 +68,8 @@ fn find_mirrors<T: PartialEq>(pattern: &[Vec<T>]) -> impl Iterator<Item=Mirror> 
 }
 
 fn find_smudgy_mirror(mut pattern: Vec<Vec<Bit>>) -> Result<Mirror> {
-    let clean_mirror: Mirror = find_mirrors(&pattern)
-        .exactly_one()
-        .map_err(|_| anyhow!("Failed to identify clean mirror"))?;
+    let clean_mirror: Mirror = Iterator::exactly_one(find_mirrors(&pattern))
+        .context("Failed to identify clean mirror")?;
     
     // I will find a better way to do this
     // I just want to go to bed
@@ -80,10 +79,9 @@ fn find_smudgy_mirror(mut pattern: Vec<Vec<Bit>>) -> Result<Mirror> {
             let tile = &mut row[col_index];
             *tile = tile.invert();
 
-            let result = find_mirrors(&pattern)
-                .filter(|&mirror| mirror != clean_mirror)
-                .exactly_one()
-                .ok();
+            let result = Iterator::exactly_one(
+                find_mirrors(&pattern).filter(|&mirror| mirror != clean_mirror)
+            );
 
             let row = &mut pattern[row_index];
             let tile = &mut row[col_index];
@@ -98,9 +96,8 @@ pub fn solve_part_1(input: &str) -> SolverResult {
     let total_points: usize = parse(input)?
         .into_iter()
         .map(|pattern| {
-            find_mirrors(&pattern)
-                .exactly_one()
-                .map_err(|_| anyhow!("Failed to identify mirror"))
+            Iterator::exactly_one(find_mirrors(&pattern))
+                .context("Failed to identify mirror")
         }).collect::<Result<Vec<Mirror>>>()?
         .iter()
         .sum_by(Mirror::summary);

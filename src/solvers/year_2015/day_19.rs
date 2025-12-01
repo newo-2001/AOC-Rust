@@ -62,7 +62,7 @@ fn fastest_synthesis(target: &str, replacements: &[Replacement]) -> Result<usize
     Err(NoSolution)
 }
 
-fn parse_data(input: &str) -> TextParserResult<(Vec<Replacement>, &str)> {
+fn parse_data(input: &str) -> TextParserResult<'_, (Vec<Replacement<'_>>, &str)> {
     separated_pair(
         lines(Replacement::parse),
         line_ending.and(line_ending),

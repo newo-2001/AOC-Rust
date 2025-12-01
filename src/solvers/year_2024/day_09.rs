@@ -61,10 +61,8 @@ impl DiskMap {
             ])
             .collect();
 
-        if let Some(remainder) = blocks.into_remainder() {
-            if let [length] = remainder.as_slice() {
-                disk.push(Block::Data { length: *length, id: disk.len() / 2 });
-            }
+        if let [length] = blocks.into_remainder().as_slice() {
+            disk.push(Block::Data { length: *length, id: disk.len() / 2 });
         }
 
         Ok(Self(disk))

@@ -16,7 +16,7 @@ enum HotSpring {
 }
 
 impl HotSpring {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         map_res(anychar, |char| Ok(match char {
             '.' => Self::Operational,
             '#' => Self::Broken,

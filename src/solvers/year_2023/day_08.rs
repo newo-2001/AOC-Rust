@@ -36,7 +36,7 @@ impl<'a> Edges<'a> {
     }
 }
 
-fn parse_map(input: &str) -> Result<(Vec<RotationDirection>, HashMap<NodeId, Edges>), ParseError> {
+fn parse_map(input: &str) -> Result<(Vec<RotationDirection>, HashMap<NodeId<'_>, Edges<'_>>), ParseError> {
     let instructions = terminated(many1(RotationDirection::parse), count(line_ending, 2));
     let node = separated_pair(NodeId::parse, tag(" = "), Edges::parse);
     let edges = separated_list1(line_ending, node)

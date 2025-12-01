@@ -31,7 +31,7 @@ impl<F> Iterator for KeyIterator<'_, F>
             let key = format!("{}{}", self.salt, self.index);
             let hash = (self.generator)(key);
 
-            self.history.extract_if(|key| hash.contains(&key.magic.to_string().repeat(5)))
+            self.history.extract_if(.., |key| hash.contains(&key.magic.to_string().repeat(5)))
                 .map(|possible_key| possible_key.index)
                 .collect_into(&mut self.key_indices);
 

@@ -4,7 +4,7 @@ use yuki::errors::NoSolution;
 
 use crate::SolverResult;
 
-fn parse_directions(input: &str) -> TextParserResult<Vec<i32>> {
+fn parse_directions(input: &str) -> TextParserResult<'_, Vec<i32>> {
     many1(
         Parser::or(
             value(1, char('(')),

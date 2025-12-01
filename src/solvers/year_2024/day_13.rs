@@ -1,5 +1,5 @@
 use mathru::{algebra::{abstr::AbsDiffEq, linear::{matrix::{General, Solve}, vector::Vector}}, matrix, vector};
-use nom::{bytes::complete::tag, character::complete::{char, newline, u64}, multi::{count, separated_list0}, sequence::{delimited, preceded, separated_pair, tuple}, Parser};
+use nom::{bytes::complete::tag, character::complete::{char, newline, u64}, multi::{count, separated_list0}, sequence::{delimited, preceded, separated_pair}, Parser};
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use yuki::{parsing::{NomError, Parsable, ParserExt, ParsingResult}, spatial::point::Point};
 
@@ -12,7 +12,7 @@ struct ClawMachine {
     prize: Point<u64>
 }
 
-fn parse_button<'a>(button: char) -> impl Parser<&'a str, Point<u64>, NomError<'a>> {
+fn parse_button<'a>(button: char) -> impl Parser<&'a str, Output = Point<u64>, Error = NomError<'a>> {
     delimited(
         delimited(tag("Button "), char(button), tag(": X+")),
         separated_pair(u64, tag(", Y+"), u64),
@@ -23,20 +23,20 @@ fn parse_button<'a>(button: char) -> impl Parser<&'a str, Point<u64>, NomError<'
 
 impl<'a> Parsable<'a> for ClawMachine {
     fn parse(input: &'a str) -> ParsingResult<'a, Self> {
-        tuple((
+        (
             parse_button('A'),
             parse_button('B'),
             preceded(
                 tag("Prize: X="),
                 separated_pair(u64, tag(", Y="), u64)
             ).map(Point::from)
-        ))
+        )
         .map(|(a, b, prize)| Self { a, b, prize })
         .parse(input)
     }
 }
 
-fn parse_claw_machines(input: &str) -> ParsingResult<Vec<ClawMachine>> {
+fn parse_claw_machines(input: &str) -> ParsingResult<'_, Vec<ClawMachine>> {
     separated_list0(
         count(newline, 2),
         ClawMachine::parse

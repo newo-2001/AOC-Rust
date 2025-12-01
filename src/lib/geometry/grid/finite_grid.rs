@@ -111,19 +111,19 @@ impl<T> Grid<T>
         } else { Ok(()) }
     }
 
-    pub fn sub_grid(&self, area: Area<usize>) -> Result<GridView<T>, InvalidGridAreaError> {
+    pub fn sub_grid(&self, area: Area<usize>) -> Result<GridView<'_, T>, InvalidGridAreaError> {
         self.valid_sub_grid(area)?;
         Ok(GridView { grid: self, area })
     }
 
-    pub fn sub_grid_mut(&mut self, area: Area<usize>) -> Result<GridViewMut<T>, InvalidGridAreaError> {
+    pub fn sub_grid_mut(&mut self, area: Area<usize>) -> Result<GridViewMut<'_, T>, InvalidGridAreaError> {
         self.valid_sub_grid(area)?;
         Ok(GridViewMut { grid: self, area })
     }
 
     #[must_use]
-    pub fn view(&self) -> GridView<T> { self.into() }
-    pub fn view_mut(&mut self) -> GridViewMut<T> { self.into() }
+    pub fn view(&self) -> GridView<'_, T> { self.into() }
+    pub fn view_mut(&mut self) -> GridViewMut<'_, T> { self.into() }
 
     pub(crate) const fn backing_index(&self, Point2D(x, y): Point2D<usize>) -> usize {
         y * self.dimensions.width() + x

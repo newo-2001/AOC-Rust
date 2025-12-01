@@ -2,7 +2,7 @@ use aoc_lib::{parsing::{parse_lines, TextParser, ParseError}, iteration::ExtraIt
 use yuki::tuples::snd;
 use crate::SolverResult;
 use itertools::Itertools;
-use nom::{character::complete::{multispace1, u32}, combinator::map, sequence::{preceded, tuple}};
+use nom::{character::complete::{multispace1, u32}, combinator::map, sequence::preceded};
 
 #[derive(Clone, Copy)]
 struct Triangle(u32, u32, u32);
@@ -18,11 +18,11 @@ impl Triangle {
 
     fn parse(input: &str) -> Result<Self, ParseError> {
         map(
-            tuple((
+            (
                 preceded(multispace1, u32),
                 preceded(multispace1, u32),
                 preceded(multispace1, u32)
-            )),
+            ),
             |(x, y, z)| Self(x, y, z)
         )
         .run(input)

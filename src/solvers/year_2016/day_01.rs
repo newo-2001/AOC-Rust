@@ -25,7 +25,7 @@ impl State {
 }
 
 fn parse_instructions(input: &str) -> Result<Vec<Instruction>, ParseError> {
-    fn parse_instruction(input: &str) -> TextParserResult<Instruction> {
+    fn parse_instruction(input: &str) -> TextParserResult<'_, Instruction> {
         let left = value(RotationDirection::Left, char('L'));
         let right = value(RotationDirection::Right, char('R'));
         let direction = left.or(right);

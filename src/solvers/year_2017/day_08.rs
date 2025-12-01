@@ -4,7 +4,7 @@ use ahash::{HashMap, HashMapExt};
 use aoc_lib::{parsing::{ParseError, TextParserResult, TextParser, parse_lines}, string_enum};
 use yuki::errors::NoSolution;
 use crate::SolverResult;
-use nom::{Parser, bytes::complete::tag, character::complete::{alpha1, i32}, sequence::{preceded, tuple}};
+use nom::{Parser, bytes::complete::tag, character::complete::{alpha1, i32}, sequence::preceded};
 
 #[derive(Clone, Copy)]
 enum ComparisonOperator {
@@ -17,7 +17,7 @@ enum ComparisonOperator {
 }
 
 impl ComparisonOperator {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         string_enum! {
             " == " => Self::Equal,
             " != " => Self::NotEqual,
@@ -49,11 +49,11 @@ struct Condition<'a> {
 
 impl<'a> Condition<'a> {
     fn parse(input: &'a str) -> TextParserResult<'a, Self>{
-        tuple((
+        (
             preceded(tag(" if "), alpha1),
             ComparisonOperator::parse,
             i32
-        )).map(|(left, operator, right)| Condition {
+        ).map(|(left, operator, right)| Condition {
             left, right, operator
         }).parse(input)
     }
@@ -66,7 +66,7 @@ enum Operation {
 }
 
 impl Operation {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         Parser::or(
             preceded(tag(" inc "), i32).map(Self::Increment),
             preceded(tag(" dec "), i32).map(Self::Decrement)
@@ -81,12 +81,12 @@ struct Instruction<'a> {
 }
 
 impl Instruction<'_> {
-    fn parse(input: &str) -> Result<Instruction, ParseError> {
-        tuple((
+    fn parse(input: &str) -> Result<Instruction<'_>, ParseError> {
+        (
             alpha1,
             Operation::parse,
             Condition::parse
-        )).map(|(target, operation, condition)| Instruction {
+        ).map(|(target, operation, condition)| Instruction {
             target, condition, operation
         }).run(input)
     }

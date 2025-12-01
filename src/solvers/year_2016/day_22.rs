@@ -4,7 +4,7 @@ use aoc_lib::{geometry::{Point2D, grid::{Grid, GridLike}, CardinalDirection, Dim
 use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
-use nom::{sequence::{preceded, delimited, tuple}, bytes::complete::tag, character::complete::{space1, char, u8, u16}, Parser};
+use nom::{sequence::{preceded, delimited}, bytes::complete::tag, character::complete::{space1, char, u8, u16}, Parser};
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 struct Node {
@@ -38,7 +38,7 @@ impl Node {
         let size = || delimited(space1, u16, char('T'));
         let used_percent = delimited(space1, u8, char('%'));
 
-        tuple((position, size(), size(), size(), used_percent))
+        (position, size(), size(), size(), used_percent)
             .map(|(position, size, used, avail, used_percent)| Self {
                 position, size, used, avail, used_percent
             }).run(input)

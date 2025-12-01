@@ -18,7 +18,7 @@ enum Register {
 }
 
 impl Parsable<'_> for Register {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         Parser::or(
         value(Self::A, char('a')),
             value(Self::B, char('b'))       
@@ -37,7 +37,7 @@ enum Instruction {
 }
 
 impl Parsable<'_> for Instruction {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         alt((
             preceded(tag("hlf "), Register::parse).map(Instruction::Half),
             preceded(tag("tpl "), Register::parse).map(Instruction::Triple),

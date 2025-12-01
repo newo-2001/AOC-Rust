@@ -6,7 +6,7 @@ use yuki::{errors::NoSolution, parsing::{combinators::lines, ParserExt, ParsingR
 
 use crate::SolverResult;
 
-fn parse_byte(input: &str) -> ParsingResult<Point<usize>> {
+fn parse_byte(input: &str) -> ParsingResult<'_, Point<usize>> {
     separated_pair(
         u16,
         char(','),

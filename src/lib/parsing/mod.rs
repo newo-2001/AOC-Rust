@@ -2,7 +2,8 @@ mod combinators;
 mod parsers;
 mod errors;
 
-use nom::{IResult, error::VerboseError, Parser, character::complete::{u8, u16, u32, u64, u128, i8, i16, i32, i64, i128}};
+use nom::{IResult, Parser, character::complete::{u8, u16, u32, u64, u128, i8, i16, i32, i64, i128}};
+use nom_language::error::VerboseError;
 
 pub use parsers::*;
 pub use combinators::*;
@@ -14,7 +15,7 @@ pub trait Parsable<'a>: Sized {
     fn parse(input: &'a str) -> TextParserResult<'a, Self>;
 }
 
-pub trait TextParser<'a, O>: Parser<&'a str, O, VerboseError<&'a str>> {
+pub trait TextParser<'a, O>: Parser<&'a str, Output = O, Error = VerboseError<&'a str>> {
     fn run(self, input: &'a str) -> Result<O, ParseError>
         where Self: Sized
     {
@@ -23,7 +24,7 @@ pub trait TextParser<'a, O>: Parser<&'a str, O, VerboseError<&'a str>> {
 }
 
 impl<'a, O, F> TextParser<'a, O> for F
-    where F: Parser<&'a str, O, VerboseError<&'a str>>
+    where F: Parser<&'a str, Output = O, Error = VerboseError<&'a str>>
 {}
 
 pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
@@ -38,7 +39,7 @@ pub fn parse_lines<'a, F, T, E>(parser: F, input: &'a str) -> Result<Vec<T>, E>
 macro_rules! impl_parsable {
     ($type: ty, $parser: expr) => {
         impl Parsable<'_> for $type {
-            fn parse(input: &str) -> TextParserResult<Self> {
+            fn parse(input: &str) -> TextParserResult<'_, Self> {
                 $parser.parse(input)
             }
         }

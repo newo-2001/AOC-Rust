@@ -5,6 +5,7 @@ use std::{
 
 use ahash::{HashSet, HashMap};
 use aoc_lib::parsing::{parse_lines, TextParser, ParseError};
+use nom_language::error::VerboseError;
 use yuki::errors::NoSolution;
 use crate::SolverResult;
 use itertools::Itertools;
@@ -12,8 +13,7 @@ use nom::{
     character::complete::{alpha1, u32},
     sequence::preceded,
     Parser,
-    bytes::complete::tag,
-    error::VerboseError
+    bytes::complete::tag
 };
 
 #[derive(Clone)]
@@ -38,7 +38,7 @@ impl PartialEq for Edge<'_> {
 
 type WeightedEdge<'a> = (Edge<'a>, u32);
 
-fn parse_edge(input: &str) -> Result<WeightedEdge, ParseError> {
+fn parse_edge(input: &str) -> Result<WeightedEdge<'_>, ParseError> {
     let edge = alpha1::<&str, VerboseError<&str>>.and(preceded(tag(" to "), alpha1))
         .map(|(from, to)| Edge(from, to));
 

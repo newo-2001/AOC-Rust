@@ -164,7 +164,7 @@ struct Enemy {
 }
 
 impl Parsable<'_> for Enemy {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         map(
             separated_pair(
                 preceded(tag("Hit Points: "), u32),

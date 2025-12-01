@@ -9,7 +9,7 @@ use yuki::parsing::{ParserExt, ParsingResult};
 
 use crate::SolverResult;
 
-fn parse_stones(input: &str) -> ParsingResult<Vec<u64>> {
+fn parse_stones(input: &str) -> ParsingResult<'_, Vec<u64>> {
     separated_list0(
         space1,
         u64

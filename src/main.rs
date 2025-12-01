@@ -1,6 +1,4 @@
 #![feature(
-    get_many_mut,
-    extract_if,
     iter_collect_into,
     try_find,
     map_try_insert,
@@ -11,10 +9,9 @@
     cmp_minmax,
     iter_intersperse,
     anonymous_lifetime_in_impl_trait,
-    unsigned_is_multiple_of,
-    let_chains,
     iter_map_windows,
-    array_windows
+    array_windows,
+    exact_length_collection
 )]
 
 use std::fs::File;

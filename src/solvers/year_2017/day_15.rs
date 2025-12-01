@@ -1,6 +1,6 @@
 use aoc_lib::{iteration::ExtraIter, parsing::{TextParserResult, TextParser, ParseError}};
 use crate::SolverResult;
-use nom::{bytes::complete::tag, character::complete::{anychar, line_ending, u128}, sequence::{tuple, preceded, terminated}, Parser, combinator::opt};
+use nom::{bytes::complete::tag, character::complete::{anychar, line_ending, u128}, sequence::{preceded, terminated}, Parser, combinator::opt};
 use num::Integer;
 
 
@@ -20,9 +20,9 @@ impl Iterator for Generator {
 }
 
 fn parse_generators(input: &str) -> Result<(Generator, Generator), ParseError> {
-    fn parse_seed(input: &str) -> TextParserResult<u128> {
+    fn parse_seed(input: &str) -> TextParserResult<'_, u128> {
         preceded(
-            tuple((tag("Generator "), anychar, tag(" starts with "))),
+            (tag("Generator "), anychar, tag(" starts with ")),
             terminated(u128, opt(line_ending))
         ).parse(input)
     }

@@ -9,7 +9,7 @@ use crate::SolverResult;
 type Rules = HashMap<u32, Vec<u32>>;
 struct Update(Vec<u32>);
 
-fn parse_manual(input: &str) -> ParsingResult<(Rules, Vec<Update>)> {
+fn parse_manual(input: &str) -> ParsingResult<'_, (Rules, Vec<Update>)> {
     separated_pair(
         map(
             lines(

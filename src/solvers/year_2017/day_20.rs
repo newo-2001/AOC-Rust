@@ -4,14 +4,14 @@ use anyhow::bail;
 use aoc_lib::{geometry::Point3D, parsing::{Parsable, angle_brackets, Map3, TextParserResult, lines, TextParser}};
 use yuki::{errors::{MultipleSolutions, NoInput}, iterators::{ExtraIter, SingleError}};
 use crate::SolverResult;
-use nom::{sequence::{tuple, terminated, delimited, preceded}, character::complete::{i32, char}, Parser, bytes::complete::tag};
+use nom::{sequence::{terminated, delimited, preceded}, character::complete::{i32, char}, Parser, bytes::complete::tag};
 use itertools::Itertools;
 
-fn parse_vec3(input: &str) -> TextParserResult<Point3D<i32>> {
-    angle_brackets(tuple((
+fn parse_vec3(input: &str) -> TextParserResult<'_, Point3D<i32>> {
+    angle_brackets((
         terminated(i32, char(',')),
         terminated(i32, char(',')), i32
-    ))).map3(Point3D).parse(input)
+    )).map3(Point3D).parse(input)
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -22,12 +22,12 @@ struct Particle {
 }
 
 impl Parsable<'_> for Particle {
-    fn parse(input: &str) -> TextParserResult<Self> {
-        tuple((
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
+        (
             delimited(tag("p="), parse_vec3, tag(", ")),
             delimited(tag("v="), parse_vec3, tag(", ")),
             preceded(tag("a="), parse_vec3)
-        )).map(|(position, velocity, acceleration)| Self {
+        ).map(|(position, velocity, acceleration)| Self {
             position, velocity, acceleration
         }).parse(input)
     }

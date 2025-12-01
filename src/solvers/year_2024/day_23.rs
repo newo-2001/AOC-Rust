@@ -8,7 +8,7 @@ use yuki::{errors::{MultipleSolutions, NoInput}, iterators::{ExtraIter, SingleEr
 
 use crate::SolverResult;
 
-fn parse_edge(input: &str) -> ParsingResult<(&str, &str)> {
+fn parse_edge(input: &str) -> ParsingResult<'_, (&str, &str)> {
     separated_pair(
         alpha1,
         char('-'),

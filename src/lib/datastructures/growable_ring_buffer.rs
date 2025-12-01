@@ -36,7 +36,7 @@ impl<T> GrowableRingBuffer<T> {
     }
     
     #[must_use]
-    pub fn iter(&self) -> std::collections::vec_deque::Iter<T> { self.buffer.iter() }
+    pub fn iter(&self) -> std::collections::vec_deque::Iter<'_, T> { self.buffer.iter() }
 
     #[must_use]
     pub fn len(&self) -> usize { self.buffer.len() }

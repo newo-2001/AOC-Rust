@@ -4,7 +4,7 @@ use aoc_lib::{parsing::{parse_lines, TextParser, ParseError, square_brackets}, f
 use yuki::{errors::NoSolution, tuples::fst};
 use crate::SolverResult;
 use itertools::Itertools;
-use nom::{character::{is_alphabetic, complete::{alpha1, u32}}, bytes::complete::take_while1, sequence::tuple, Parser};
+use nom::{AsChar, Parser, bytes::complete::take_while1, character::complete::{alpha1, u32}};
 
 struct Room<'a> {
     name: String,
@@ -37,11 +37,11 @@ impl Room<'_> {
             .eq(self.checksum.chars())
     }
 
-    fn parse(input: &str) -> Result<Room, ParseError> {
-        let name = take_while1(|c| is_alphabetic(c as u8) || c == '-');
+    fn parse(input: &str) -> Result<Room<'_>, ParseError> {
+        let name = take_while1(|c: char| c.is_alpha() || c == '-');
         let checksum = square_brackets(alpha1);
 
-        tuple((name, u32, checksum))
+        (name, u32, checksum)
             .map(|(name, sector_id, checksum)| Room { name: String::from(name), sector_id, checksum})
             .run(input)
     }

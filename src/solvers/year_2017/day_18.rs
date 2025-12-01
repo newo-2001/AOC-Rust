@@ -17,7 +17,7 @@ enum Register {
 }
 
 impl Parsable<'_> for Register {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         satisfy(|c| c.is_ascii_lowercase())
             .map(Register::GeneralPurpose)
             .parse(input)
@@ -44,7 +44,7 @@ enum Instruction {
 }
 
 impl Parsable<'_> for Instruction {
-    fn parse(input: &str) -> TextParserResult<Self> {
+    fn parse(input: &str) -> TextParserResult<'_, Self> {
         fn binary_operator<'a, X, Y, O, M>(name: &'a str, mapper: M) -> impl TextParser<'a, O>
             where M: Fn(X, Y) -> O,
                   X: Parsable<'a>, Y: Parsable<'a>
