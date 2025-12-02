@@ -372,7 +372,7 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 [[package]]
 name = "jikan"
 version = "0.1.0"
-source = "git+https://github.com/newo-2001/jikan#1bbe76295833a9ef6666b6423a2ffbac4684bbc0"
+source = "git+https://github.com/newo-2001/jikan#ea320ddfda168841a1576a7d1076078360aee750"
 dependencies = [
  "clap",
  "colored",

@@ -11,7 +11,8 @@
     anonymous_lifetime_in_impl_trait,
     iter_map_windows,
     array_windows,
-    exact_length_collection
+    exact_length_collection,
+    exact_div
 )]
 
 use std::fs::File;
@@ -163,7 +164,8 @@ fn main() {
         solver!(2024, "24", 1),
         solver!(2024, "25", 1),
 
-        solver!(2025, "01")
+        solver!(2025, "01"),
+        solver!(2025, "02")
     ].into_iter()
         .flatten()
         .collect();
