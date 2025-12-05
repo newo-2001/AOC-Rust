@@ -1,7 +1,7 @@
 // We have `std::iter::range`, What is the purpose of this?
 // https://kaylynn.gay/blog/post/rust_ranges_and_suffering
 
-use std::{iter::Step, fmt::Display, cmp::{max, min}, ops::{Sub, Add, Div}};
+use std::{cmp::{Ordering, max, min}, fmt::Display, iter::Step, ops::{Add, Div, Sub}};
 
 use num::{FromPrimitive, One, Zero};
 use thiserror::Error;
@@ -134,6 +134,22 @@ impl<T: Step> IntoIterator for Range<T> {
     }
 }
 
+impl<T: PartialOrd> PartialOrd for Range<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self.start.partial_cmp(&other.start) {
+            Some(Ordering::Equal) => self.end.partial_cmp(&other.end),
+            ord => ord,
+        }
+    }
+}
+
+impl<T: Ord> Ord for Range<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.start.cmp(&other.start)
+            .then_with(|| self.end.cmp(&other.end))
+    }
+}
+
 #[macro_export]
 macro_rules! range {
     ($start: literal..$end: literal) => {
@@ -153,6 +169,8 @@ macro_rules! range {
 
 #[cfg(test)]
 mod tests {
+    use std::cmp::Ordering;
+
     use crate::math::{Range, InvalidRangeError};
 
     #[test]
@@ -219,5 +237,12 @@ mod tests {
         // After
         let actual = range.split_range(range!(10..18));
         assert_eq!((range, None), actual);
+    }
+
+    #[test]
+    fn test_cmp() {
+        assert!(range!(1..2) > range!(0..5));
+        assert!(range!(1..3) > range!(1..2));
+        assert!(range!(1..2).cmp(&range!(1..2)) == Ordering::Equal)
     }
 }
