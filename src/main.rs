@@ -12,7 +12,8 @@
     iter_map_windows,
     array_windows,
     exact_length_collection,
-    exact_div
+    exact_div,
+    iter_partition_in_place
 )]
 
 use std::fs::File;
@@ -172,7 +173,7 @@ fn main() {
         solver!(2025, "06"),
         solver!(2025, "07"),
         solver!(2025, "08"),
-        solver!(2025, "09", 1)
+        solver!(2025, "09")
     ].into_iter()
         .flatten()
         .collect();
